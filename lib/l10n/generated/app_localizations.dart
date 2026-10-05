@@ -430,6 +430,24 @@ abstract class AppLocalizations {
   /// **'Change leader'**
   String get changeLeader;
 
+  /// No description provided for @leaderAbility.
+  ///
+  /// In en, this message translates to:
+  /// **'Leader ability'**
+  String get leaderAbility;
+
+  /// No description provided for @previousLeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous leader'**
+  String get previousLeader;
+
+  /// No description provided for @nextLeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Next leader'**
+  String get nextLeader;
+
   /// No description provided for @factionAbility.
   ///
   /// In en, this message translates to:

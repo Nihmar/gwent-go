@@ -182,6 +182,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get changeLeader => 'Change leader';
 
   @override
+  String get leaderAbility => 'Leader ability';
+
+  @override
+  String get previousLeader => 'Previous leader';
+
+  @override
+  String get nextLeader => 'Next leader';
+
+  @override
   String get factionAbility => 'Faction ability';
 
   @override
