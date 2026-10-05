@@ -52,6 +52,11 @@ class SessionCommandRejected extends SessionEvent {
   final CommandRejection reason;
 }
 
+/// The peer went away. The match can continue once it reconnects.
+class SessionPeerLost extends SessionEvent {
+  const SessionPeerLost();
+}
+
 /// The session ended: version mismatch, malformed payload or disconnect.
 class SessionFailed extends SessionEvent {
   const SessionFailed(this.code);

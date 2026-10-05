@@ -14,21 +14,21 @@ import 'session_event.dart';
 /// the projections the host sends back.
 class ClientSession {
   ClientSession({
-    required this.transport,
+    required MatchTransport transport,
     required this.deck,
     this.name = 'Guest',
-  }) {
-    _subscription = transport.incoming.listen(
-      _onMessage,
-      onDone: () => _fail(SessionFailure.closed),
-    );
+  }) : _transport = transport {
+    _listen(transport);
   }
 
-  final MatchTransport transport;
+  /// Current link to the host. Replaced by [reconnect].
+  MatchTransport get transport => _transport;
   final DeckDefinition deck;
   final String name;
 
-  late final StreamSubscription<Map<String, Object?>> _subscription;
+  late MatchTransport _transport;
+  StreamSubscription<Map<String, Object?>>? _subscription;
+  bool _handshaken = false;
   final StreamController<SessionEvent> _events =
       StreamController<SessionEvent>.broadcast();
 
@@ -46,9 +46,29 @@ class ClientSession {
 
   bool get isReady => _seat != null;
 
+  /// Attaches a new link after a disconnect and handshakes again.
+  ///
+  /// The host answers with a fresh projection, so the guest can resume without
+  /// replaying anything.
+  Future<void> reconnect(MatchTransport next) async {
+    await _subscription?.cancel();
+    await _transport.close();
+    _transport = next;
+    _listen(next);
+    connect();
+  }
+
+  void _listen(MatchTransport link) {
+    _subscription = link.incoming.listen(
+      _onMessage,
+      onDone: () => _fail(SessionFailure.closed),
+      onError: (_) => _fail(SessionFailure.closed),
+    );
+  }
+
   /// Starts the handshake; the host answers with a seat or a rejection.
   void connect() {
-    transport.send({
+    _transport.send({
       'type': SessionMessage.hello,
       'protocol': MatchVersions.protocolVersion,
       'catalog': MatchVersions.catalogHash,
@@ -64,7 +84,7 @@ class ClientSession {
       'the client only submits commands for its own seat',
     );
     _seq++;
-    transport.send({
+    _transport.send({
       'type': SessionMessage.command,
       'seq': _seq,
       'command': CommandCodec.encode(command),
@@ -73,9 +93,9 @@ class ClientSession {
 
   Future<void> close() async {
     if (_events.isClosed) return;
-    transport.send(const {'type': SessionMessage.bye});
-    await transport.close();
-    await _subscription.cancel();
+    _transport.send(const {'type': SessionMessage.bye});
+    await _transport.close();
+    await _subscription?.cancel();
     await _events.close();
   }
 
@@ -114,7 +134,12 @@ class ClientSession {
     if (seat is! int) return _fail(SessionFailure.protocol);
     _seat = seat;
     _events.add(SessionReady(seat));
-    transport.send({'type': SessionMessage.deck, 'deck': deckToJson(deck)});
+    // Only the first handshake submits the deck; a reconnection reuses the one
+    // the host already has.
+    if (!_handshaken) {
+      _handshaken = true;
+      _transport.send({'type': SessionMessage.deck, 'deck': deckToJson(deck)});
+    }
   }
 
   void _fail(String code) {

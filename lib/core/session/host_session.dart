@@ -18,20 +18,18 @@ import 'session_event.dart';
 /// commands over the wire.
 class HostSession {
   HostSession({
-    required this.transport,
+    required MatchTransport transport,
     required this.hostSeat,
     required this.hostDeck,
     this.opponentName = 'Guest',
     this.difficulty = Difficulty.normal,
     this.randomSeed,
-  }) {
-    _subscription = transport.incoming.listen(
-      _onMessage,
-      onDone: () => _fail(SessionFailure.closed),
-    );
+  }) : _transport = transport {
+    _listen(transport);
   }
 
-  final MatchTransport transport;
+  /// Current link to the guest. Replaced by [rebind] after a reconnection.
+  MatchTransport get transport => _transport;
   final int hostSeat;
   final DeckDefinition hostDeck;
   final String opponentName;
@@ -39,7 +37,8 @@ class HostSession {
   /// Seed for the match generator; a random one is used when null.
   final int? randomSeed;
 
-  late final StreamSubscription<Map<String, Object?>> _subscription;
+  late MatchTransport _transport;
+  StreamSubscription<Map<String, Object?>>? _subscription;
   final StreamController<SessionEvent> _events =
       StreamController<SessionEvent>.broadcast();
 
@@ -68,12 +67,39 @@ class HostSession {
     return result;
   }
 
+  /// Points the session at a new link, e.g. after the guest reconnected.
+  ///
+  /// The engine is untouched, so the returning guest can be caught up with a
+  /// fresh projection.
+  Future<void> rebind(MatchTransport next) async {
+    await _subscription?.cancel();
+    await _transport.close();
+    _transport = next;
+    _listen(next);
+    if (_engine != null) _publishView();
+  }
+
   Future<void> close() async {
     if (_events.isClosed) return;
-    transport.send(const {'type': SessionMessage.bye});
-    await transport.close();
-    await _subscription.cancel();
+    _transport.send(const {'type': SessionMessage.bye});
+    await _transport.close();
+    await _subscription?.cancel();
     await _events.close();
+  }
+
+  void _listen(MatchTransport link) {
+    _subscription = link.incoming.listen(
+      _onMessage,
+      onDone: _onPeerLost,
+      onError: (_) => _onPeerLost(),
+    );
+  }
+
+  /// A guest leaving does not end the match: the engine lives on and a
+  /// reconnecting guest can be caught up.
+  void _onPeerLost() {
+    if (_events.isClosed) return;
+    _events.add(const SessionPeerLost());
   }
 
   // ---------------------------------------------------------------------------
@@ -89,7 +115,8 @@ class HostSession {
       case SessionMessage.command:
         _handleCommand(message);
       case SessionMessage.bye:
-        _fail(SessionFailure.closed);
+        // A guest leaving is a disconnect, not the end of the match.
+        _onPeerLost();
       default:
         _fail(SessionFailure.protocol);
     }
@@ -115,6 +142,9 @@ class HostSession {
       'catalog': MatchVersions.catalogHash,
       'rules': MatchVersions.rulesVersion,
     });
+    // A returning guest arrives after the match started: catch it up instead
+    // of waiting for another deck.
+    if (_engine != null) _publishView();
   }
 
   void _handleDeck(Map<String, Object?> message) {
@@ -191,7 +221,7 @@ class HostSession {
 
   int _otherSeat(int seat) => seat == 0 ? 1 : 0;
 
-  void _send(Map<String, Object?> message) => transport.send(message);
+  void _send(Map<String, Object?> message) => _transport.send(message);
 
   void _sendFailure(String code) {
     _send({'type': SessionMessage.reject, 'reason': code});
