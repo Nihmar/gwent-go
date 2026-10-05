@@ -156,9 +156,9 @@ class DeckListPane extends StatelessWidget {
     final result = <CardDefinition>[];
     counts.forEach((id, count) {
       final card = CardRepository.byId(id);
-      if (card.row != row && !(row == CardRow.special && card.isWeather)) {
-        return;
-      }
+      // Every card belongs to the group of its declared row. Weather cards
+      // have their own row, so they must not also be listed under special.
+      if (card.row != row) return;
       for (var i = 0; i < count; i++) {
         result.add(card);
       }
