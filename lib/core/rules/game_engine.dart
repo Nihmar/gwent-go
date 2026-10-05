@@ -7,6 +7,8 @@ import 'game_random.dart';
 import 'scoring.dart';
 
 part 'game_engine_abilities.dart';
+part 'game_engine_leaders.dart';
+part 'game_engine_zones.dart';
 
 /// The authoritative, platform-independent Gwent rules engine.
 ///
@@ -80,8 +82,7 @@ class GameEngine {
       state.phase == GamePhase.playing && state.currentPlayer == human.index;
 
   bool get isOpponentTurn =>
-      state.phase == GamePhase.playing &&
-      state.currentPlayer == opponent.index;
+      state.phase == GamePhase.playing && state.currentPlayer == opponent.index;
 
   int nextUid() => _uid++;
 
@@ -96,7 +97,11 @@ class GameEngine {
       final definition = CardRepository.byId(id);
       for (var i = 0; i < count; i++) {
         player.deck.add(
-          CardInstance(uid: nextUid(), definition: definition, owner: player.index),
+          CardInstance(
+            uid: nextUid(),
+            definition: definition,
+            owner: player.index,
+          ),
         );
       }
     });
@@ -251,7 +256,9 @@ class GameEngine {
         );
       }
       if (revived.isNotEmpty) {
-        _emit(AbilityTriggered(player: player.index, ability: 'skellige_revive'));
+        _emit(
+          AbilityTriggered(player: player.index, ability: 'skellige_revive'),
+        );
       }
     }
   }

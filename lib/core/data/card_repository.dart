@@ -42,8 +42,8 @@ abstract final class CardRepository {
         .toList();
     cards.sort((a, b) {
       if (a.row != b.row) {
-        final order = CardRow.values.indexOf(a.row) -
-            CardRow.values.indexOf(b.row);
+        final order =
+            CardRow.values.indexOf(a.row) - CardRow.values.indexOf(b.row);
         return order;
       }
       if (a.baseStrength != b.baseStrength) {

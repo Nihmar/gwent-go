@@ -9,6 +9,7 @@
 import '../models/card.dart';
 
 /// Every card known to the game, including non-collectible summons.
+// dart format off
 const List<CardDefinition> allCards = [
   CardDefinition(id: 'foltest_silver', name: "Foltest - King of Temeria", faction: CardFaction.realms, row: CardRow.leader, baseStrength: 0, artFilename: 'realms_foltest_silver', abilities: ['foltest_king']),
   CardDefinition(id: 'foltest_gold', name: "Foltest - Lord Commander of the North", faction: CardFaction.realms, row: CardRow.leader, baseStrength: 0, artFilename: 'realms_foltest_gold', abilities: ['foltest_lord']),
@@ -225,3 +226,4 @@ const List<CardDefinition> allCards = [
   CardDefinition(id: 'storm', name: "Skellige Storm", faction: CardFaction.weather, row: CardRow.weather, baseStrength: 0, artFilename: 'weather_storm', abilities: ['rain', 'fog'], maxCopies: 3),
   CardDefinition(id: 'rain', name: "Torrential Rain", faction: CardFaction.weather, row: CardRow.weather, baseStrength: 0, artFilename: 'weather_rain', abilities: ['rain'], maxCopies: 2),
 ];
+// dart format on

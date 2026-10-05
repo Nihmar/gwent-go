@@ -63,7 +63,11 @@ void main() {
         CardFaction.scoiatael,
         CardFaction.skellige,
       ]) {
-        expect(CardRepository.defaultDeckFor(faction), isNotNull, reason: faction.name);
+        expect(
+          CardRepository.defaultDeckFor(faction),
+          isNotNull,
+          reason: faction.name,
+        );
       }
     });
 

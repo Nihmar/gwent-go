@@ -197,9 +197,12 @@ extension _FirstOrNull<T> on Iterable<T> {
 /// Instances are cheap wrappers around an immutable [CardDefinition]; mutable
 /// per-match state lives here so definitions can be shared safely.
 class CardInstance {
-  CardInstance({required this.uid, required this.definition, required this.owner})
-    : baseStrength = definition.baseStrength,
-      currentStrength = definition.baseStrength;
+  CardInstance({
+    required this.uid,
+    required this.definition,
+    required this.owner,
+  }) : baseStrength = definition.baseStrength,
+       currentStrength = definition.baseStrength;
 
   final int uid;
   final CardDefinition definition;

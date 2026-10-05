@@ -53,7 +53,8 @@ const header = `// GENERATED FILE — do not edit by hand.
 import '../models/card.dart';
 
 /// Every card known to the game, including non-collectible summons.
+// dart format off
 const List<CardDefinition> allCards = [
 `;
-require('fs').writeFileSync('lib/core/data/card_catalog.dart', header + body + '\n];\n');
+require('fs').writeFileSync('lib/core/data/card_catalog.dart', header + body + '\n];\n// dart format on\n');
 console.log('wrote', recs.length, 'cards');

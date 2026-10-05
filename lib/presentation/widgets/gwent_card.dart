@@ -170,7 +170,11 @@ class _Frame extends StatelessWidget {
                 begin: Alignment.bottomCenter,
                 end: Alignment.topCenter,
                 stops: [0, 0.32, 0.56],
-                colors: [Color(0xEB0A0704), Color(0x730A0704), Color(0x000A0704)],
+                colors: [
+                  Color(0xEB0A0704),
+                  Color(0x730A0704),
+                  Color(0x000A0704),
+                ],
               ),
             ),
           ),
@@ -219,7 +223,11 @@ class _PowerBadge extends StatelessWidget {
                 height: 1,
                 color: hero ? const Color(0xFFF7E8C2) : const Color(0xFF221806),
                 shadows: const [
-                  Shadow(color: Colors.black45, blurRadius: 2, offset: Offset(0, 1)),
+                  Shadow(
+                    color: Colors.black45,
+                    blurRadius: 2,
+                    offset: Offset(0, 1),
+                  ),
                 ],
               ),
             ),

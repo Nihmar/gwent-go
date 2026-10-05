@@ -64,7 +64,11 @@ class WeatherChanged extends GameEvent {
 }
 
 class RoundEnded extends GameEvent {
-  const RoundEnded({required this.round, required this.winner, required this.scores});
+  const RoundEnded({
+    required this.round,
+    required this.winner,
+    required this.scores,
+  });
   final int round;
   final int? winner;
   final List<int> scores;

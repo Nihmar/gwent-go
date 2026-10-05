@@ -166,9 +166,9 @@ class AiEvaluator {
   double _berserkerValue() {
     final hasMardroeme =
         player.hand.any((c) => c.hasAbility(Ability.mardroeme)) ||
-        state.rowsFor(player.index).any(
-          (r) => r.special?.hasAbility(Ability.mardroeme) ?? false,
-        );
+        state
+            .rowsFor(player.index)
+            .any((r) => r.special?.hasAbility(Ability.mardroeme) ?? false);
     return hasMardroeme ? 14 : 2;
   }
 
@@ -179,7 +179,8 @@ class AiEvaluator {
       final beforePlayer = playerTotal;
       state.activeWeather.clear();
       Scoring.refresh(state);
-      final gain = (beforeOpponent - opponentTotal) - (beforePlayer - playerTotal);
+      final gain =
+          (beforeOpponent - opponentTotal) - (beforePlayer - playerTotal);
       _restoreWeather(previous);
       if (state.activeWeather.isEmpty && gain == 0) return 1;
       return gain.toDouble();
@@ -192,7 +193,8 @@ class AiEvaluator {
     }
     if (!changed) return 1;
     Scoring.refresh(state);
-    final gain = (beforeOpponent - opponentTotal) - (beforePlayer - playerTotal);
+    final gain =
+        (beforeOpponent - opponentTotal) - (beforePlayer - playerTotal);
     _restoreWeather(previous);
     return gain.toDouble();
   }
@@ -239,8 +241,12 @@ class AiEvaluator {
 
     final powerPlayer = strongest(player.index);
     final powerOpponent = strongest(opponent.index);
-    if (powerPlayer > powerOpponent) return 0;
-    if (powerPlayer < powerOpponent) return totalAt(opponent.index, powerOpponent);
+    if (powerPlayer > powerOpponent) {
+      return 0;
+    }
+    if (powerPlayer < powerOpponent) {
+      return totalAt(opponent.index, powerOpponent);
+    }
     return (totalAt(opponent.index, powerOpponent) -
             totalAt(player.index, powerPlayer))
         .clamp(0, double.infinity)
@@ -347,11 +353,20 @@ class AiEvaluator {
           const AiActivateLeader(),
         );
       case 'foltest_king':
-        return AiCandidate(_weatherValue(_weatherById(Ability.fog)), const AiActivateLeader());
+        return AiCandidate(
+          _weatherValue(_weatherById(Ability.fog)),
+          const AiActivateLeader(),
+        );
       case 'emhyr_imperial':
-        return AiCandidate(_weatherValue(_weatherById(Ability.rain)), const AiActivateLeader());
+        return AiCandidate(
+          _weatherValue(_weatherById(Ability.rain)),
+          const AiActivateLeader(),
+        );
       case 'francesca_pureblood':
-        return AiCandidate(_weatherValue(_weatherById(Ability.frost)), const AiActivateLeader());
+        return AiCandidate(
+          _weatherValue(_weatherById(Ability.frost)),
+          const AiActivateLeader(),
+        );
       case 'eredin_king':
         final best = _bestWeatherInDeck();
         return AiCandidate(best, const AiActivateLeader());
@@ -373,7 +388,10 @@ class AiEvaluator {
           const AiActivateLeader(),
         );
       default:
-        return AiCandidate(10.0 + (state.roundNumber - 1) * 15, const AiActivateLeader());
+        return AiCandidate(
+          10.0 + (state.roundNumber - 1) * 15,
+          const AiActivateLeader(),
+        );
     }
   }
 

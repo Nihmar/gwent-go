@@ -5,7 +5,8 @@ import '../../core/models/card.dart';
 /// Artwork and icon sprites come from the reference game art; they are copied
 /// into `assets/` so the app never depends on the ignored reference checkout.
 abstract final class CardAssets {
-  static String art(CardDefinition card) => 'assets/cards/${card.artFilename}.jpg';
+  static String art(CardDefinition card) =>
+      'assets/cards/${card.artFilename}.jpg';
 
   static String? rowIcon(CardRow row) {
     if (!row.isUnitRow) return null;
@@ -45,13 +46,17 @@ abstract final class CardAssets {
       break;
     }
     if (ability == null) {
-      return card.row == CardRow.agile ? 'assets/icons/card_ability_agile.png' : null;
+      return card.row == CardRow.agile
+          ? 'assets/icons/card_ability_agile.png'
+          : null;
     }
     return 'assets/icons/card_ability_${_abilitySuffix(ability)}.png';
   }
 
   static String _abilitySuffix(String ability) => switch (ability) {
-    Ability.scorchClose || Ability.scorchRanged || Ability.scorchSiege => 'scorch',
+    Ability.scorchClose ||
+    Ability.scorchRanged ||
+    Ability.scorchSiege => 'scorch',
     Ability.avengerKambi => 'avenger',
     _ => ability,
   };

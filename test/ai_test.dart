@@ -34,7 +34,11 @@ int playMatch(Difficulty difficulty, {int seed = 1, int maxTurns = 2000}) {
     engine.takeEvents();
     turns++;
   }
-  expect(engine.state.phase, GamePhase.gameOver, reason: 'match did not finish');
+  expect(
+    engine.state.phase,
+    GamePhase.gameOver,
+    reason: 'match did not finish',
+  );
   return turns;
 }
 
@@ -81,9 +85,10 @@ void main() {
     test('Hard passes when ahead and the opponent has already passed', () {
       final engine = harness();
       setTurn(engine, 1);
-      engine.state.rowState(1, CardRow.close).cards.add(
-        makeCard('geralt', owner: 1),
-      );
+      engine.state
+          .rowState(1, CardRow.close)
+          .cards
+          .add(makeCard('geralt', owner: 1));
       engine.state.players[0].passed = true;
       final action = HardAi().decide(engine, engine.opponent);
       expect(action, isA<AiPass>());

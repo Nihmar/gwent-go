@@ -114,7 +114,11 @@ class RowStrip extends StatelessWidget {
 }
 
 class _CardStack extends StatelessWidget {
-  const _CardStack({required this.cards, required this.cardWidth, this.onCardTap});
+  const _CardStack({
+    required this.cards,
+    required this.cardWidth,
+    this.onCardTap,
+  });
 
   final List<CardInstance> cards;
   final double cardWidth;

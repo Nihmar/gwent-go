@@ -20,8 +20,9 @@ abstract final class Scoring {
       row.cards.where((c) => c.hasAbility(Ability.morale)).length;
 
   /// Number of Tight Bond cards sharing [card]'s name in [row].
-  static int bondCount(RowState row, CardInstance card) =>
-      row.cards.where((c) => c.hasAbility(Ability.bond) && c.name == card.name).length;
+  static int bondCount(RowState row, CardInstance card) => row.cards
+      .where((c) => c.hasAbility(Ability.bond) && c.name == card.name)
+      .length;
 
   /// Strength of [card] as placed in [row].
   ///

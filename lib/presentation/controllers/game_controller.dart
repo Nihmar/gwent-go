@@ -200,12 +200,18 @@ class GameController extends ChangeNotifier {
   void _applyAi(AiAction action) {
     final applied = switch (action) {
       AiPlayCard(:final card, :final targetRow, :final target) =>
-        engine.playCard(opponent.index, card, targetRow: targetRow, target: target),
-      AiActivateLeader(:final targetRow, :final target) => engine.activateLeader(
-        opponent.index,
-        targetRow: targetRow,
-        target: target,
-      ),
+        engine.playCard(
+          opponent.index,
+          card,
+          targetRow: targetRow,
+          target: target,
+        ),
+      AiActivateLeader(:final targetRow, :final target) =>
+        engine.activateLeader(
+          opponent.index,
+          targetRow: targetRow,
+          target: target,
+        ),
       AiPass() => _passAi(),
     };
     if (!applied) engine.pass(opponent.index);

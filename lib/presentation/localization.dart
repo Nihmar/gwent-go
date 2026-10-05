@@ -95,7 +95,9 @@ extension GwentLocalizations on AppLocalizations {
   /// Full description of a card: type line followed by its abilities.
   String cardDescription(CardDefinition card) {
     if (card.isLeader) {
-      return card.abilities.isEmpty ? '' : abilityDescription(card.abilities.first);
+      return card.abilities.isEmpty
+          ? ''
+          : abilityDescription(card.abilities.first);
     }
     if (card.isWeather) {
       return card.abilities

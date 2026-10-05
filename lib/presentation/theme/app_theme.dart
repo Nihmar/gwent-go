@@ -66,7 +66,9 @@ abstract final class AppTheme {
         elevation: 1,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: GwentColors.outlineVariant.withValues(alpha: 0.5)),
+          side: BorderSide(
+            color: GwentColors.outlineVariant.withValues(alpha: 0.5),
+          ),
         ),
       ),
       dividerTheme: const DividerThemeData(
@@ -90,7 +92,10 @@ abstract final class AppTheme {
           foregroundColor: GwentColors.onPrimary,
           shape: const StadiumBorder(),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          textStyle: const TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.2),
+          textStyle: const TextStyle(
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.2,
+          ),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
@@ -110,10 +115,18 @@ abstract final class AppTheme {
       navigationRailTheme: NavigationRailThemeData(
         backgroundColor: GwentColors.surfaceLow,
         indicatorColor: GwentColors.secondaryContainer,
-        selectedIconTheme: const IconThemeData(color: GwentColors.onSecondaryContainer),
-        unselectedIconTheme: const IconThemeData(color: GwentColors.onSurfaceVariant),
-        selectedLabelTextStyle: const TextStyle(color: GwentColors.onSecondaryContainer),
-        unselectedLabelTextStyle: const TextStyle(color: GwentColors.onSurfaceVariant),
+        selectedIconTheme: const IconThemeData(
+          color: GwentColors.onSecondaryContainer,
+        ),
+        unselectedIconTheme: const IconThemeData(
+          color: GwentColors.onSurfaceVariant,
+        ),
+        selectedLabelTextStyle: const TextStyle(
+          color: GwentColors.onSecondaryContainer,
+        ),
+        unselectedLabelTextStyle: const TextStyle(
+          color: GwentColors.onSurfaceVariant,
+        ),
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: GwentColors.surfaceHigh,

@@ -41,18 +41,20 @@ void main() {
       final engine = harness();
       engine.finishMulligan();
       // Force a human win in round one.
-      engine.state.rowState(0, CardRow.close).cards.add(
-        makeCard('geralt', owner: 0),
-      );
+      engine.state
+          .rowState(0, CardRow.close)
+          .cards
+          .add(makeCard('geralt', owner: 0));
       engine.pass(engine.state.currentPlayer);
       engine.pass(engine.state.currentPlayer);
       expect(engine.opponent.roundsLost, 1);
       expect(engine.state.roundNumber, 2);
 
       // Force a human win in round two.
-      engine.state.rowState(0, CardRow.close).cards.add(
-        makeCard('ciri', owner: 0),
-      );
+      engine.state
+          .rowState(0, CardRow.close)
+          .cards
+          .add(makeCard('ciri', owner: 0));
       engine.pass(engine.state.currentPlayer);
       engine.pass(engine.state.currentPlayer);
       expect(engine.state.phase, GamePhase.gameOver);
@@ -146,9 +148,10 @@ void main() {
     test('Mardroeme transforms all Berserkers on its row', () {
       final engine = harness();
       setTurn(engine, 0);
-      engine.state.rowState(0, CardRow.close).cards.add(
-        makeCard('berserker', owner: 0),
-      );
+      engine.state
+          .rowState(0, CardRow.close)
+          .cards
+          .add(makeCard('berserker', owner: 0));
       setHand(engine, 0, ['mardroeme']);
       final card = engine.human.hand.first;
       expect(engine.playCard(0, card, targetRow: CardRow.close), isTrue);
@@ -176,27 +179,36 @@ void main() {
     test('Weather clamps unit strength for both players', () {
       final engine = harness();
       setTurn(engine, 0);
-      engine.state.rowState(0, CardRow.close).cards.add(
-        makeCard('gryffin', owner: 0),
-      );
-      engine.state.rowState(1, CardRow.close).cards.add(
-        makeCard('fiend', owner: 1),
-      );
+      engine.state
+          .rowState(0, CardRow.close)
+          .cards
+          .add(makeCard('gryffin', owner: 0));
+      engine.state
+          .rowState(1, CardRow.close)
+          .cards
+          .add(makeCard('fiend', owner: 1));
       setHand(engine, 0, ['frost']);
       final frost = engine.human.hand.first;
       expect(engine.playCard(0, frost), isTrue);
       expect(engine.state.activeWeather, contains(Ability.frost));
       Scoring.refresh(engine.state);
-      expect(Scoring.rowTotal(engine.state, engine.state.rowState(0, CardRow.close)), 1);
-      expect(Scoring.rowTotal(engine.state, engine.state.rowState(1, CardRow.close)), 1);
+      expect(
+        Scoring.rowTotal(engine.state, engine.state.rowState(0, CardRow.close)),
+        1,
+      );
+      expect(
+        Scoring.rowTotal(engine.state, engine.state.rowState(1, CardRow.close)),
+        1,
+      );
     });
 
     test('Avenger summons a replacement when destroyed', () {
       final engine = harness();
       setTurn(engine, 0);
-      engine.state.rowState(0, CardRow.close).cards.add(
-        makeCard('cow', owner: 0),
-      );
+      engine.state
+          .rowState(0, CardRow.close)
+          .cards
+          .add(makeCard('cow', owner: 0));
       setHand(engine, 0, ['scorch']);
       final scorch = engine.human.hand.first;
       expect(engine.playCard(0, scorch), isTrue);
@@ -223,9 +235,10 @@ void main() {
     test("Foltest's Siegemaster doubles the player's siege row", () {
       final engine = harness(humanLeader: 'foltest_copper');
       setTurn(engine, 0);
-      engine.state.rowState(0, CardRow.siege).cards.add(
-        makeCard('ballista', owner: 0),
-      );
+      engine.state
+          .rowState(0, CardRow.siege)
+          .cards
+          .add(makeCard('ballista', owner: 0));
       expect(engine.activateLeader(0), isTrue);
       Scoring.refresh(engine.state);
       expect(

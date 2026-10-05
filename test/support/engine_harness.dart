@@ -38,7 +38,12 @@ GameEngine harness({
     humanDeck: testDeck(
       faction: humanFaction,
       leaderId: humanLeader,
-      cards: const {'geralt': 1, 'blue_stripes': 3, 'stennis': 1, 'yennefer': 1},
+      cards: const {
+        'geralt': 1,
+        'blue_stripes': 3,
+        'stennis': 1,
+        'yennefer': 1,
+      },
     ),
     opponentDeck: testDeck(
       faction: opponentFaction,
