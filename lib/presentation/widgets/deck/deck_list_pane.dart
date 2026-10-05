@@ -8,6 +8,7 @@ import '../../localization.dart';
 import '../../theme/gwent_colors.dart';
 import '../card_assets.dart';
 import '../gwent_card.dart';
+import 'card_picker_sheet.dart';
 import 'deck_editor_parts.dart';
 
 /// The deck contents grouped by battlefield row.
@@ -78,6 +79,20 @@ class DeckListPane extends StatelessWidget {
       for (final row in CardRow.values)
         if (_entriesForRow(row).isNotEmpty) row,
     ];
+
+    // Long-press opens the same card sheet as the collection: artwork, full
+    // ability text and the copy actions.
+    void showDetail(CardDefinition card) {
+      showCardPickerSheet(
+        context,
+        card: card,
+        copies: counts[card.id] ?? 0,
+        maxCopies: _copiesCap(card),
+        onAdd: () => onAdd(card),
+        onRemove: () => onRemove(card),
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -117,6 +132,7 @@ class DeckListPane extends StatelessWidget {
                         capOf: _copiesCap,
                         onAdd: onAdd,
                         onRemove: onRemove,
+                        onShowDetail: showDetail,
                       ),
                   ],
                 ),
@@ -197,6 +213,7 @@ class _DeckGroup extends StatelessWidget {
     required this.capOf,
     required this.onAdd,
     required this.onRemove,
+    required this.onShowDetail,
   });
 
   final CardRow row;
@@ -204,6 +221,7 @@ class _DeckGroup extends StatelessWidget {
   final int Function(CardDefinition card) capOf;
   final ValueChanged<CardDefinition> onAdd;
   final ValueChanged<CardDefinition> onRemove;
+  final ValueChanged<CardDefinition> onShowDetail;
 
   @override
   Widget build(BuildContext context) {
@@ -262,6 +280,7 @@ class _DeckGroup extends StatelessWidget {
             cap: capOf(cards.first),
             onAdd: onAdd,
             onRemove: onRemove,
+            onShowDetail: onShowDetail,
           ),
           for (var i = 1; i < entries.length; i++)
             _DeckRowItem(
@@ -270,6 +289,7 @@ class _DeckGroup extends StatelessWidget {
               cap: capOf(cards[i]),
               onAdd: onAdd,
               onRemove: onRemove,
+              onShowDetail: onShowDetail,
             ),
         ],
       ),
@@ -284,6 +304,7 @@ class _DeckRowItem extends StatelessWidget {
     required this.cap,
     required this.onAdd,
     required this.onRemove,
+    required this.onShowDetail,
   });
 
   final CardDefinition card;
@@ -291,6 +312,7 @@ class _DeckRowItem extends StatelessWidget {
   final int cap;
   final ValueChanged<CardDefinition> onAdd;
   final ValueChanged<CardDefinition> onRemove;
+  final ValueChanged<CardDefinition> onShowDetail;
 
   String _subtitle(BuildContext context) {
     final strings = context.strings;
@@ -317,31 +339,41 @@ class _DeckRowItem extends StatelessWidget {
       ),
       child: Row(
         children: [
-          GwentCard(definition: card, width: 42, showName: false),
-          const SizedBox(width: 10),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  card.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onLongPress: () => onShowDetail(card),
+              child: Row(
+                children: [
+                  GwentCard(definition: card, width: 42, showName: false),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          card.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Text(
+                          _subtitle(context),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: GwentColors.onSurfaceVariant,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                Text(
-                  _subtitle(context),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: GwentColors.onSurfaceVariant,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           const SizedBox(width: 8),
