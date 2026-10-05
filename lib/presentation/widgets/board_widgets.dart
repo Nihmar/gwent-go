@@ -248,9 +248,7 @@ class WeatherBand extends StatelessWidget {
           const Spacer(),
           Flexible(
             child: Text(
-              state.activeWeather.isEmpty
-                  ? strings.clearWeatherNotPlayed
-                  : strings.closeRowAtOne,
+              _summary(context),
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(color: GwentColors.tertiary, fontSize: 12),
             ),
@@ -258,6 +256,22 @@ class WeatherBand extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// Short description of the active weather based on the rows it affects.
+  String _summary(BuildContext context) {
+    final strings = context.strings;
+    if (state.activeWeather.isEmpty) return strings.clearWeatherNotPlayed;
+    final affected = <CardRow>{};
+    for (final row in CardRow.combatRows) {
+      final hit = state.activeWeather.any(
+        (type) => Ability.weatherRows[type]?.contains(row) ?? false,
+      );
+      if (hit) affected.add(row);
+    }
+    return affected
+        .map((row) => strings.weatherRowAtOne(strings.rowName(row)))
+        .join(' · ');
   }
 }
 

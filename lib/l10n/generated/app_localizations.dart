@@ -844,11 +844,11 @@ abstract class AppLocalizations {
   /// **'Clear Weather not played'**
   String get clearWeatherNotPlayed;
 
-  /// No description provided for @closeRowAtOne.
+  /// No description provided for @weatherRowAtOne.
   ///
   /// In en, this message translates to:
-  /// **'Close rows at 1'**
-  String get closeRowAtOne;
+  /// **'{row} at 1'**
+  String weatherRowAtOne(String row);
 
   /// No description provided for @pointsAbbrev.
   ///
