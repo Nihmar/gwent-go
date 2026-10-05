@@ -113,7 +113,7 @@ Blocking issues, each addressed by a phase below:
 Each phase is independently mergeable and testable. Phases 1–4 contain **no
 networking** and improve the current single-player code too.
 
-### Phase 1 — Engine as a command processor
+### Phase 1 — Engine as a command processor *(done)*
 
 Goal: every state mutation is a serializable command applied by the engine.
 
@@ -141,7 +141,7 @@ Tests: command validation (illegal commands rejected with the right reason), a
 scripted mulligan for both seats, and a **determinism test** that replays the
 same seed + command list and asserts an identical state hash.
 
-### Phase 2 — Fog of war and versioning
+### Phase 2 — Fog of war and versioning *(done)*
 
 Goal: a peer can be given a view of the match that never contains hidden data.
 
