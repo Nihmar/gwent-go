@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/session/host_session.dart';
 import 'match_backend.dart';
 import 'turn_driver.dart';
 
@@ -70,7 +71,27 @@ class GameController extends ChangeNotifier {
   factory GameController.remote({
     required ClientSession session,
     required int localSeat,
-  }) => GameController._(SessionBackend(session, localSeat: localSeat), localSeat: localSeat);
+  }) => GameController._(
+    SessionBackend(session, localSeat: localSeat),
+    localSeat: localSeat,
+    driveOpponent: false,
+  );
+
+  /// Creates a controller for the host of a LAN match.
+  ///
+  /// The engine comes from [session]; the other seat is a remote human, so no
+  /// AI is driven.
+  factory GameController.host(HostSession session, {int localSeat = 0}) {
+    final engine = session.engine;
+    if (engine == null) {
+      throw StateError('the host session has not started a match yet');
+    }
+    return GameController._(
+      EngineBackend(engine),
+      localSeat: localSeat,
+      driveOpponent: false,
+    );
+  }
 
   /// Resumes a match from a snapshot produced by [snapshot] using the given
   /// snapshot (which already carries the player names).
@@ -93,6 +114,7 @@ class GameController extends ChangeNotifier {
     this._backend, {
     required int localSeat,
     this.hotseat = false,
+    bool driveOpponent = true,
     String? opponentName,
   }) : _localSeat = localSeat,
        difficulty = _backend.state.players[localSeat].difficulty {
@@ -116,7 +138,7 @@ class GameController extends ChangeNotifier {
     }
     // Only a client that owns the engine has seats to drive; a guest waits for
     // the host's projections.
-    _driver = engine == null || hotseat
+    _driver = engine == null || hotseat || !driveOpponent
         ? const IdleTurnDriver()
         : LocalAiDriver(
             engine: engine,
