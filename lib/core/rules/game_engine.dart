@@ -283,16 +283,17 @@ class GameEngine {
       }
     }
     if (player.faction == CardFaction.skellige && state.roundNumber == 3) {
-      final revived = player.graveyard.where((c) => c.isUnit).toList()
-        ..sort((a, b) => b.baseStrength.compareTo(a.baseStrength));
-      for (final card in revived.take(2)) {
-        player.graveyard.remove(card);
-        _abilities.insertSorted(
-          _abilities.rowForCard(card, player.index),
-          card,
-        );
-      }
-      if (revived.isNotEmpty) {
+      // The reference returns two random units from the graveyard.
+      final candidates = player.graveyard.where((c) => c.isUnit).toList();
+      if (candidates.isNotEmpty) {
+        _random.shuffle(candidates);
+        for (final card in candidates.take(2)) {
+          player.graveyard.remove(card);
+          _abilities.insertSorted(
+            _abilities.rowForCard(card, player.index),
+            card,
+          );
+        }
         _emit(
           AbilityTriggered(player: player.index, ability: 'skellige_revive'),
         );

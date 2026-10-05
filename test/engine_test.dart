@@ -1,6 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gwent_go/core/models/card.dart';
 import 'package:gwent_go/core/models/game_state.dart';
+import 'package:gwent_go/core/models/player.dart';
+import 'package:gwent_go/core/rules/game_engine.dart';
+import 'package:gwent_go/core/rules/game_random.dart';
 import 'package:gwent_go/core/rules/scoring.dart';
 
 import 'support/engine_harness.dart';
@@ -356,4 +359,54 @@ void main() {
       expect(engine.state.rowState(0, CardRow.close).halfWeather, isTrue);
     });
   });
+
+  group('Skellige faction', () {
+    test('round three revives two random units, not the strongest', () {
+      final engine = GameEngine(
+        humanDeck: testDeck(
+          faction: CardFaction.skellige,
+          leaderId: 'crach_an_craite',
+        ),
+        opponentDeck: testDeck(
+          faction: CardFaction.monsters,
+          leaderId: 'eredin_silver',
+        ),
+        difficulty: Difficulty.normal,
+        // A no-op shuffle keeps the graveyard order, so the two cards that
+        // come back are the first inserted and provably not the strongest.
+        random: _NoShuffleRandom(),
+      );
+      engine.startMatch();
+      engine.finishMulligan();
+
+      engine.human.graveyard
+        ..clear()
+        ..addAll([
+          makeCard('nekker', owner: 0),
+          makeCard('gargoyle', owner: 0),
+          makeCard('fiend', owner: 0),
+        ]);
+
+      // End rounds one and two so round three starts and the faction ability
+      // runs.
+      for (var i = 0; i < 4; i++) {
+        engine.pass(engine.state.currentPlayer);
+      }
+
+      expect(engine.state.roundNumber, 3);
+      final revived = [
+        for (final row in engine.state.rowsFor(0)) ...row.cards.map((c) => c.id),
+      ];
+      expect(revived, containsAll(['nekker', 'gargoyle']));
+      expect(engine.human.graveyard.map((c) => c.id), contains('fiend'));
+    });
+  });
+}
+
+/// [GameRandom] that never reorders a list, so seeded behaviour is predictable.
+class _NoShuffleRandom extends GameRandom {
+  _NoShuffleRandom() : super(1);
+
+  @override
+  void shuffle<T>(List<T> items) {}
 }
