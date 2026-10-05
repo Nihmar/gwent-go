@@ -105,6 +105,43 @@ extension GwentLocalizations on AppLocalizations {
     _ => '',
   };
 
+  /// Short ability labels for the collection grid and deck rows.
+  ///
+  /// Returns an empty list for leaders, specials and weather cards, whose
+  /// effect is expressed by the card itself rather than a unit ability.
+  List<String> abilityTags(CardDefinition card) {
+    if (card.isLeader || card.isSpecial || card.isWeather) return const [];
+    final tags = <String>[];
+    if (card.isHero) tags.add(tagHero);
+    for (final ability in card.abilities) {
+      if (ability == Ability.hero) continue;
+      final tag = _abilityTag(ability);
+      if (tag != null) tags.add(tag);
+    }
+    if (card.row == CardRow.agile && !card.abilities.contains(Ability.agile)) {
+      tags.add(abilityTagAgile);
+    }
+    return tags;
+  }
+
+  String? _abilityTag(String ability) => switch (ability) {
+    Ability.bond => abilityTagBond,
+    Ability.spy => abilityTagSpy,
+    Ability.medic => abilityTagMedic,
+    Ability.morale => abilityTagMorale,
+    Ability.muster => abilityTagMuster,
+    Ability.avenger || Ability.avengerKambi => abilityTagAvenger,
+    Ability.berserker => abilityTagBerserker,
+    Ability.horn => abilityTagHorn,
+    Ability.mardroeme => abilityTagMardroeme,
+    Ability.agile => abilityTagAgile,
+    Ability.scorch ||
+    Ability.scorchClose ||
+    Ability.scorchRanged ||
+    Ability.scorchSiege => abilityTagScorch,
+    _ => null,
+  };
+
   /// Full description of a card: type line followed by its abilities.
   String cardDescription(CardDefinition card) {
     if (card.isLeader) {

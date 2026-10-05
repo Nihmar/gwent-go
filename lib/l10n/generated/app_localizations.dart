@@ -460,6 +460,42 @@ abstract class AppLocalizations {
   /// **'Save deck'**
   String get saveDeck;
 
+  /// No description provided for @addCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Add copy'**
+  String get addCopy;
+
+  /// No description provided for @removeCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove one'**
+  String get removeCopy;
+
+  /// No description provided for @atCopyLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'At copy limit'**
+  String get atCopyLimit;
+
+  /// No description provided for @inDeckCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{copies} of {max} in deck'**
+  String inDeckCount(int copies, int max);
+
+  /// No description provided for @deckEditorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to add · long-press for the full ability'**
+  String get deckEditorHint;
+
+  /// No description provided for @noCardsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No cards match your filters'**
+  String get noCardsFound;
+
   /// No description provided for @searchCollection.
   ///
   /// In en, this message translates to:
@@ -981,6 +1017,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ability'**
   String get abilityLabel;
+
+  /// No description provided for @abilityTagBond.
+  ///
+  /// In en, this message translates to:
+  /// **'Tight Bond'**
+  String get abilityTagBond;
+
+  /// No description provided for @abilityTagSpy.
+  ///
+  /// In en, this message translates to:
+  /// **'Spy'**
+  String get abilityTagSpy;
+
+  /// No description provided for @abilityTagMedic.
+  ///
+  /// In en, this message translates to:
+  /// **'Medic'**
+  String get abilityTagMedic;
+
+  /// No description provided for @abilityTagMorale.
+  ///
+  /// In en, this message translates to:
+  /// **'Morale'**
+  String get abilityTagMorale;
+
+  /// No description provided for @abilityTagMuster.
+  ///
+  /// In en, this message translates to:
+  /// **'Muster'**
+  String get abilityTagMuster;
+
+  /// No description provided for @abilityTagAvenger.
+  ///
+  /// In en, this message translates to:
+  /// **'Avenger'**
+  String get abilityTagAvenger;
+
+  /// No description provided for @abilityTagBerserker.
+  ///
+  /// In en, this message translates to:
+  /// **'Berserker'**
+  String get abilityTagBerserker;
+
+  /// No description provided for @abilityTagHorn.
+  ///
+  /// In en, this message translates to:
+  /// **'Commander\'s Horn'**
+  String get abilityTagHorn;
+
+  /// No description provided for @abilityTagMardroeme.
+  ///
+  /// In en, this message translates to:
+  /// **'Mardroeme'**
+  String get abilityTagMardroeme;
+
+  /// No description provided for @abilityTagScorch.
+  ///
+  /// In en, this message translates to:
+  /// **'Scorch'**
+  String get abilityTagScorch;
+
+  /// No description provided for @abilityTagAgile.
+  ///
+  /// In en, this message translates to:
+  /// **'Agile'**
+  String get abilityTagAgile;
 
   /// No description provided for @abilityHero.
   ///

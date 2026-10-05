@@ -10,6 +10,8 @@ import '../localization.dart';
 import '../theme/gwent_colors.dart';
 import '../widgets/board_background.dart';
 import '../widgets/deck/deck_editor_parts.dart';
+import '../widgets/deck/deck_list_pane.dart';
+import '../widgets/deck/deck_summary_bar.dart';
 import '../widgets/deck/leader_picker.dart';
 
 /// Result returned by the deck editor.
@@ -21,6 +23,12 @@ class DeckEditorResult {
   /// When true the caller should immediately start a match with this deck.
   final bool startGame;
 }
+
+/// The two phone sections of the editor.
+enum _DeckMode { collection, deck }
+
+/// Actions available from the phone header overflow menu.
+enum _DeckMenuAction { changeLeader, save }
 
 /// Collection browser and deck builder.
 ///
@@ -49,6 +57,7 @@ class _DeckEditorScreenState extends State<DeckEditorScreen> {
   String _search = '';
   CollectionFilter _filter = CollectionFilter.all;
   bool _onlyOwned = false;
+  _DeckMode _mode = _DeckMode.collection;
 
   CardFaction get _faction => widget.deck.faction;
 
@@ -163,29 +172,40 @@ class _DeckEditorScreenState extends State<DeckEditorScreen> {
               subtitle: '${strings.factionName(_faction)} · ${_leader.name}',
             ),
           ),
-          if (wideHeader)
+          if (wideHeader) ...[
             TextButton(
               onPressed: _changeLeader,
               child: Text(strings.changeLeader),
             ),
-          const SizedBox(width: 8),
-          if (wideHeader)
-            FilledButton.tonal(onPressed: _save, child: Text(strings.saveDeck))
-          else
-            IconButton(
-              tooltip: strings.saveDeck,
-              onPressed: _save,
-              icon: const Icon(Icons.save_outlined),
+            const SizedBox(width: 8),
+            FilledButton.tonal(onPressed: _save, child: Text(strings.saveDeck)),
+            const SizedBox(width: 8),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                minimumSize: const Size(0, 40),
+              ),
+              onPressed: valid ? () => _save(startGame: true) : null,
+              child: Text(strings.startGame),
             ),
-          const SizedBox(width: 8),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              minimumSize: const Size(0, 40),
+          ] else
+            PopupMenuButton<_DeckMenuAction>(
+              tooltip: strings.menu,
+              onSelected: (action) => switch (action) {
+                _DeckMenuAction.changeLeader => _changeLeader(),
+                _DeckMenuAction.save => _save(),
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: _DeckMenuAction.changeLeader,
+                  child: Text(strings.changeLeader),
+                ),
+                PopupMenuItem(
+                  value: _DeckMenuAction.save,
+                  child: Text(strings.saveDeck),
+                ),
+              ],
             ),
-            onPressed: valid ? () => _save(startGame: true) : null,
-            child: Text(strings.startGame),
-          ),
         ],
       ),
     );
@@ -199,7 +219,7 @@ class _DeckEditorScreenState extends State<DeckEditorScreen> {
         children: [
           SizedBox(width: 380, child: _collectionPane(context)),
           const SizedBox(width: 16),
-          Expanded(child: _deckPane(context, false)),
+          Expanded(child: _deckPane(context, leaderSlot: false, header: true)),
           const SizedBox(width: 16),
           SizedBox(width: 300, child: _sidePane()),
         ],
@@ -209,32 +229,55 @@ class _DeckEditorScreenState extends State<DeckEditorScreen> {
 
   Widget _narrowBody(BuildContext context) {
     final strings = context.strings;
-    return DefaultTabController(
-      length: 2,
-      child: Column(
-        children: [
-          TabBar(
-            tabs: [
-              Tab(text: strings.collection),
-              Tab(text: strings.deck),
-            ],
-          ),
-          Expanded(
-            child: TabBarView(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: _collectionPane(context),
+    final total = _counts.values.fold(0, (a, b) => a + b);
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+          child: SizedBox(
+            width: double.infinity,
+            child: SegmentedButton<_DeckMode>(
+              segments: [
+                ButtonSegment(
+                  value: _DeckMode.collection,
+                  icon: const Icon(Icons.grid_view_outlined, size: 18),
+                  label: Text(strings.collection),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: _deckPane(context, true),
+                ButtonSegment(
+                  value: _DeckMode.deck,
+                  icon: const Icon(Icons.style_outlined, size: 18),
+                  label: Text('${strings.deck} ($total)'),
                 ),
               ],
+              selected: {_mode},
+              showSelectedIcon: false,
+              onSelectionChanged: (selection) =>
+                  setState(() => _mode = selection.first),
             ),
           ),
-        ],
-      ),
+        ),
+        Expanded(
+          child: IndexedStack(
+            index: _mode.index,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                child: _collectionPane(context),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                child: _deckPane(context, leaderSlot: true, header: false),
+              ),
+            ],
+          ),
+        ),
+        DeckSummaryBar(
+          deck: _build(),
+          validation: _validation,
+          onSave: _save,
+          onStart: _validation.isValid ? () => _save(startGame: true) : null,
+        ),
+      ],
     );
   }
 
@@ -249,13 +292,22 @@ class _DeckEditorScreenState extends State<DeckEditorScreen> {
     onFilterChanged: (filter) => setState(() => _filter = filter),
     onOnlyOwnedChanged: (value) => setState(() => _onlyOwned = value),
     onAdd: _add,
+    onRemove: _remove,
   );
 
-  Widget _deckPane(BuildContext context, bool showChangeLeader) => DeckListPane(
+  Widget _deckPane(
+    BuildContext context, {
+    required bool leaderSlot,
+    required bool header,
+  }) => DeckListPane(
     counts: _counts,
+    collection: widget.collection,
+    leader: _leader,
+    onAdd: _add,
     onRemove: _remove,
     onChangeLeader: _changeLeader,
-    showChangeLeader: showChangeLeader,
+    showLeaderSlot: leaderSlot,
+    showHeader: header,
   );
 
   Widget _sidePane() => DeckSidePane(

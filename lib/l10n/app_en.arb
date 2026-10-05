@@ -67,6 +67,18 @@
   "nextLeader": "Next leader",
   "factionAbility": "Faction ability",
   "saveDeck": "Save deck",
+  "addCopy": "Add copy",
+  "removeCopy": "Remove one",
+  "atCopyLimit": "At copy limit",
+  "inDeckCount": "{copies} of {max} in deck",
+  "@inDeckCount": {
+    "placeholders": {
+      "copies": { "type": "int" },
+      "max": { "type": "int" }
+    }
+  },
+  "deckEditorHint": "Tap to add · long-press for the full ability",
+  "noCardsFound": "No cards match your filters",
   "searchCollection": "Search collection",
   "filterAll": "All",
   "filterUnits": "Units",
@@ -232,6 +244,17 @@
   "tagSpecial": "Special",
   "tagWeather": "Weather",
   "abilityLabel": "Ability",
+  "abilityTagBond": "Tight Bond",
+  "abilityTagSpy": "Spy",
+  "abilityTagMedic": "Medic",
+  "abilityTagMorale": "Morale",
+  "abilityTagMuster": "Muster",
+  "abilityTagAvenger": "Avenger",
+  "abilityTagBerserker": "Berserker",
+  "abilityTagHorn": "Commander's Horn",
+  "abilityTagMardroeme": "Mardroeme",
+  "abilityTagScorch": "Scorch",
+  "abilityTagAgile": "Agile",
 
   "abilityHero": "Not affected by any Special Cards or abilities.",
   "abilityDecoy": "Swap with a card on the battlefield to return it to your hand.",
