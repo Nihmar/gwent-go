@@ -29,6 +29,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get continueMatch => 'Continue match';
 
   @override
+  String get stats => 'Stats';
+
+  @override
+  String get threeDifficultyLevels => '3 difficulty levels';
+
+  @override
+  String get offline => 'Offline';
+
+  @override
+  String get classicRules => 'Classic rules';
+
+  @override
+  String get version => 'v0.1.0';
+
+  @override
+  String get english => 'English';
+
+  @override
   String get deckCollection => 'Deck collection';
 
   @override

@@ -130,6 +130,42 @@ abstract class AppLocalizations {
   /// **'Continue match'**
   String get continueMatch;
 
+  /// No description provided for @stats.
+  ///
+  /// In en, this message translates to:
+  /// **'Stats'**
+  String get stats;
+
+  /// No description provided for @threeDifficultyLevels.
+  ///
+  /// In en, this message translates to:
+  /// **'3 difficulty levels'**
+  String get threeDifficultyLevels;
+
+  /// No description provided for @offline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get offline;
+
+  /// No description provided for @classicRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Classic rules'**
+  String get classicRules;
+
+  /// No description provided for @version.
+  ///
+  /// In en, this message translates to:
+  /// **'v0.1.0'**
+  String get version;
+
+  /// No description provided for @english.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get english;
+
   /// No description provided for @deckCollection.
   ///
   /// In en, this message translates to:
