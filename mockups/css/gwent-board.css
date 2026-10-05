@@ -1,0 +1,381 @@
+/* ==========================================================================
+   Gwent Go - game components: board surfaces, rows, piles, panels
+   ========================================================================== */
+
+/* ==========================================================================
+   Board
+   ========================================================================== */
+
+.board-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 85% at 50% 6%, rgba(255, 214, 140, 0.06), transparent 55%),
+    radial-gradient(100% 70% at 50% 108%, rgba(0, 0, 0, 0.55), transparent 62%),
+    linear-gradient(180deg, var(--gw-felt-a) 0%, var(--gw-felt-b) 100%);
+}
+
+.board-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.35;
+  background-image:
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.008) 0 2px, transparent 2px 6px),
+    repeating-linear-gradient(25deg, rgba(0, 0, 0, 0.05) 0 1px, transparent 1px 5px);
+}
+
+/* --- field row ------------------------------------------------------------ */
+
+.row-strip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 10px;
+  border-radius: var(--shape-md);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.16)),
+    var(--md-surface-container-low);
+  border: 1px solid rgba(255, 255, 255, 0.045);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.035),
+    inset 0 -10px 22px rgba(0, 0, 0, 0.28);
+}
+
+.row-strip.frozen {
+  background:
+    linear-gradient(180deg, rgba(169, 212, 232, 0.1), rgba(0, 0, 0, 0.2)),
+    var(--md-surface-container-low);
+  border-color: rgba(169, 212, 232, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(196, 231, 251, 0.12),
+    inset 0 0 34px rgba(120, 170, 205, 0.16);
+}
+
+.row-marker {
+  width: 38px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.row-marker .row-icon {
+  width: 20px;
+  height: 20px;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  opacity: 0.9;
+}
+
+.row-marker .row-score {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--md-on-surface-variant);
+}
+
+.row-strip.leading .row-score {
+  color: var(--gw-gold-bright);
+}
+
+.row-cards {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.row-cards .gcard + .gcard {
+  margin-left: calc(var(--cw) * -0.16);
+}
+
+/* special-card slot at the end of each row */
+.row-slot {
+  width: 34px;
+  height: 46px;
+  flex: none;
+  border-radius: var(--shape-xs);
+  border: 1px dashed rgba(240, 220, 170, 0.25);
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.row-slot.filled {
+  border: 0;
+  background: none;
+}
+
+/* weather icon shown on an affected row */
+.row-wx {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  filter: drop-shadow(0 0 6px rgba(159, 198, 222, 0.55));
+  opacity: 0.95;
+}
+
+/* --- weather band --------------------------------------------------------- */
+
+.weather-band {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border-radius: var(--shape-sm);
+  background:
+    linear-gradient(180deg, rgba(169, 212, 232, 0.07), rgba(0, 0, 0, 0.18)),
+    var(--md-surface-container-lowest);
+  border: 1px solid rgba(169, 212, 232, 0.16);
+}
+
+.weather-band .wb-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--md-tertiary);
+  opacity: 0.85;
+  width: 62px;
+  flex: none;
+}
+
+.weather-slot {
+  width: 30px;
+  height: 42px;
+  border-radius: var(--shape-xs);
+  border: 1px dashed rgba(169, 212, 232, 0.22);
+  background: rgba(0, 0, 0, 0.2);
+  flex: none;
+}
+
+/* --- card piles ----------------------------------------------------------- */
+
+.pile {
+  --pw: 44px;
+  position: relative;
+  width: var(--pw);
+  aspect-ratio: 4.45 / 6.35;
+  flex: none;
+  border-radius: calc(var(--pw) * 0.09);
+}
+
+.pile::before,
+.pile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: var(--back);
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.65);
+}
+
+.pile::before {
+  transform: translate(2px, -2px);
+  filter: brightness(0.7);
+}
+
+.pile.grave::after {
+  filter: grayscale(0.9) brightness(0.55);
+}
+
+.pile .pile-count {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  z-index: 2;
+}
+
+.pile .pile-icon {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  color: rgba(233, 226, 214, 0.85);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+}
+
+.pile .pile-icon .ic {
+  width: calc(var(--pw) * 0.42);
+  height: calc(var(--pw) * 0.42);
+}
+
+.pile-caption {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--md-on-surface-variant);
+  text-align: center;
+}
+
+/* --- player panels -------------------------------------------------------- */
+
+.score-num {
+  font-size: 34px;
+  line-height: 1;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--gw-gold-bright);
+  text-shadow: 0 0 18px rgba(231, 194, 125, 0.25);
+}
+
+.score-cap {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--md-on-surface-variant);
+}
+
+.player-card-surface {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(0, 0, 0, 0.12)),
+    var(--md-surface-container-low);
+  border: 1px solid color-mix(in srgb, var(--md-outline-variant) 45%, transparent);
+  border-radius: var(--shape-md);
+}
+
+/* --- turn indicator -------------------------------------------------------- */
+
+.turn-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: var(--shape-full);
+  background: color-mix(in srgb, var(--gw-gold) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gw-gold) 45%, transparent);
+  color: var(--gw-gold-bright);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.turn-chip .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gw-gold-bright);
+  box-shadow: 0 0 8px rgba(242, 206, 121, 0.8);
+  animation: gw-pulse 1.6s ease-in-out infinite;
+}
+
+/* --- hand ------------------------------------------------------------------ */
+
+.hand {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.hand .gcard + .gcard {
+  margin-left: calc(var(--cw) * -0.28);
+}
+
+/* --- misc ------------------------------------------------------------------ */
+
+.mid-rule {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: color-mix(in srgb, var(--gw-gold) 55%, transparent);
+}
+
+.mid-rule::before,
+.mid-rule::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gw-gold) 38%, transparent), transparent);
+}
+
+.mid-rule .mid-diamond {
+  width: 7px;
+  height: 7px;
+  transform: rotate(45deg);
+  background: var(--gw-gold);
+  box-shadow: 0 0 10px rgba(217, 169, 63, 0.6);
+}
+
+.faction-shield {
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+}
+
+/* round gems, sprite from the reference HUD */
+.gem-spr {
+  width: 15px;
+  height: 15px;
+  flex: none;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+}
+
+.gem-spr.on {
+  background-image: url("../../gwent-classic-enhanced/img/icons/icon_gem_on.png");
+  filter: drop-shadow(0 0 5px rgba(217, 169, 63, 0.55));
+}
+
+.gem-spr.off {
+  background-image: url("../../gwent-classic-enhanced/img/icons/icon_gem_off.png");
+  opacity: 0.55;
+}
+
+/* status dot used in player panels */
+.hand-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: var(--shape-full);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid color-mix(in srgb, var(--md-outline-variant) 60%, transparent);
+  font-size: 12px;
+  color: var(--md-on-surface-variant);
+  font-variant-numeric: tabular-nums;
+}
+
+.hand-count .ic {
+  width: 14px;
+  height: 14px;
+}
+
+.leader-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: var(--shape-full);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.leader-state.ready {
+  background: color-mix(in srgb, var(--gw-gold) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gw-gold) 50%, transparent);
+  color: var(--gw-gold-bright);
+}
+
+.leader-state.used {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid color-mix(in srgb, var(--md-outline) 40%, transparent);
+  color: var(--md-on-surface-variant);
+}

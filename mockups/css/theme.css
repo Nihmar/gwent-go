@@ -1,0 +1,224 @@
+/* ==========================================================================
+   Gwent Go - UI mockup theme
+   Material 3 dark color scheme, gold seed, Gwent flavour.
+   ========================================================================== */
+
+:root {
+  /* --- color: primary -------------------------------------------------- */
+  --md-primary: #e7c27d;
+  --md-on-primary: #3b2a00;
+
+  /* --- color: secondary / tertiary ------------------------------------- */
+  --md-secondary-container: #4f4533;
+  --md-on-secondary-container: #f5e2cb;
+  --md-tertiary: #a9d4e8;
+
+  /* --- color: error ---------------------------------------------------- */
+  --md-error: #ffb4ab;
+
+  /* --- color: surfaces ------------------------------------------------- */
+  --md-background: #14110d;
+  --md-surface-container-lowest: #0e0c09;
+  --md-surface-container-low: #1d1915;
+  --md-surface-container-high: #2c2620;
+  --md-surface-container-highest: #372f28;
+  --md-on-surface: #e9e2d6;
+  --md-on-surface-variant: #cfc4b0;
+  --md-outline: #988e7c;
+  --md-outline-variant: #4c453a;
+
+  /* --- gwent accents --------------------------------------------------- */
+  --gw-gold: #d9a93f;
+  --gw-gold-bright: #f2ce79;
+  --gw-gold-deep: #8a6a20;
+  --gw-parchment: #eadfc8;
+  --gw-felt-a: #241f19;
+  --gw-felt-b: #171310;
+
+  /* --- type ------------------------------------------------------------ */
+  --font: "Roboto", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-display: "Cinzel", "Roboto", serif;
+
+  /* --- shape ----------------------------------------------------------- */
+  --shape-xs: 4px;
+  --shape-sm: 8px;
+  --shape-md: 12px;
+  --shape-lg: 16px;
+  --shape-xl: 28px;
+  --shape-full: 999px;
+
+  /* --- elevation ------------------------------------------------------- */
+  --elev-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 3px 1px rgba(0, 0, 0, 0.18);
+  --elev-2: 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 6px 2px rgba(0, 0, 0, 0.22);
+  --elev-3: 0 4px 8px 3px rgba(0, 0, 0, 0.24), 0 1px 3px rgba(0, 0, 0, 0.4);
+  --elev-glow: 0 0 0 1px rgba(231, 194, 125, 0.55), 0 0 18px rgba(217, 169, 63, 0.35);
+}
+
+/* ==========================================================================
+   Reset / base
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--md-on-surface);
+  background: #000;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body.screen {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* Fixed design canvas for every mock screen */
+.canvas {
+  position: relative;
+  overflow: hidden;
+  color: var(--md-on-surface);
+  background: var(--md-background);
+  flex: none;
+}
+
+img {
+  display: block;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+/* ==========================================================================
+   Material 3 type scale
+   ========================================================================== */
+
+.t-title-m {
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0.15px;
+  font-weight: 500;
+}
+
+.t-title-s {
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0.1px;
+  font-weight: 500;
+}
+
+.t-body-s {
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.4px;
+}
+
+.t-label-s {
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   Utilities
+   ========================================================================== */
+
+.hstack {
+  display: flex;
+  align-items: center;
+}
+
+.vstack {
+  display: flex;
+  flex-direction: column;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.muted {
+  color: var(--md-on-surface-variant);
+}
+
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* invisible SVG icon used inline */
+.ic {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ic-16 { width: 16px; height: 16px; }
+.ic-18 { width: 18px; height: 18px; }
+.ic-20 { width: 20px; height: 20px; }
+
+/* ==========================================================================
+   Scrollbars
+   ========================================================================== */
+
+.scroll-y {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(152, 142, 124, 0.4) transparent;
+}
+
+.scroll-y::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scroll-y::-webkit-scrollbar-thumb {
+  background: rgba(152, 142, 124, 0.35);
+  border-radius: 3px;
+}
+
+.scroll-y::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.hide-scroll {
+  scrollbar-width: none;
+}
+
+.hide-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* ==========================================================================
+   Motion helpers
+   ========================================================================== */
+
+@keyframes gw-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.82); }
+}
