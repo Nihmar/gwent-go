@@ -652,6 +652,12 @@ abstract class AppLocalizations {
   /// **'That choice is not valid.'**
   String get commandInvalidChoice;
 
+  /// No description provided for @commandInvalidTargetRow.
+  ///
+  /// In en, this message translates to:
+  /// **'That card cannot be placed on the chosen row.'**
+  String get commandInvalidTargetRow;
+
   /// No description provided for @searchCollection.
   ///
   /// In en, this message translates to:

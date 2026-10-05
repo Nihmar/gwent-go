@@ -117,6 +117,7 @@
   "commandAlreadyDone": "You have already confirmed that step.",
   "commandChoiceNotAllowed": "That decision is not yours to make.",
   "commandInvalidChoice": "That choice is not valid.",
+  "commandInvalidTargetRow": "That card cannot be placed on the chosen row.",
   "searchCollection": "Search collection",
   "filterAll": "All",
   "filterUnits": "Units",

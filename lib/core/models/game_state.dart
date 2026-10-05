@@ -85,8 +85,15 @@ class GameState {
 
   PlayerState opponent(PlayerState player) => players[opponentOf(player.index)];
 
-  RowState rowState(int owner, CardRow row) =>
-      rows[owner * CardRow.combatRows.length + CardRow.combatRows.indexOf(row)];
+  RowState rowState(int owner, CardRow row) {
+    final index = CardRow.combatRows.indexOf(row);
+    if (index < 0) {
+      // A non-combat row would otherwise index out of bounds (owner 0) or
+      // silently hit another player's row (owner 1).
+      throw ArgumentError.value(row, 'row', 'not a combat row');
+    }
+    return rows[owner * CardRow.combatRows.length + index];
+  }
 
   List<RowState> rowsFor(int owner) => [
     for (final row in CardRow.combatRows) rowState(owner, row),
