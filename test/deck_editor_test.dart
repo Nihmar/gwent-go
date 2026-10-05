@@ -160,4 +160,47 @@ void main() {
     expect(find.text(strings.inDeckCount(1, 1)), findsOneWidget);
     expect(find.text(strings.atCopyLimit), findsOneWidget);
   });
+
+  testWidgets('saving an already edited deck does not grow its name', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(412, 915);
+    addTearDown(tester.view.reset);
+
+    final deck = smallDeck.copyWith(name: 'Test small (edited)');
+    DeckEditorResult? result;
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Builder(
+          builder: (context) => Center(
+            child: ElevatedButton(
+              onPressed: () async {
+                result = await Navigator.of(context).push<DeckEditorResult>(
+                  MaterialPageRoute(
+                    builder: (_) => DeckEditorScreen(
+                      deck: deck,
+                      difficulty: Difficulty.normal,
+                    ),
+                  ),
+                );
+              },
+              child: const Text('open editor'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open editor'));
+    await tester.pumpAndSettle();
+
+    final strings = stringsOf(tester);
+    await tester.tap(find.widgetWithText(FilledButton, strings.saveDeck));
+    await tester.pumpAndSettle();
+
+    expect(result, isNotNull);
+    expect(result!.deck.name, 'Test small (edited)');
+  });
 }

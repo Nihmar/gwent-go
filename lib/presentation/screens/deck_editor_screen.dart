@@ -61,6 +61,12 @@ class _DeckEditorScreenState extends State<DeckEditorScreen> {
 
   CardFaction get _faction => widget.deck.faction;
 
+  /// Name saved by the editor. The "(edited)" marker is applied only once, so
+  /// editing and saving repeatedly does not grow the name.
+  late final String _editedName = widget.deck.name.endsWith(' (edited)')
+      ? widget.deck.name
+      : '${widget.deck.name} (edited)';
+
   List<CardDefinition> get _bank {
     final query = _search.toLowerCase();
     return CardRepository.collectionFor(_faction).where((card) {
@@ -84,7 +90,7 @@ class _DeckEditorScreenState extends State<DeckEditorScreen> {
 
   DeckDefinition _build() => DeckDefinition(
     id: widget.deck.id,
-    name: '${widget.deck.name} (edited)',
+    name: _editedName,
     faction: _faction,
     leader: _leader,
     cardCounts: Map.of(_counts),
