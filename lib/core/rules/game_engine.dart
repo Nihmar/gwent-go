@@ -184,8 +184,10 @@ class GameEngine {
     for (final player in state.players) {
       final leader = player.leader;
       if (leader.hasAbility('francesca_daisy')) {
-        _abilities.draw(player, 1);
-        _emit(CardsDrawn(player: player.index, count: 1));
+        final drawn = _abilities.draw(player, 1);
+        if (drawn > 0) {
+          _emit(CardsDrawn(player: player.index, count: drawn));
+        }
       }
       if (leader.hasAbility('eredin_treacherous')) {
         state.doubleSpyPower = true;
@@ -278,8 +280,9 @@ class GameEngine {
         state.roundNumber > 1 &&
         state.roundHistory.isNotEmpty &&
         state.roundHistory.last.winner == player.index) {
-      if (_abilities.draw(player, 1)) {
-        _emit(CardsDrawn(player: player.index, count: 1));
+      final drawn = _abilities.draw(player, 1);
+      if (drawn > 0) {
+        _emit(CardsDrawn(player: player.index, count: drawn));
       }
     }
     if (player.faction == CardFaction.skellige && state.roundNumber == 3) {

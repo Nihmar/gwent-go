@@ -105,8 +105,10 @@ class _AbilityResolver {
         case Ability.muster:
           _resolveMuster(player, card);
         case Ability.spy:
-          draw(player, 2);
-          engine._emit(CardsDrawn(player: player.index, count: 2));
+          final drawn = draw(player, 2);
+          if (drawn > 0) {
+            engine._emit(CardsDrawn(player: player.index, count: drawn));
+          }
           card.owner = state.opponentOf(player.index);
         case Ability.medic:
           _resolveMedic(player, target);
