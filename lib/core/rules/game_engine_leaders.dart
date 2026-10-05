@@ -10,6 +10,8 @@ extension _LeaderAbilities on _AbilityResolver {
     String ability, {
     CardRow? targetRow,
     CardInstance? target,
+    List<CardInstance>? discard,
+    CardInstance? deckPick,
   }) {
     switch (ability) {
       case 'foltest_king':
@@ -38,13 +40,13 @@ extension _LeaderAbilities on _AbilityResolver {
           ),
         );
       case 'emhyr_relentless':
-        _drawFromOpponentGrave(player);
+        _drawFromOpponentGrave(player, target: target);
       case 'eredin_commander':
         _leaderHorn(player, CardRow.close);
       case 'eredin_bringer_of_death':
-        _restoreFromGraveToHand(player);
+        _restoreFromGraveToHand(player, target: target);
       case 'eredin_destroyer':
-        _eredinDestroyer(player);
+        _eredinDestroyer(player, discard: discard, deckPick: deckPick);
       case 'eredin_king':
         _playWeatherFromDeck(player, null);
       case 'francesca_queen':
@@ -84,12 +86,14 @@ extension _LeaderAbilities on _AbilityResolver {
     )..temporary = true;
   }
 
-  void _drawFromOpponentGrave(PlayerState player) {
+  void _drawFromOpponentGrave(PlayerState player, {CardInstance? target}) {
     final grave = state.players[state.opponentOf(player.index)].graveyard;
     final units = grave.where((c) => c.isUnit).toList()
       ..sort((a, b) => b.baseStrength.compareTo(a.baseStrength));
     if (units.isEmpty) return;
-    final card = units.first;
+    final card = target != null && units.contains(target)
+        ? target
+        : units.first;
     grave.remove(card);
     card.owner = player.index;
     player.hand.add(card);
@@ -102,11 +106,13 @@ extension _LeaderAbilities on _AbilityResolver {
     );
   }
 
-  void _restoreFromGraveToHand(PlayerState player) {
+  void _restoreFromGraveToHand(PlayerState player, {CardInstance? target}) {
     final units = player.graveyard.where((c) => c.isUnit).toList()
       ..sort((a, b) => b.baseStrength.compareTo(a.baseStrength));
     if (units.isEmpty) return;
-    final card = units.first;
+    final card = target != null && units.contains(target)
+        ? target
+        : units.first;
     player.graveyard.remove(card);
     player.hand.add(card);
     engine._emit(
@@ -118,13 +124,23 @@ extension _LeaderAbilities on _AbilityResolver {
     );
   }
 
-  void _eredinDestroyer(PlayerState player) {
-    final discarded = discardOrder(player).take(2).toList();
+  void _eredinDestroyer(
+    PlayerState player, {
+    List<CardInstance>? discard,
+    CardInstance? deckPick,
+  }) {
+    final discarded = (discard != null && discard.isNotEmpty)
+        ? discard.where(player.hand.contains).take(2).toList()
+        : discardOrder(player).take(2).toList();
     for (final card in discarded) {
       toGrave(card);
     }
     if (player.deck.isNotEmpty) {
-      player.hand.add(player.deck.removeAt(0));
+      final pick = deckPick != null && player.deck.contains(deckPick)
+          ? deckPick
+          : player.deck.first;
+      player.deck.remove(pick);
+      player.hand.add(pick);
     }
     if (discarded.isNotEmpty) {
       engine._emit(

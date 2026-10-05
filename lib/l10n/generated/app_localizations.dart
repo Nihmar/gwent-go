@@ -640,6 +640,24 @@ abstract class AppLocalizations {
   /// **'Choose a target'**
   String get selectTargetHint;
 
+  /// No description provided for @selectDiscardHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard {count} cards'**
+  String selectDiscardHint(int count);
+
+  /// No description provided for @selectDrawHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a card to draw'**
+  String get selectDrawHint;
+
+  /// No description provided for @confirmSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirmSelection;
+
   /// No description provided for @mulliganTitle.
   ///
   /// In en, this message translates to:

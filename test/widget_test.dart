@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gwent_go/app.dart';
 import 'package:gwent_go/core/data/card_repository.dart';
+import 'package:gwent_go/core/models/card.dart';
 import 'package:gwent_go/core/models/player.dart';
+import 'package:gwent_go/presentation/controllers/game_controller.dart';
 import 'package:gwent_go/presentation/screens/game_screen.dart';
 import 'package:gwent_go/presentation/screens/home_screen.dart';
 import 'package:gwent_go/presentation/widgets/game/game_hand.dart';
+import 'package:gwent_go/presentation/widgets/game/game_overlays.dart';
 import 'package:gwent_go/presentation/widgets/gwent_card.dart';
 
 void setSurface(WidgetTester tester, double width, double height) {
@@ -131,6 +134,46 @@ void main() {
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
       expect(find.text('Play card'), findsNothing);
+    });
+
+    testWidgets('leader multi-select asks for confirmation', (tester) async {
+      setSurface(tester, 412, 915);
+      final controller = GameController(
+        humanDeck: DeckDefinition(
+          id: 'test_leader',
+          name: 'Test leader',
+          faction: CardFaction.monsters,
+          leader: CardRepository.byId('eredin_gold'),
+          cardCounts: const {'gryffin': 12, 'nekker': 2},
+        ),
+        opponentDeck: CardRepository.defaultDecks()[1],
+        difficulty: Difficulty.normal,
+        seed: 3,
+      );
+      controller.start();
+      controller.engine.finishMulligan();
+      controller.state.currentPlayer = 0;
+      controller.activateLeader();
+      final choice = controller.pendingChoice!;
+
+      await tester.pumpWidget(
+        GwentApp(
+          home: Scaffold(
+            body: Stack(
+              children: [ChoiceOverlay(controller: controller, choice: choice)],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Discard 2 cards'), findsOneWidget);
+
+      await tester.tap(find.byType(GwentCard).at(0));
+      await tester.pump();
+      await tester.tap(find.byType(GwentCard).at(1));
+      await tester.pump();
+      expect(find.text('Confirm (2/2)'), findsOneWidget);
+      controller.dispose();
     });
   });
 }

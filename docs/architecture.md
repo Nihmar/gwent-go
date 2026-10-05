@@ -107,10 +107,11 @@ mind and should be revisited when it is:
 
 ## Known limitations / follow-ups
 
-- **Rule choices for the human:** target selection is implemented for Decoy and
-  Medic. Leader abilities that require a complicated choice (Emhyr's Destroyer of
-  Worlds discard, Emhyr's Relentless graveyard pick) auto-resolve with sensible
-  heuristics and are candidates for dedicated dialogs.
+- **Rule choices for the human:** target selection is implemented for Decoy,
+  Medic, Eredin's Destroyer of Worlds (discard two, then draw one), Emhyr's
+  Relentless and Eredin's Bringer of Death (pick from a discard pile). Emhyr's
+  Emperor emits the revealed cards as an event but does not show them in a
+  dedicated dialog yet.
 - **King Bran** is described as "units only lose half their Strength in bad
   weather"; the reference implementation does not apply it, so this project
   implements the ceiled half as the intended behaviour.

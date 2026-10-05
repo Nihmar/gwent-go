@@ -257,4 +257,69 @@ void main() {
       expect(engine.human.deck.map((c) => c.id), contains('gryffin'));
     });
   });
+
+  group('Manual leader choices', () {
+    test('Destroyer of Worlds discards and draws the chosen cards', () {
+      final engine = harness(
+        humanFaction: CardFaction.monsters,
+        humanLeader: 'eredin_gold',
+      );
+      setTurn(engine, 0);
+      final discardA = makeCard('nekker', owner: 0);
+      final discardB = makeCard('nekker_1', owner: 0);
+      final pick = makeCard('gryffin', owner: 0);
+      engine.human.hand
+        ..clear()
+        ..addAll([discardA, discardB]);
+      engine.human.deck
+        ..clear()
+        ..addAll([pick, makeCard('fiend', owner: 0)]);
+
+      expect(
+        engine.activateLeader(0, discard: [discardA, discardB], deckPick: pick),
+        isTrue,
+      );
+      expect(
+        engine.human.graveyard.map((c) => c.id),
+        containsAll(['nekker', 'nekker_1']),
+      );
+      expect(engine.human.hand.map((c) => c.id), contains('gryffin'));
+      expect(engine.human.deck.map((c) => c.id), isNot(contains('gryffin')));
+    });
+
+    test('Emhyr the Relentless draws the chosen opponent card', () {
+      final engine = harness(
+        humanFaction: CardFaction.nilfgaard,
+        humanLeader: 'emhyr_gold',
+      );
+      setTurn(engine, 0);
+      final target = makeCard('gryffin', owner: 1);
+      engine.opponent.graveyard
+        ..clear()
+        ..addAll([target, makeCard('fiend', owner: 1)]);
+
+      expect(engine.activateLeader(0, target: target), isTrue);
+      expect(engine.human.hand.map((c) => c.id), contains('gryffin'));
+      expect(
+        engine.opponent.graveyard.map((c) => c.id),
+        isNot(contains('gryffin')),
+      );
+    });
+
+    test('Bringer of Death restores the chosen own card', () {
+      final engine = harness(
+        humanFaction: CardFaction.monsters,
+        humanLeader: 'eredin_bronze',
+      );
+      setTurn(engine, 0);
+      final target = makeCard('fiend', owner: 0);
+      engine.human.graveyard
+        ..clear()
+        ..add(target);
+
+      expect(engine.activateLeader(0, target: target), isTrue);
+      expect(engine.human.hand.map((c) => c.id), contains('fiend'));
+      expect(engine.human.graveyard, isEmpty);
+    });
+  });
 }

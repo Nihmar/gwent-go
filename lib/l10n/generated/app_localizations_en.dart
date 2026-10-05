@@ -293,6 +293,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectTargetHint => 'Choose a target';
 
   @override
+  String selectDiscardHint(int count) {
+    return 'Discard $count cards';
+  }
+
+  @override
+  String get selectDrawHint => 'Choose a card to draw';
+
+  @override
+  String get confirmSelection => 'Confirm';
+
+  @override
   String mulliganTitle(int count) {
     return 'Choose up to $count cards to redraw';
   }

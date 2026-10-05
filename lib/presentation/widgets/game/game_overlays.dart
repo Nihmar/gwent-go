@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/models/card.dart';
 import '../../controllers/game_controller.dart';
 import '../../localization.dart';
 import '../../theme/gwent_colors.dart';
@@ -110,8 +111,13 @@ class MulliganOverlay extends StatelessWidget {
   }
 }
 
-/// Bottom sheet that collects a row or target choice for the selected card.
-class ChoiceOverlay extends StatelessWidget {
+/// Bottom sheet that collects a row or target choice.
+///
+/// Serves two callers: card plays (Decoy, Medic) and leader abilities that ask
+/// the player to pick cards (Eredin's Destroyer of Worlds, Emhyr's Relentless,
+/// Eredin's Bringer of Death). When more than one card must be chosen the sheet
+/// turns into a multi-select with a confirm action.
+class ChoiceOverlay extends StatefulWidget {
   const ChoiceOverlay({
     super.key,
     required this.controller,
@@ -122,8 +128,55 @@ class ChoiceOverlay extends StatelessWidget {
   final PendingChoice choice;
 
   @override
+  State<ChoiceOverlay> createState() => _ChoiceOverlayState();
+}
+
+class _ChoiceOverlayState extends State<ChoiceOverlay> {
+  final List<CardInstance> _selected = [];
+
+  @override
+  void didUpdateWidget(ChoiceOverlay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.choice, widget.choice)) _selected.clear();
+  }
+
+  String _title(BuildContext context) {
+    final strings = context.strings;
+    return switch (widget.choice) {
+      RowChoice() => strings.selectRowHint,
+      TargetChoice(:final kind, :final requiredCount) => switch (kind) {
+        TargetKind.hand => strings.selectDiscardHint(requiredCount),
+        TargetKind.deck => strings.selectDrawHint,
+        TargetKind.graveyard ||
+        TargetKind.battlefield => strings.selectTargetHint,
+      },
+    };
+  }
+
+  void _toggle(CardInstance target, int requiredCount) {
+    if (requiredCount == 1) {
+      _resolve([target]);
+      return;
+    }
+    setState(() {
+      if (_selected.remove(target)) return;
+      if (_selected.length >= requiredCount) _selected.removeAt(0);
+      _selected.add(target);
+    });
+  }
+
+  void _resolve(List<CardInstance> chosen) {
+    if (widget.controller.selectedCard != null) {
+      widget.controller.playSelected(target: chosen.first);
+    } else {
+      widget.controller.chooseTargets(List.of(chosen));
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final strings = context.strings;
+    final choice = widget.choice;
     return Positioned(
       left: 0,
       right: 0,
@@ -143,13 +196,13 @@ class ChoiceOverlay extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Text(switch (choice) {
-                    RowChoice() => strings.selectRowHint,
-                    TargetChoice() => strings.selectTargetHint,
-                  }, style: const TextStyle(fontWeight: FontWeight.w600)),
+                  Text(
+                    _title(context),
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
                   const Spacer(),
                   TextButton(
-                    onPressed: controller.clearSelection,
+                    onPressed: widget.controller.clearSelection,
                     child: Text(strings.cancel),
                   ),
                 ],
@@ -161,27 +214,49 @@ class ChoiceOverlay extends StatelessWidget {
                   children: [
                     for (final row in rows)
                       FilledButton.tonal(
-                        onPressed: () => controller.playSelected(row: row),
+                        onPressed: () =>
+                            widget.controller.playSelected(row: row),
                         child: Text(strings.rowName(row)),
                       ),
                   ],
                 ),
-                TargetChoice(:final targets) => SizedBox(
-                  height: 130,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: targets.length,
-                    separatorBuilder: (_, _) => const SizedBox(width: 8),
-                    itemBuilder: (context, index) {
-                      final target = targets[index];
-                      return GwentCard(
-                        definition: target.definition,
-                        strength: target.baseStrength,
-                        width: 78,
-                        onTap: () => controller.playSelected(target: target),
-                      );
-                    },
-                  ),
+                TargetChoice(:final targets, :final requiredCount) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(
+                      height: 130,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: targets.length,
+                        separatorBuilder: (_, _) => const SizedBox(width: 8),
+                        itemBuilder: (context, index) {
+                          final target = targets[index];
+                          return GwentCard(
+                            definition: target.definition,
+                            strength: target.baseStrength,
+                            width: 78,
+                            selected: _selected.contains(target),
+                            onTap: () => _toggle(target, requiredCount),
+                          );
+                        },
+                      ),
+                    ),
+                    if (requiredCount > 1) ...[
+                      const SizedBox(height: 10),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: FilledButton(
+                          onPressed: _selected.length == requiredCount
+                              ? () => _resolve(_selected)
+                              : null,
+                          child: Text(
+                            '${strings.confirmSelection} '
+                            '(${_selected.length}/$requiredCount)',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               },
             ],
