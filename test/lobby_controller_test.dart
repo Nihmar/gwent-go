@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gwent_go/core/data/card_repository.dart';
 import 'package:gwent_go/core/session/client_session.dart';
+import 'package:gwent_go/presentation/controllers/game_controller.dart';
 import 'package:gwent_go/presentation/controllers/lobby_controller.dart';
 import 'package:gwent_go/platform/tcp_match_transport.dart';
 
@@ -78,14 +79,23 @@ void main() {
     await guestLobby.browse();
     await until(() => guestLobby.hosts.isNotEmpty);
     expect(guestLobby.hosts.first.name, 'Host');
-
     await guestLobby.joinMatch(guestLobby.hosts.first, decks[1]);
     await hosting;
 
     expect(guestLobby.status, LobbyStatus.ready);
     expect(guestLobby.clientSession!.seat, 1);
-    await until(() => guestLobby.clientSession?.view != null);
+    // The lobby must not report ready before the host's first projection, or
+    // the game controller would be built without a state to render.
+    expect(guestLobby.clientSession!.view, isNotNull);
     expect(hostLobby.status, LobbyStatus.ready);
+
+    // The controller the lobby hands to the board must be buildable as-is.
+    final controller = GameController.remote(
+      session: guestLobby.clientSession!,
+      localSeat: 1,
+    );
+    expect(controller.state.players, hasLength(2));
+    controller.dispose();
 
     await guestLobby.cancel();
     await hostLobby.cancel();
