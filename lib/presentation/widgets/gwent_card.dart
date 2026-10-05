@@ -59,16 +59,16 @@ class GwentCard extends StatelessWidget {
           ),
           // Every non-leader card carries its badge in the same top-left
           // slot: the strength number for units and heroes, the effect emblem
-          // for special and weather cards. It sits inside the frame with a
-          // small margin and leaves the artwork centre visible.
+          // for special and weather cards. The slot is the size of the visible
+          // disc; hero sprites draw their decorative rays around it.
           if (!definition.isLeader)
             Positioned(
-              left: width * 0.06,
-              top: width * 0.06,
+              left: width * 0.045,
+              top: width * 0.045,
               child: _PowerBadge(
                 definition: definition,
                 strength: showStrength ? shownStrength : null,
-                size: width * 0.26,
+                disc: width * 0.24,
               ),
             ),
           if (CardAssets.rowIcon(definition.row) case final rowIcon?)
@@ -189,41 +189,80 @@ class _PowerBadge extends StatelessWidget {
   const _PowerBadge({
     required this.definition,
     required this.strength,
-    required this.size,
+    required this.disc,
   });
 
   final CardDefinition definition;
   final int? strength;
-  final double size;
+
+  /// Diameter of the visible badge disc.
+  final double disc;
+
+  /// Reference sprites are 215x215 canvases. Every sprite places its disc at
+  /// the same spot; units and specials fill (15, 14)-(125, 125), heroes have
+  /// an 88px disc with decorative rays around it.
+  static const double _canvas = 215;
+  static const double _unitDisc = 110;
+  static const double _unitLeft = 15;
+  static const double _unitTop = 14;
+  static const double _heroDisc = 88;
+  static const double _heroWindow = 150;
+  static const Offset _discCenter = Offset(69.2 / _canvas, 68.8 / _canvas);
+
+  bool get _hero => definition.isHero;
+
+  /// Crop window and disc size inside it, in canvas pixels.
+  double get _window => _hero ? _heroWindow : _unitDisc;
+  double get _cropLeft => _hero ? 0 : _unitLeft;
+  double get _cropTop => _hero ? 0 : _unitTop;
+  double get _discPixels => _hero ? _heroDisc : _unitDisc;
 
   @override
   Widget build(BuildContext context) {
-    final hero = definition.isHero;
+    final cropSize = disc * _window / _discPixels;
+    final discCenter = Offset(
+      (_discCenter.dx * _canvas - _cropLeft) / _window * cropSize,
+      (_discCenter.dy * _canvas - _cropTop) / _window * cropSize,
+    );
     return SizedBox(
       key: GwentCard.powerBadgeKey,
-      width: size,
-      height: size,
+      width: disc,
+      height: disc,
       child: Stack(
-        alignment: Alignment.center,
+        clipBehavior: Clip.none,
         children: [
-          // Every sprite (hero included) keeps its disc in the same content
-          // rect, so one crop centres all of them under the number.
-          _SpriteCrop(asset: CardAssets.powerBadge(definition), size: size),
+          Positioned(
+            left: disc / 2 - discCenter.dx,
+            top: disc / 2 - discCenter.dy,
+            child: _SpriteCrop(
+              asset: CardAssets.powerBadge(definition),
+              size: cropSize,
+              left: _cropLeft,
+              top: _cropTop,
+              window: _window,
+            ),
+          ),
           if (strength != null)
-            Text(
-              '$strength',
-              style: TextStyle(
-                fontSize: size * 0.44,
-                fontWeight: FontWeight.w700,
-                height: 1,
-                color: hero ? const Color(0xFFF7E8C2) : const Color(0xFF221806),
-                shadows: const [
-                  Shadow(
-                    color: Colors.black45,
-                    blurRadius: 2,
-                    offset: Offset(0, 1),
+            Positioned.fill(
+              child: Center(
+                child: Text(
+                  '$strength',
+                  style: TextStyle(
+                    fontSize: disc * 0.44,
+                    fontWeight: FontWeight.w700,
+                    height: 1,
+                    color: _hero
+                        ? const Color(0xFFF7E8C2)
+                        : const Color(0xFF221806),
+                    shadows: const [
+                      Shadow(
+                        color: Colors.black45,
+                        blurRadius: 2,
+                        offset: Offset(0, 1),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
         ],
@@ -232,33 +271,36 @@ class _PowerBadge extends StatelessWidget {
   }
 }
 
+/// Draws a [size]-sized window of a sprite canvas, starting at
+/// ([left], [top]) and [window] pixels wide.
 class _SpriteCrop extends StatelessWidget {
-  const _SpriteCrop({required this.asset, required this.size});
+  const _SpriteCrop({
+    required this.asset,
+    required this.size,
+    required this.left,
+    required this.top,
+    required this.window,
+  });
 
   final String asset;
   final double size;
+  final double left;
+  final double top;
+  final double window;
 
-  /// Reference sprites are 215x215 canvases whose badge sits at
-  /// (15, 14)-(125, 125); `power_hero.png` is the only full-canvas sprite.
   static const double _canvas = 215;
-  static const double _left = 15;
-  static const double _top = 14;
-  static const double _content = 110;
 
   @override
   Widget build(BuildContext context) {
-    // Draw the sprite large enough that its badge area matches [size], then
-    // shift the badge origin onto the widget origin and clip the rest.
-    final drawn = size * _canvas / _content;
+    // Draw the whole canvas large enough that the window matches [size], then
+    // shift the window origin onto the widget origin and clip the rest.
+    final drawn = size * _canvas / window;
     return ClipRect(
       child: SizedBox(
         width: size,
         height: size,
         child: Transform.translate(
-          offset: Offset(
-            -_left * size / _content,
-            -_top * size / _content,
-          ),
+          offset: Offset(-left * size / window, -top * size / window),
           child: OverflowBox(
             alignment: Alignment.topLeft,
             minWidth: drawn,
