@@ -10,6 +10,8 @@ class GameRandom {
 
   int nextInt(int max) => _random.nextInt(max);
 
+  double nextDouble() => _random.nextDouble();
+
   T pick<T>(List<T> items) => items[_random.nextInt(items.length)];
 
   bool chance(double probability) => _random.nextDouble() < probability;
