@@ -1,7 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gwent_go/platform/lan_discovery.dart';
 
 void main() {
+  _broadcastTargets();
+  _virtualInterfaces();
+
   group('LAN discovery', () {
     test('a browser finds an announcer and ignores repeats', () async {
       final browser = LanBrowser(port: 0);
@@ -80,5 +85,54 @@ void main() {
       await announcer.stop();
       await browser.close();
     });
+  });
+}
+
+void _broadcastTargets() {
+  group('broadcasts', () {
+    test('a /24 interface maps to its subnet broadcast', () {
+      expect(
+        directedBroadcast(InternetAddress('192.168.1.42'), 24),
+        '192.168.1.255',
+      );
+      expect(
+        directedBroadcast(InternetAddress('10.0.5.7'), 16),
+        '10.0.255.255',
+      );
+    });
+
+    test('point-to-point and unusable prefixes are skipped', () {
+      expect(directedBroadcast(InternetAddress('192.168.1.42'), 32), isNull);
+      expect(directedBroadcast(InternetAddress('192.168.1.42'), 0), isNull);
+    });
+
+    test('the announcer also reaches the local subnet broadcast', () async {
+      final browser = LanBrowser(port: 0);
+      await browser.start();
+      final announcer = LanAnnouncer(
+        name: 'Host',
+        matchPort: 40000,
+        port: browser.boundPort,
+        // The local subnet, as if the device were on 127.0.0.0/8.
+        targets: () async => ['127.255.255.255'],
+      );
+      await announcer.start();
+
+      final host = await browser.hosts.first.timeout(const Duration(seconds: 3));
+      expect(host.name, 'Host');
+
+      await announcer.stop();
+      await browser.close();
+    });
+  });
+}
+
+void _virtualInterfaces() {
+  test('virtual interfaces are left out of the announcements', () {
+    expect(isVirtualInterface('docker0'), isTrue);
+    expect(isVirtualInterface('virbr0'), isTrue);
+    expect(isVirtualInterface('wlan0'), isFalse);
+    expect(isVirtualInterface('enp3s0'), isFalse);
+    expect(isVirtualInterface('Wi-Fi'), isFalse);
   });
 }

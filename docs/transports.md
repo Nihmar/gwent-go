@@ -23,6 +23,11 @@ same-network case, and are the recommended default: no pairing, both devices
 keep their normal network connection, and the host's TCP server is reachable by
 address when discovery is blocked.
 
+Over Wi-Fi the announcements go to the subnet broadcast of every physical
+interface *and* to `255.255.255.255`, because access points differ in which of
+the two they forward; virtual interfaces (containers, VMs, VPN tunnels) are
+skipped, and the browser lists a host once even when several datagrams reach it.
+
 The message set is small: commands are a few hundred bytes at most, and a
 projection is the whole visible board — currently a few kilobytes of JSON, sent
 after every action. Any transport must handle that comfortably.
