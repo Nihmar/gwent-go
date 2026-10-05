@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gwent_go/core/data/card_repository.dart';
 import 'package:gwent_go/core/models/card.dart';
 import 'package:gwent_go/core/models/game_state.dart';
 import 'package:gwent_go/core/models/player.dart';
@@ -12,16 +13,19 @@ import 'support/engine_harness.dart';
 void main() {
   group('Engine flow', () {
     test('startMatch deals ten cards and enters the mulligan phase', () {
-      final engine = harness();
-      expect(engine.state.phase, isNot(GamePhase.gameOver));
-      // Hands were replaced by the harness, so assert on a fresh engine.
-      expect(engine.human.hand, isNotEmpty);
-    });
+      final decks = CardRepository.defaultDecks();
+      final engine = GameEngine(
+        humanDeck: decks[0],
+        opponentDeck: decks[1],
+        difficulty: Difficulty.normal,
+        random: GameRandom(11),
+      );
 
-    test('fresh match deals ten cards to each player', () {
-      final engine = harness();
-      expect(engine.human.hand.length, lessThanOrEqualTo(10));
-      expect(engine.opponent.hand.length, lessThanOrEqualTo(10));
+      engine.startMatch();
+
+      expect(engine.state.phase, GamePhase.mulligan);
+      expect(engine.human.hand, hasLength(10));
+      expect(engine.opponent.hand, hasLength(10));
     });
 
     test('finishMulligan starts round one with the first player acting', () {
