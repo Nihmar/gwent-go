@@ -174,7 +174,7 @@ Goal: a match can be hosted and joined over an abstract transport, in memory.
 Tests: an in-memory loopback pair plays a full match; illegal commands from the
 client are rejected; a mid-match transport drop can be resumed with a `resync`.
 
-### Phase 4 — Hotseat (local multiplayer)
+### Phase 4 — Hotseat (local multiplayer) *(done)*
 
 Goal: validate Phases 1–3 without any networking.
 

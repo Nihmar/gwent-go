@@ -33,8 +33,11 @@ class TargetChoice extends PendingChoice {
 
 /// Bridges the rules engine to the widget tree.
 ///
-/// Owns the human's interaction state (selected card, pending target) and
-/// drives the AI opponent with small delays so its moves are readable.
+/// Owns the local player's interaction state (selected card, pending target)
+/// and drives the AI opponent with small delays so its moves are readable.
+///
+/// In [hotseat] mode two humans share the device: the local seat follows the
+/// turn and the UI asks them to pass the device before the next hand is shown.
 class GameController extends ChangeNotifier {
   GameController({
     required DeckDefinition humanDeck,
@@ -42,6 +45,7 @@ class GameController extends ChangeNotifier {
     required Difficulty difficulty,
     String opponentName = 'Opponent',
     int localSeat = 0,
+    bool hotseat = false,
     int? seed,
   }) : this._(
          GameEngine(
@@ -52,6 +56,7 @@ class GameController extends ChangeNotifier {
          ),
          localSeat: localSeat,
          opponentName: opponentName,
+         hotseat: hotseat,
        );
 
   /// Resumes a match from a snapshot produced by [snapshot] using the given
@@ -59,10 +64,12 @@ class GameController extends ChangeNotifier {
   factory GameController.resume(
     Map<String, dynamic> snapshot, {
     int localSeat = 0,
+    bool hotseat = false,
   }) {
     final controller = GameController._(
       GameEngine.fromJson(snapshot),
       localSeat: localSeat,
+      hotseat: hotseat,
     );
     controller._runAiMulligan();
     controller._maybeRunAi();
@@ -71,22 +78,42 @@ class GameController extends ChangeNotifier {
 
   GameController._(
     this.engine, {
-    required this.localSeat,
+    required int localSeat,
+    required this.hotseat,
     String? opponentName,
-  }) : difficulty = engine.state.players[localSeat].difficulty {
+  }) : _localSeat = localSeat,
+       difficulty = engine.state.players[localSeat].difficulty {
     _ai = createAi(difficulty);
-    // The engine is seat agnostic; the presentation marks which seat is local.
-    engine.state.players[localSeat].isHuman = true;
-    if (opponentName != null) {
-      engine.state.players[engine.state.opponentOf(localSeat)].name =
-          opponentName;
+    // The engine is seat agnostic; the presentation marks which seats humans
+    // control. In hotseat play both of them are.
+    if (hotseat) {
+      for (final player in engine.state.players) {
+        player.isHuman = true;
+      }
+    } else {
+      engine.state.players[localSeat].isHuman = true;
+      if (opponentName != null) {
+        engine.state.players[engine.state.opponentOf(localSeat)].name =
+            opponentName;
+      }
     }
   }
 
   final GameEngine engine;
 
-  /// Seat this client controls.
-  final int localSeat;
+  /// True when two humans share this device.
+  final bool hotseat;
+
+  int _localSeat;
+
+  /// Seat the device is currently showing.
+  int get localSeat => _localSeat;
+
+  int? _pendingSeat;
+
+  /// Seat waiting for the device, when [hotseat] is on and the turn moved to
+  /// the other player. The UI must hide the board until it is confirmed.
+  int? get pendingSeat => _pendingSeat;
 
   final Difficulty difficulty;
   late final AiPlayer _ai;
@@ -112,8 +139,8 @@ class GameController extends ChangeNotifier {
   bool get isChoosingForLeader => pendingChoice != null && selectedCard == null;
 
   GameState get state => engine.state;
-  PlayerState get human => state.players[localSeat];
-  PlayerState get opponent => state.players[state.opponentOf(localSeat)];
+  PlayerState get human => state.players[_localSeat];
+  PlayerState get opponent => state.players[state.opponentOf(_localSeat)];
   bool get isMulligan =>
       state.phase == GamePhase.mulligan && !human.mulliganDone;
   bool get isGameOver => state.phase == GamePhase.gameOver;
@@ -128,6 +155,33 @@ class GameController extends ChangeNotifier {
 
   int get redrawsLeft => GameEngine.maxRedraws - human.redraws;
 
+  /// Accepts the pending device hand-over and switches the visible seat.
+  void confirmSeatSwitch() {
+    final seat = _pendingSeat;
+    if (seat == null) return;
+    _localSeat = seat;
+    _pendingSeat = null;
+    selectedCard = null;
+    pendingChoice = null;
+    notifyListeners();
+  }
+
+  /// Hands the device over to [seat] when hotseat play moved the turn.
+  void _syncHotseat() {
+    if (!hotseat) return;
+    if (state.phase == GamePhase.mulligan) {
+      final next = state.players.where((p) => !p.mulliganDone);
+      if (next.length == 1 && next.single.index != _localSeat) {
+        _pendingSeat = next.single.index;
+      }
+      return;
+    }
+    if (state.phase != GamePhase.playing) return;
+    final current = state.currentPlayer;
+    if (current == _localSeat || state.players[current].passed) return;
+    _pendingSeat = current;
+  }
+
   /// Starts the match and enters the mulligan phase.
   void start() {
     engine.startMatch();
@@ -138,6 +192,7 @@ class GameController extends ChangeNotifier {
 
   /// Redraws the opening hand of every seat this client does not control.
   void _runAiMulligan() {
+    if (hotseat) return;
     if (state.phase != GamePhase.mulligan) return;
     for (final player in state.players) {
       if (player.isHuman || player.mulliganDone) continue;
@@ -176,6 +231,7 @@ class GameController extends ChangeNotifier {
     redrawPicks.clear();
     engine.finishMulligan(human.index);
     _drainEvents();
+    _syncHotseat();
     notifyListeners();
     _maybeRunAi();
   }
@@ -330,6 +386,7 @@ class GameController extends ChangeNotifier {
     pendingChoice = null;
     _destroyerDiscard = const [];
     _drainEvents();
+    _syncHotseat();
     notifyListeners();
     _maybeRunAi();
   }
@@ -339,7 +396,7 @@ class GameController extends ChangeNotifier {
   // ---------------------------------------------------------------------------
 
   void _maybeRunAi() {
-    if (_disposed) return;
+    if (_disposed || hotseat) return;
     if (isGameOver) return;
     if (state.phase != GamePhase.playing) return;
     if (!isRemoteTurn) return;

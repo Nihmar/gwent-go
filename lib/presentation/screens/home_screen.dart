@@ -76,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (result.startGame && mounted) _startMatch(deck: result.deck);
   }
 
-  void _startMatch({DeckDefinition? deck}) {
+  void _startMatch({DeckDefinition? deck, bool hotseat = false}) {
     final chosen = deck ?? _deck;
     final validation = DeckValidator.validate(
       chosen,
@@ -97,6 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
           humanDeck: chosen,
           opponentDeck: opponentDeck,
           difficulty: _difficulty,
+          hotseat: hotseat,
           onFinished: _onMatchFinished,
           onPersist: (snapshot) => _settings.saveMatch(snapshot),
         ),
@@ -313,6 +314,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 10),
               TonalActionButton(
+                onPressed: () => _startMatch(hotseat: true),
+                icon: Icons.people_alt_outlined,
+                label: strings.localMatch,
+              ),
+              const SizedBox(height: 10),
+              TonalActionButton(
                 onPressed: _editDeck,
                 icon: Icons.grid_view_rounded,
                 label: strings.deckCollection,
@@ -460,6 +467,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           onDifficulty: _settings.setDifficulty,
                           onFaction: _settings.setFaction,
                           onStart: _startMatch,
+                          onStartLocal: () => _startMatch(hotseat: true),
                         ),
                       ),
                       const SizedBox(width: 18),

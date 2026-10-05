@@ -28,6 +28,7 @@ class GameScreen extends StatefulWidget {
     this.humanDeck,
     this.opponentDeck,
     this.difficulty = Difficulty.normal,
+    this.hotseat = false,
     this.snapshot,
     this.onFinished,
     this.onPersist,
@@ -39,6 +40,10 @@ class GameScreen extends StatefulWidget {
   final DeckDefinition? humanDeck;
   final DeckDefinition? opponentDeck;
   final Difficulty difficulty;
+
+  /// Two humans share this device; the board hides until the turn's player
+  /// confirms the hand-over.
+  final bool hotseat;
 
   /// When set, the match is restored instead of started.
   final Map<String, dynamic>? snapshot;
@@ -64,12 +69,13 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     final snapshot = widget.snapshot;
     controller = snapshot != null
-        ? GameController.resume(snapshot)
+        ? GameController.resume(snapshot, hotseat: widget.hotseat)
         : GameController(
             humanDeck: widget.humanDeck!,
             opponentDeck: widget.opponentDeck!,
             difficulty: widget.difficulty,
             opponentName: _opponentName(),
+            hotseat: widget.hotseat,
           );
     controller.addListener(_onChange);
     if (snapshot == null) controller.start();
@@ -172,16 +178,22 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
           child: SafeArea(
             child: Stack(
               children: [
-                wide ? _buildDesktop(context) : _buildPhone(context),
-                if (controller.isMulligan)
-                  MulliganOverlay(controller: controller),
-                if (controller.pendingChoice case final choice?)
-                  ChoiceOverlay(controller: controller, choice: choice),
-                if (!wide &&
-                    !controller.isMulligan &&
-                    controller.pendingChoice == null &&
-                    controller.selectedCard != null)
-                  CardPreviewSheet(controller: controller),
+                // While hotseat play waits for the device to change hands the
+                // board is not built at all, so no hand can leak.
+                if (controller.pendingSeat != null)
+                  PassDeviceOverlay(controller: controller)
+                else ...[
+                  wide ? _buildDesktop(context) : _buildPhone(context),
+                  if (controller.isMulligan)
+                    MulliganOverlay(controller: controller),
+                  if (controller.pendingChoice case final choice?)
+                    ChoiceOverlay(controller: controller, choice: choice),
+                  if (!wide &&
+                      !controller.isMulligan &&
+                      controller.pendingChoice == null &&
+                      controller.selectedCard != null)
+                    CardPreviewSheet(controller: controller),
+                ],
               ],
             ),
           ),

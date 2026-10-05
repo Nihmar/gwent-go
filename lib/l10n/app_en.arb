@@ -80,6 +80,22 @@
   "deckEditorHint": "Tap to add · long-press for the full ability",
   "noCardsFound": "No cards match your filters",
 
+  "localMatch": "Local match",
+  "playerSeat": "Player {seat}",
+  "@playerSeat": {
+    "placeholders": {
+      "seat": { "type": "int" }
+    }
+  },
+  "passDeviceTitle": "Pass the device to {name}",
+  "@passDeviceTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "passDeviceHint": "The next hand stays hidden until the next player is ready.",
+  "passDeviceReady": "I'm ready",
+
   "commandWrongPhase": "This action is not available right now.",
   "commandNotYourTurn": "It is not your turn.",
   "commandPlayerPassed": "You have already passed this round.",

@@ -223,6 +223,7 @@ class NewMatchPanel extends StatelessWidget {
     required this.onDifficulty,
     required this.onFaction,
     required this.onStart,
+    required this.onStartLocal,
   });
 
   final Difficulty difficulty;
@@ -231,6 +232,9 @@ class NewMatchPanel extends StatelessWidget {
   final ValueChanged<Difficulty> onDifficulty;
   final ValueChanged<CardFaction> onFaction;
   final VoidCallback onStart;
+
+  /// Starts a match where two humans share the device.
+  final VoidCallback onStartLocal;
 
   @override
   Widget build(BuildContext context) {
@@ -264,7 +268,12 @@ class NewMatchPanel extends StatelessWidget {
                 icon: const Icon(Icons.double_arrow_rounded),
                 label: Text(strings.startMatch),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
+              TextButton(
+                onPressed: onStartLocal,
+                child: Text(strings.localMatch),
+              ),
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   '${strings.factionName(faction)} · ${deck.leader.name}',

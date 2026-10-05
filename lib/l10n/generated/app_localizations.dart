@@ -496,6 +496,36 @@ abstract class AppLocalizations {
   /// **'No cards match your filters'**
   String get noCardsFound;
 
+  /// No description provided for @localMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Local match'**
+  String get localMatch;
+
+  /// No description provided for @playerSeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Player {seat}'**
+  String playerSeat(int seat);
+
+  /// No description provided for @passDeviceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pass the device to {name}'**
+  String passDeviceTitle(String name);
+
+  /// No description provided for @passDeviceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The next hand stays hidden until the next player is ready.'**
+  String get passDeviceHint;
+
+  /// No description provided for @passDeviceReady.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'m ready'**
+  String get passDeviceReady;
+
   /// No description provided for @commandWrongPhase.
   ///
   /// In en, this message translates to:

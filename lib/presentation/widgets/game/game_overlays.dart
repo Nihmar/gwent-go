@@ -267,3 +267,68 @@ class _ChoiceOverlayState extends State<ChoiceOverlay> {
     );
   }
 }
+
+/// Full-screen hand-over used by hotseat play.
+///
+/// Nothing of the next player's hand is rendered until they confirm, so the
+/// board and the new hand are only revealed once the device has changed hands.
+class PassDeviceOverlay extends StatelessWidget {
+  const PassDeviceOverlay({super.key, required this.controller});
+
+  final GameController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = context.strings;
+    final seat = controller.pendingSeat;
+    final name = seat == null
+        ? ''
+        : strings.playerSeat(seat + 1);
+    return Positioned.fill(
+      child: ColoredBox(
+        color: Colors.black.withValues(alpha: 0.97),
+        child: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(28),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.pan_tool_alt_outlined,
+                    size: 44,
+                    color: GwentColors.goldBright,
+                  ),
+                  const SizedBox(height: 18),
+                  Text(
+                    strings.passDeviceTitle(name),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    strings.passDeviceHint,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: GwentColors.onSurfaceVariant,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  FilledButton.icon(
+                    onPressed: controller.confirmSeatSwitch,
+                    icon: const Icon(Icons.visibility_outlined),
+                    label: Text(strings.passDeviceReady),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
