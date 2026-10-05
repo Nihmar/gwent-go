@@ -14,6 +14,9 @@ import '../core/session/match_transport.dart';
 class TcpMatchTransport implements MatchTransport {
   TcpMatchTransport._(this._socket) {
     _socket.setOption(SocketOption.tcpNoDelay, true);
+    // Write errors on a socket whose peer vanished surface on `done`; they are
+    // expected when a peer disappears and must not become uncaught errors.
+    unawaited(_socket.done.then((_) {}, onError: (Object _) {}));
     _subscription = _socket
         .cast<List<int>>()
         .transform(utf8.decoder)
@@ -61,7 +64,12 @@ class TcpMatchTransport implements MatchTransport {
   @override
   void send(Map<String, Object?> message) {
     if (_closed) return;
-    _socket.write('${jsonEncode(message)}\n');
+    try {
+      _socket.write('${jsonEncode(message)}\n');
+    } on SocketException {
+      // The peer went away; the incoming stream will complete and the session
+      // reports the disconnect.
+    }
   }
 
   void _onLine(String line) {
