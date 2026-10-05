@@ -126,11 +126,9 @@
 }
 
 /* special / weather cards show the emblem centred */
+/* Special and weather cards keep their emblem in the same top-left slot as a
+   unit's strength, so the artwork centre stays visible. */
 .gcard.special .gcard-power {
-  left: 50%;
-  top: 42%;
-  width: 54%;
-  transform: translate(-50%, -50%);
   filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.6));
 }
 
