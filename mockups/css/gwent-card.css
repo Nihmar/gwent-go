@@ -1,0 +1,229 @@
+/* ==========================================================================
+   Gwent Go - game components: card
+   Card artwork and icon sprites are loaded from the reference repository
+   (gwent-classic-enhanced/img) so the mockup does not duplicate assets.
+   ========================================================================== */
+
+/* ==========================================================================
+   Gwent Go - game components: cards, rows, piles, board surfaces
+   Card artwork and icon sprites are loaded from the reference repository
+   (gwent-classic-enhanced/img) so the mockup does not duplicate assets.
+   ========================================================================== */
+
+/* ==========================================================================
+   Card
+   Usage: <div class="gcard" style="--cw:64px;--art:url(...)">
+   ========================================================================== */
+
+.gcard {
+  --cw: 64px;
+  position: relative;
+  width: var(--cw);
+  aspect-ratio: 4.45 / 6.35;
+  flex: none;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+}
+
+.gcard-clip {
+  position: absolute;
+  inset: 0;
+  border-radius: calc(var(--cw) * 0.095);
+  overflow: hidden;
+  background: #0d0b08;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(0, 0, 0, 0.7);
+}
+
+.gcard-art {
+  position: absolute;
+  inset: 0;
+  background-image: var(--art);
+  background-size: cover;
+  background-position: center 20%;
+}
+
+/* bottom scrim so the name stays readable over any artwork */
+.gcard-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(10, 7, 4, 0.92) 0%,
+    rgba(10, 7, 4, 0.45) 26%,
+    rgba(10, 7, 4, 0) 46%
+  );
+}
+
+/* inner bronze / gold frame */
+.gcard-clip::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 0 1px rgba(240, 220, 170, 0.3),
+    inset 0 0 0 2.5px rgba(20, 14, 6, 0.55),
+    inset 0 0 calc(var(--cw) * 0.22) rgba(0, 0, 0, 0.55);
+}
+
+.gcard.hero .gcard-clip::after {
+  box-shadow:
+    inset 0 0 0 2px rgba(242, 206, 121, 0.78),
+    inset 0 0 0 3.5px rgba(20, 14, 6, 0.6),
+    inset 0 0 calc(var(--cw) * 0.24) rgba(217, 169, 63, 0.22);
+}
+
+.gcard.special .gcard-clip::after {
+  box-shadow:
+    inset 0 0 0 1px rgba(240, 220, 170, 0.35),
+    inset 0 0 0 2.5px rgba(20, 14, 6, 0.5),
+    inset 0 0 calc(var(--cw) * 0.28) rgba(0, 0, 0, 0.5);
+}
+
+/* --- power badge (gold sprite from the reference art) -------------------- */
+
+.gcard-power {
+  position: absolute;
+  left: calc(var(--cw) * -0.1);
+  top: calc(var(--cw) * -0.1);
+  width: calc(var(--cw) * 0.44);
+  aspect-ratio: 1;
+  background-image: var(--spr);
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.65));
+}
+
+/* non-hero sprites have their content at (15,14)-(125,125) of a 215x215 canvas */
+.gcard-power.is-unit {
+  background-size: 195.45%;
+  background-position: 14.29% 13.33%;
+}
+
+.gcard-power.is-hero {
+  background-size: 100% 100%;
+  background-position: center;
+}
+
+.gcard-power.is-special {
+  background-size: 195.45%;
+  background-position: 14.29% 13.33%;
+}
+
+.gcard-power > span {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: calc(var(--cw) * 0.175);
+  font-weight: 700;
+  line-height: 1;
+  color: #221806;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.gcard-power.is-hero > span {
+  color: #f7e8c2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* special / weather cards show the emblem centred */
+.gcard.special .gcard-power {
+  left: 50%;
+  top: 42%;
+  width: 54%;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.6));
+}
+
+/* --- name banner --------------------------------------------------------- */
+
+.gcard-name {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: calc(var(--cw) * 0.06) calc(var(--cw) * 0.09) calc(var(--cw) * 0.055);
+  font-size: calc(var(--cw) * 0.115);
+  line-height: 1.15;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  color: #f1e6cd;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.gcard.noname .gcard-name {
+  display: none;
+}
+
+/* --- row tag (top-right) -------------------------------------------------- */
+
+.gcard-rowtag {
+  position: absolute;
+  right: calc(var(--cw) * 0.055);
+  top: calc(var(--cw) * 0.055);
+  width: calc(var(--cw) * 0.26);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background-image: var(--ic);
+  background-repeat: no-repeat;
+  background-size: 68%;
+  background-position: center;
+  background-color: rgba(10, 8, 5, 0.6);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* --- ability tag (bottom-right, over the name scrim) --------------------- */
+
+.gcard-abiltag {
+  position: absolute;
+  right: calc(var(--cw) * 0.05);
+  bottom: calc(var(--cw) * 0.045);
+  width: calc(var(--cw) * 0.22);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background-image: var(--ic);
+  background-repeat: no-repeat;
+  background-size: 62%;
+  background-position: center;
+  background-color: rgba(10, 8, 5, 0.55);
+  opacity: 0.95;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8));
+}
+
+.gcard.noname .gcard-abiltag {
+  width: calc(var(--cw) * 0.3);
+  right: calc(var(--cw) * 0.08);
+  bottom: calc(var(--cw) * 0.08);
+}
+
+.gcard.noname .gcard-rowtag {
+  display: none;
+}
+
+/* --- states --------------------------------------------------------------- */
+
+.gcard.selectable {
+  cursor: pointer;
+}
+
+.gcard.selectable:hover {
+  transform: translateY(calc(var(--cw) * -0.1));
+  z-index: 6;
+}
+
+.gcard.selected {
+  transform: translateY(calc(var(--cw) * -0.2));
+  z-index: 8;
+}
+
+.gcard.selected .gcard-clip {
+  box-shadow: var(--elev-glow), 0 10px 22px rgba(0, 0, 0, 0.55);
+}
+
+.gcard.dim {
+  filter: saturate(0.55) brightness(0.72);
+}
+

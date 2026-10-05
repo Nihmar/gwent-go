@@ -1,0 +1,366 @@
+/* ==========================================================================
+   Material 3 components used by the Gwent Go mockups
+   ========================================================================== */
+
+/* --- top app bar --------------------------------------------------------- */
+
+.app-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 64px;
+  padding: 0 12px;
+  background: var(--md-surface-container-low);
+  border-bottom: 1px solid color-mix(in srgb, var(--md-outline-variant) 45%, transparent);
+  flex: none;
+}
+
+.app-bar .app-title {
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--gw-gold-bright);
+}
+
+/* --- icon button --------------------------------------------------------- */
+
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: var(--shape-full);
+  color: var(--md-on-surface-variant);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.icon-btn:hover {
+  background: color-mix(in srgb, var(--md-on-surface) 8%, transparent);
+  color: var(--md-on-surface);
+}
+
+.icon-btn.sm {
+  width: 32px;
+  height: 32px;
+}
+
+.icon-btn.gold {
+  color: var(--gw-gold-bright);
+}
+
+/* --- buttons ------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 24px;
+  border-radius: var(--shape-full);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  cursor: pointer;
+  user-select: none;
+  transition: box-shadow 0.15s ease, filter 0.15s ease, background 0.15s ease;
+}
+
+.btn .ic {
+  width: 18px;
+  height: 18px;
+}
+
+.btn.filled {
+  background: var(--md-primary);
+  color: var(--md-on-primary);
+}
+
+.btn.filled:hover {
+  box-shadow: var(--elev-2);
+  filter: brightness(1.06);
+}
+
+.btn.tonal {
+  background: var(--md-secondary-container);
+  color: var(--md-on-secondary-container);
+}
+
+.btn.tonal:hover {
+  filter: brightness(1.12);
+}
+
+.btn.text {
+  padding: 0 12px;
+  color: var(--md-primary);
+}
+
+.btn.text:hover {
+  background: color-mix(in srgb, var(--md-primary) 10%, transparent);
+}
+
+.btn.gold {
+  background: linear-gradient(180deg, var(--gw-gold-bright), var(--gw-gold));
+  color: #2a1e05;
+  box-shadow: 0 2px 10px rgba(217, 169, 63, 0.28);
+}
+
+.btn.sm {
+  height: 32px;
+  padding: 0 16px;
+  font-size: 13px;
+}
+
+.btn.xl {
+  height: 56px;
+  padding: 0 32px;
+  font-size: 16px;
+  border-radius: var(--shape-xl);
+}
+
+.btn.block {
+  width: 100%;
+}
+
+/* --- chips --------------------------------------------------------------- */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: var(--shape-sm);
+  border: 1px solid color-mix(in srgb, var(--md-outline) 70%, transparent);
+  color: var(--md-on-surface-variant);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  cursor: default;
+  white-space: nowrap;
+}
+
+.chip .ic {
+  width: 16px;
+  height: 16px;
+}
+
+.chip.selected {
+  background: var(--md-secondary-container);
+  color: var(--md-on-secondary-container);
+  border-color: transparent;
+}
+
+.chip.gold {
+  border-color: color-mix(in srgb, var(--gw-gold) 65%, transparent);
+  color: var(--gw-gold-bright);
+  background: color-mix(in srgb, var(--gw-gold) 12%, transparent);
+}
+
+.chip.pill {
+  border-radius: var(--shape-full);
+}
+
+.chip.sm {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+/* --- segmented button ---------------------------------------------------- */
+
+.segmented {
+  display: inline-flex;
+  height: 40px;
+  border-radius: var(--shape-full);
+  border: 1px solid var(--md-outline);
+  overflow: hidden;
+}
+
+.segmented > button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 1;
+  padding: 0 18px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--md-on-surface-variant);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.segmented > button + button {
+  border-left: 1px solid var(--md-outline);
+}
+
+.segmented > button.selected {
+  background: var(--md-secondary-container);
+  color: var(--md-on-secondary-container);
+}
+
+.segmented > button:hover:not(.selected) {
+  background: color-mix(in srgb, var(--md-on-surface) 7%, transparent);
+}
+
+.segmented .ic {
+  width: 16px;
+  height: 16px;
+}
+
+/* --- surfaces / cards ---------------------------------------------------- */
+
+.surface {
+  background: var(--md-surface-container-low);
+  border: 1px solid color-mix(in srgb, var(--md-outline-variant) 50%, transparent);
+  border-radius: var(--shape-md);
+}
+
+.surface.pad {
+  padding: 16px;
+}
+
+.surface-title {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--md-on-surface-variant);
+}
+
+/* --- list tile ----------------------------------------------------------- */
+
+/* --- search bar ---------------------------------------------------------- */
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 48px;
+  padding: 0 16px;
+  border-radius: var(--shape-full);
+  background: var(--md-surface-container-high);
+  color: var(--md-on-surface-variant);
+}
+
+.search-bar input {
+  flex: 1;
+  background: none;
+  border: 0;
+  outline: 0;
+  color: var(--md-on-surface);
+  font: inherit;
+  font-size: 15px;
+}
+
+.search-bar input::placeholder {
+  color: var(--md-on-surface-variant);
+}
+
+/* --- badges -------------------------------------------------------------- */
+
+.badge {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: var(--shape-full);
+  background: var(--md-primary);
+  color: var(--md-on-primary);
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.badge.dark {
+  background: rgba(10, 8, 5, 0.82);
+  color: var(--gw-parchment);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+/* --- navigation rail (desktop) ------------------------------------------- */
+
+.nav-rail {
+  width: 96px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 16px 0;
+  background: var(--md-surface-container-low);
+  border-right: 1px solid color-mix(in srgb, var(--md-outline-variant) 40%, transparent);
+}
+
+.nav-rail .rail-item {
+  width: 80px;
+  padding: 10px 0 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  border-radius: var(--shape-lg);
+  color: var(--md-on-surface-variant);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+}
+
+.nav-rail .rail-item:hover {
+  background: color-mix(in srgb, var(--md-on-surface) 7%, transparent);
+}
+
+.nav-rail .rail-item.active {
+  background: var(--md-secondary-container);
+  color: var(--md-on-secondary-container);
+}
+
+.nav-rail .rail-icon {
+  width: 56px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--shape-full);
+}
+
+/* --- avatars ------------------------------------------------------------- */
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--shape-full);
+  background-size: cover;
+  background-position: center 22%;
+  border: 2px solid color-mix(in srgb, var(--md-outline) 60%, transparent);
+  flex: none;
+}
+
+.avatar.sm { width: 28px; height: 28px; border-width: 1px; }
+/* --- fields / inputs ------------------------------------------------------ */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field > label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--md-on-surface-variant);
+}
+
+/* --- dialog --------------------------------------------------------------- */
+
+/* --- misc ----------------------------------------------------------------- */
+
