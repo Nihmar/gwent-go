@@ -175,6 +175,10 @@ class LobbyController extends ChangeNotifier {
   }
 
   /// Connects to [host] and completes the handshake.
+  ///
+  /// The lobby only reports [LobbyStatus.ready] once the host has sent its first
+  /// projection: a guest renders the host's state, so handing it a session that
+  /// has a seat but no view would crash the game screen immediately.
   Future<void> joinMatch(DiscoveredHost host, DeckDefinition deck) async {
     _role = LobbyRole.joining;
     _setStatus(LobbyStatus.connecting);
@@ -191,9 +195,14 @@ class LobbyController extends ChangeNotifier {
       final session = ClientSession(transport: _transport!, deck: deck);
       _clientSession = session;
       _joinedHost = host;
+      // Subscribe before connecting: both messages can arrive at any time.
       final ready = session.events.firstWhere((event) => event is SessionReady);
+      final firstView = session.events.firstWhere(
+        (event) => event is SessionViewUpdated,
+      );
       session.connect();
       await ready.timeout(connectTimeout);
+      await firstView.timeout(connectTimeout);
       if (_disposed) return;
       _setStatus(LobbyStatus.ready);
     } on Object catch (error) {
