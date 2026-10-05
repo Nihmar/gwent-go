@@ -109,6 +109,11 @@ class _GameScreenState extends State<GameScreen> {
                 MulliganOverlay(controller: controller),
               if (controller.pendingChoice case final choice?)
                 ChoiceOverlay(controller: controller, choice: choice),
+              if (!wide &&
+                  !controller.isMulligan &&
+                  controller.pendingChoice == null &&
+                  controller.selectedCard != null)
+                CardPreviewSheet(controller: controller),
             ],
           ),
         ),

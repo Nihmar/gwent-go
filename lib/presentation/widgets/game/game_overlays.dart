@@ -4,6 +4,44 @@ import '../../controllers/game_controller.dart';
 import '../../localization.dart';
 import '../../theme/gwent_colors.dart';
 import '../gwent_card.dart';
+import 'game_panels.dart';
+
+/// Bottom preview/action sheet shown on narrow layouts when a card is selected.
+///
+/// The desktop layout has a permanent preview panel; phones need the same
+/// controls, otherwise a selected card could never be played.
+class CardPreviewSheet extends StatelessWidget {
+  const CardPreviewSheet({super.key, required this.controller});
+
+  final GameController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 0,
+      child: Container(
+        decoration: BoxDecoration(
+          color: GwentColors.surfaceHigh,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          border: Border.all(color: GwentColors.gold.withValues(alpha: 0.3)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.sizeOf(context).height * 0.5,
+            ),
+            child: SingleChildScrollView(
+              child: GamePreviewPanel(controller: controller, embedded: true),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 /// Full-screen opening redraw chooser.
 class MulliganOverlay extends StatelessWidget {

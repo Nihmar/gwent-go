@@ -65,6 +65,10 @@ class GamePlayerStrip extends StatelessWidget {
               RoundGems(roundsWon: player.roundsWon),
             ],
           ),
+          if (!opponent) ...[
+            const SizedBox(width: 10),
+            _LeaderChip(controller: controller),
+          ],
           const Spacer(),
           _HandCount(count: player.hand.length),
           const SizedBox(width: 6),
@@ -82,6 +86,48 @@ class GamePlayerStrip extends StatelessWidget {
             icon: Icons.delete_outline,
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Compact leader control shown on the phone player strip.
+class _LeaderChip extends StatelessWidget {
+  const _LeaderChip({required this.controller});
+  final GameController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = context.strings;
+    final player = controller.human;
+    final available = player.leaderAvailable && controller.engine.isHumanTurn;
+    return Tooltip(
+      message: strings.cardDescription(player.leader),
+      child: GestureDetector(
+        onTap: available ? controller.activateLeader : null,
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            GwentCard(
+              definition: player.leader,
+              width: 26,
+              dim: !player.leaderAvailable,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              available ? strings.leaderReady : strings.leaderUsed,
+              style: TextStyle(
+                color: available
+                    ? GwentColors.goldBright
+                    : GwentColors.onSurfaceVariant,
+                fontSize: 9,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -260,88 +306,97 @@ class _LeaderButton extends StatelessWidget {
 
 /// Selected-card preview with the play action.
 class GamePreviewPanel extends StatelessWidget {
-  const GamePreviewPanel({super.key, required this.controller});
+  const GamePreviewPanel({
+    super.key,
+    required this.controller,
+    this.embedded = false,
+  });
 
   final GameController controller;
+
+  /// Drops the surrounding surface so the panel can be embedded in a sheet.
+  final bool embedded;
 
   @override
   Widget build(BuildContext context) {
     final strings = context.strings;
     final card = controller.selectedCard;
-    return _SurfacePanel(
-      child: card == null
-          ? Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                strings.cardPreview.toUpperCase(),
+    final content = card == null
+        ? Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              strings.cardPreview.toUpperCase(),
+              style: const TextStyle(
+                color: GwentColors.onSurfaceVariant,
+                fontSize: 12,
+                letterSpacing: 1.6,
+              ),
+            ),
+          )
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  GwentCard(definition: card.definition, width: 76),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          card.name,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _typeLine(context, card.definition),
+                          style: const TextStyle(
+                            color: GwentColors.onSurfaceVariant,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(
+                strings.cardDescription(card.definition),
                 style: const TextStyle(
                   color: GwentColors.onSurfaceVariant,
-                  fontSize: 12,
-                  letterSpacing: 1.6,
+                  fontSize: 12.5,
+                  height: 1.4,
                 ),
               ),
-            )
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    GwentCard(definition: card.definition, width: 76),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            card.name,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 15,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            _typeLine(context, card.definition),
-                            style: const TextStyle(
-                              color: GwentColors.onSurfaceVariant,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  strings.cardDescription(card.definition),
-                  style: const TextStyle(
-                    color: GwentColors.onSurfaceVariant,
-                    fontSize: 12.5,
-                    height: 1.4,
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  FilledButton.icon(
+                    onPressed: controller.engine.isHumanTurn
+                        ? () => controller.playSelected()
+                        : null,
+                    icon: const Icon(Icons.double_arrow_rounded, size: 18),
+                    label: Text(strings.playCard),
                   ),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    FilledButton.icon(
-                      onPressed: controller.engine.isHumanTurn
-                          ? () => controller.playSelected()
-                          : null,
-                      icon: const Icon(Icons.double_arrow_rounded, size: 18),
-                      label: Text(strings.playCard),
-                    ),
-                    const SizedBox(width: 6),
-                    TextButton(
-                      onPressed: controller.clearSelection,
-                      child: Text(strings.cancel),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-    );
+                  const SizedBox(width: 6),
+                  TextButton(
+                    onPressed: controller.clearSelection,
+                    child: Text(strings.cancel),
+                  ),
+                ],
+              ),
+            ],
+          );
+    if (embedded) {
+      return Padding(padding: const EdgeInsets.all(16), child: content);
+    }
+    return _SurfacePanel(child: content);
   }
 
   String _typeLine(BuildContext context, CardDefinition card) {
