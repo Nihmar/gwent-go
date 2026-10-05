@@ -143,9 +143,11 @@ class GameEngine {
   void startMatch() {
     _abilities.draw(human, openingHandSize);
     _abilities.draw(opponent, openingHandSize);
-    _applyGameStart();
+    final leadersDisabled = _applyGameStart();
     _randomizeFirstPlayer();
-    _applyLeaderStartAbilities();
+    // White Flame disables every leader, including the passive ones, matching
+    // the reference implementation's disableLeader branch.
+    if (!leadersDisabled) _applyLeaderStartAbilities();
     _mulliganOpponent();
     state.phase = GamePhase.mulligan;
     Scoring.refresh(state);
@@ -165,12 +167,16 @@ class GameEngine {
     }
   }
 
-  void _applyGameStart() {
+  /// Applies start-of-game leader rules. Returns true when a White Flame leader
+  /// disabled both leaders, so no other leader effect may run.
+  bool _applyGameStart() {
     if (human.leader.hasAbility('emhyr_whiteflame') ||
         opponent.leader.hasAbility('emhyr_whiteflame')) {
       human.leaderUsed = true;
       opponent.leaderUsed = true;
+      return true;
     }
+    return false;
   }
 
   /// Passive / start-of-game leader abilities.
