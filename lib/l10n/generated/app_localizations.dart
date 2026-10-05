@@ -502,6 +502,60 @@ abstract class AppLocalizations {
   /// **'Local match'**
   String get localMatch;
 
+  /// No description provided for @lanMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'LAN match'**
+  String get lanMatch;
+
+  /// No description provided for @hostMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Host match'**
+  String get hostMatch;
+
+  /// No description provided for @joinMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Join match'**
+  String get joinMatch;
+
+  /// No description provided for @hosting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for a guest to join…'**
+  String get hosting;
+
+  /// No description provided for @searchingHosts.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching the local network…'**
+  String get searchingHosts;
+
+  /// No description provided for @joinAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Host address'**
+  String get joinAddress;
+
+  /// No description provided for @noHostsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No match found on this network'**
+  String get noHostsFound;
+
+  /// No description provided for @lobbyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not start the match'**
+  String get lobbyFailed;
+
+  /// No description provided for @cancelHosting.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop hosting'**
+  String get cancelHosting;
+
   /// No description provided for @playerSeat.
   ///
   /// In en, this message translates to:
