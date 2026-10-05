@@ -57,7 +57,13 @@ void main() {
 
     expect(find.byType(DeckSummaryBar), findsOneWidget);
     expect(statValue(tester, DeckSummaryBar.cardsKey), '${defaultDeck.totalCards} / 40');
-    expect(statValue(tester, DeckSummaryBar.unitsKey), contains('/'));
+    final units = defaultDeck.cardCounts.entries
+        .where((entry) => DeckValidator.isUnitCard(CardRepository.byId(entry.key)))
+        .fold(0, (total, entry) => total + entry.value);
+    expect(
+      statValue(tester, DeckSummaryBar.unitsKey),
+      '$units / ${DeckValidator.minUnits}',
+    );
     expect(statValue(tester, DeckSummaryBar.specialKey), contains('/'));
     expect(statValue(tester, DeckSummaryBar.strengthKey), isNotEmpty);
     expect(find.text(strings.deckValid), findsOneWidget);

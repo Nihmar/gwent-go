@@ -85,7 +85,7 @@ abstract final class CardRepository {
   static int deckUnitCount(DeckDefinition deck) {
     var total = 0;
     deck.cardCounts.forEach((id, count) {
-      if (byId(id).isUnit) total += count;
+      if (byId(id).isDeckUnit) total += count;
     });
     return total;
   }

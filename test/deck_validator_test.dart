@@ -15,6 +15,18 @@ void main() {
       }
     });
 
+    test('the displayed unit count matches the validated unit count', () {
+      for (final deck in CardRepository.defaultDecks()) {
+        var expected = 0;
+        deck.cardCounts.forEach((id, count) {
+          if (DeckValidator.isUnitCard(CardRepository.byId(id))) {
+            expected += count;
+          }
+        });
+        expect(CardRepository.deckUnitCount(deck), expected, reason: deck.id);
+      }
+    });
+
     test('flags too few unit cards', () {
       final deck = testDeck(
         faction: CardFaction.realms,

@@ -35,8 +35,7 @@ abstract final class DeckValidator {
   static const int maxSpecial = 10;
   static const int maxTotal = 40;
 
-  static bool isUnitCard(CardDefinition card) =>
-      card.row.isUnitRow && !card.isLeader;
+  static bool isUnitCard(CardDefinition card) => card.isDeckUnit;
 
   static bool isSpecialCard(CardDefinition card) =>
       card.isSpecial || card.isWeather;

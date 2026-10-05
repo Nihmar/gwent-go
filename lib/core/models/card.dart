@@ -152,6 +152,13 @@ class CardDefinition {
   bool get isUnit =>
       !isHero && (row.isUnitRow) && !isWeather && !isSpecial && !isLeader;
 
+  /// True for cards that count as units when building a deck.
+  ///
+  /// Deck rules ask for a minimum number of unit cards and heroes are valid
+  /// unit cards; they merely ignore modifiers on the battlefield, which is why
+  /// [isUnit] excludes them and this predicate does not.
+  bool get isDeckUnit => row.isUnitRow && !isLeader;
+
   /// True when the card is placed in a row's special (horn / mardroeme) slot.
   ///
   /// Only Special-faction cards use that slot: units such as Dandelion or
