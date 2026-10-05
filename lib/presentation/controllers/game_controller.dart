@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'turn_driver.dart';
+
 import '../../core/ai/ai.dart';
 import '../../core/ai/ai_players.dart';
 import '../../core/models/card.dart';
@@ -72,7 +74,7 @@ class GameController extends ChangeNotifier {
       hotseat: hotseat,
     );
     controller._runAiMulligan();
-    controller._maybeRunAi();
+    controller._driver.onStateChanged();
     return controller;
   }
 
@@ -97,6 +99,21 @@ class GameController extends ChangeNotifier {
             opponentName;
       }
     }
+    _driver = hotseat
+        ? const IdleTurnDriver()
+        : LocalAiDriver(
+            engine: engine,
+            seat: engine.state.opponentOf(localSeat),
+            ai: _ai,
+            onApplied: () {
+              _drainEvents();
+              if (!_disposed) notifyListeners();
+            },
+            onThinkingChanged: (value) {
+              isAiThinking = value;
+              if (!_disposed) notifyListeners();
+            },
+          );
   }
 
   final GameEngine engine;
@@ -117,6 +134,7 @@ class GameController extends ChangeNotifier {
 
   final Difficulty difficulty;
   late final AiPlayer _ai;
+  late final TurnDriver _driver;
 
   final List<CardInstance> redrawPicks = [];
 
@@ -233,7 +251,7 @@ class GameController extends ChangeNotifier {
     _drainEvents();
     _syncHotseat();
     notifyListeners();
-    _maybeRunAi();
+    _driver.onStateChanged();
   }
 
   // ---------------------------------------------------------------------------
@@ -388,59 +406,7 @@ class GameController extends ChangeNotifier {
     _drainEvents();
     _syncHotseat();
     notifyListeners();
-    _maybeRunAi();
-  }
-
-  // ---------------------------------------------------------------------------
-  // AI
-  // ---------------------------------------------------------------------------
-
-  void _maybeRunAi() {
-    if (_disposed || hotseat) return;
-    if (isGameOver) return;
-    if (state.phase != GamePhase.playing) return;
-    if (!isRemoteTurn) return;
-    isAiThinking = true;
-    notifyListeners();
-    Future<void>.delayed(const Duration(milliseconds: 650), () {
-      if (_disposed || isGameOver) return;
-      if (!isRemoteTurn) {
-        isAiThinking = false;
-        notifyListeners();
-        return;
-      }
-      final action = _ai.decide(engine, opponent);
-      _applyAi(action);
-      isAiThinking = false;
-      _drainEvents();
-      notifyListeners();
-      _maybeRunAi();
-    });
-  }
-
-  void _applyAi(AiAction action) {
-    final applied = switch (action) {
-      AiPlayCard(:final card, :final targetRow, :final target) =>
-        engine.playCard(
-          opponent.index,
-          card,
-          targetRow: targetRow,
-          target: target,
-        ),
-      AiActivateLeader(:final targetRow, :final target) =>
-        engine.activateLeader(
-          opponent.index,
-          targetRow: targetRow,
-          target: target,
-        ),
-      AiPass() => _passAi(),
-    };
-    if (!applied) engine.pass(opponent.index);
-  }
-
-  bool _passAi() {
-    engine.pass(opponent.index);
-    return true;
+    _driver.onStateChanged();
   }
 
   // ---------------------------------------------------------------------------
@@ -482,6 +448,7 @@ class GameController extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    _driver.dispose();
     super.dispose();
   }
 }
