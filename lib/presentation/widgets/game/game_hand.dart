@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../controllers/game_controller.dart';
+import '../card_detail_dialog.dart';
 import '../gwent_card.dart';
 
 /// The player's hand, selectable and scrollable on both layouts.
@@ -35,6 +36,11 @@ class GameHand extends StatelessWidget {
                 !controller.engine.canPlayCard(human.index, card) &&
                 controller.engine.isHumanTurn,
             onTap: () => controller.selectCard(card),
+            onLongPress: () => showCardDetail(
+              context,
+              card.definition,
+              strength: card.baseStrength,
+            ),
           ),
         ),
     ];

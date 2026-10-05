@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/data/card_repository.dart';
+import '../../core/data/faction_catalog.dart';
 import '../../core/models/card.dart';
 import '../../core/models/collection.dart';
 import '../../core/models/player.dart';
@@ -157,7 +158,7 @@ class _DeckEditorScreenState extends State<DeckEditorScreen> {
             icon: const Icon(Icons.arrow_back),
           ),
           Expanded(
-            child: DeckHeaderInfo(
+            child: _DeckHeaderInfo(
               faction: _faction,
               title: strings.deckEditor,
               subtitle: '${strings.factionName(_faction)} · ${_leader.name}',
@@ -263,4 +264,43 @@ class _DeckEditorScreenState extends State<DeckEditorScreen> {
     validation: _validation,
     onChangeLeader: _changeLeader,
   );
+}
+
+/// Faction shield + title used by the deck editor header.
+class _DeckHeaderInfo extends StatelessWidget {
+  const _DeckHeaderInfo({
+    required this.faction,
+    required this.title,
+    required this.subtitle,
+  });
+
+  final CardFaction faction;
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Image.asset(factionInfo(faction).shieldAsset, width: 22, height: 25),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+              Text(
+                subtitle,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: GwentColors.onSurfaceVariant,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 }

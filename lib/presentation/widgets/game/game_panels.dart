@@ -40,8 +40,8 @@ class GamePlayerStrip extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text(
-            '$total',
+          AnimatedScore(
+            value: total,
             style: const TextStyle(
               color: GwentColors.goldBright,
               fontSize: 26,
@@ -201,8 +201,8 @@ class GamePlayerPanel extends StatelessWidget {
           const SizedBox(height: 10),
           Row(
             children: [
-              Text(
-                '$total',
+              AnimatedScore(
+                value: total,
                 style: const TextStyle(
                   color: GwentColors.goldBright,
                   fontSize: 30,

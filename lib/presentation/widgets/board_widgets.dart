@@ -78,14 +78,22 @@ class RowStrip extends StatelessWidget {
                   if (CardAssets.rowIcon(row) case final icon?)
                     Image.asset(icon, width: 18, height: 18),
                   const SizedBox(height: 2),
-                  Text(
-                    '$total',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: leading
-                          ? GwentColors.goldBright
-                          : GwentColors.onSurfaceVariant,
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 220),
+                    transitionBuilder: (child, animation) => FadeTransition(
+                      opacity: animation,
+                      child: ScaleTransition(scale: animation, child: child),
+                    ),
+                    child: Text(
+                      '$total',
+                      key: ValueKey<int>(total),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: leading
+                            ? GwentColors.goldBright
+                            : GwentColors.onSurfaceVariant,
+                      ),
                     ),
                   ),
                 ],
@@ -145,16 +153,19 @@ class _CardStack extends StatelessWidget {
               children: [
                 for (var i = 0; i < cards.length; i++)
                   Positioned(
+                    key: ValueKey<int>(cards[i].uid),
                     left: i * effectiveStep,
                     top: 0,
-                    child: GwentCard(
-                      definition: cards[i].definition,
-                      strength: cards[i].currentStrength,
-                      width: effective,
-                      showName: false,
-                      onTap: onCardTap == null
-                          ? null
-                          : () => onCardTap!(cards[i]),
+                    child: _EntranceCard(
+                      child: GwentCard(
+                        definition: cards[i].definition,
+                        strength: cards[i].currentStrength,
+                        width: effective,
+                        showName: false,
+                        onTap: onCardTap == null
+                            ? null
+                            : () => onCardTap!(cards[i]),
+                      ),
                     ),
                   ),
               ],
@@ -357,15 +368,19 @@ class TurnChip extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 7),
-          Text(
-            label.toUpperCase(),
-            style: TextStyle(
-              color: active
-                  ? GwentColors.goldBright
-                  : GwentColors.onSurfaceVariant,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.8,
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 220),
+            child: Text(
+              label.toUpperCase(),
+              key: ValueKey<String>(label),
+              style: TextStyle(
+                color: active
+                    ? GwentColors.goldBright
+                    : GwentColors.onSurfaceVariant,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.8,
+              ),
             ),
           ),
         ],
@@ -395,4 +410,65 @@ class MidRule extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Plays a short scale/fade entrance when a card is added to a row.
+///
+/// It runs once per widget instance; the parent stack keys each card by uid, so
+/// rebuilds and neighbours moving do not replay the animation.
+class _EntranceCard extends StatefulWidget {
+  const _EntranceCard({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_EntranceCard> createState() => _EntranceCardState();
+}
+
+class _EntranceCardState extends State<_EntranceCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 240),
+  )..forward();
+
+  late final Animation<double> _scale = Tween<double>(
+    begin: 0.85,
+    end: 1,
+  ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
+
+  late final Animation<double> _opacity = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeOut,
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => FadeTransition(
+    opacity: _opacity,
+    child: ScaleTransition(scale: _scale, child: widget.child),
+  );
+}
+
+/// A number that fades/scales when its value changes (row and player scores).
+class AnimatedScore extends StatelessWidget {
+  const AnimatedScore({super.key, required this.value, required this.style});
+
+  final int value;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) => AnimatedSwitcher(
+    duration: const Duration(milliseconds: 220),
+    transitionBuilder: (child, animation) => FadeTransition(
+      opacity: animation,
+      child: ScaleTransition(scale: animation, child: child),
+    ),
+    child: Text('$value', key: ValueKey<int>(value), style: style),
+  );
 }
