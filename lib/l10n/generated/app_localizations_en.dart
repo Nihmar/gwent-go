@@ -239,6 +239,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deckInvalid => 'Deck is not valid yet';
 
   @override
+  String deckIssueTooFewUnits(int min) {
+    return 'Needs at least $min unit cards';
+  }
+
+  @override
+  String deckIssueTooManySpecial(int max) {
+    return 'At most $max special cards';
+  }
+
+  @override
+  String deckIssueTooManyCards(int max) {
+    return 'At most $max cards in total';
+  }
+
+  @override
+  String get deckIssueLeaderFaction => 'The leader does not match the faction';
+
+  @override
+  String get deckIssueCardNotAllowed =>
+      'Some cards are not allowed in this faction';
+
+  @override
+  String get deckIssueTooManyCopies => 'Some cards exceed the owned copies';
+
+  @override
+  String get deckIssueUnknownCard => 'The deck contains an unknown card';
+
+  @override
+  String get invalidDeckTitle => 'Deck not playable';
+
+  @override
+  String get openDeckEditor => 'Open deck editor';
+
+  @override
   String cardsOwned(int owned, int distinct) {
     return '$owned cards owned · $distinct distinct';
   }

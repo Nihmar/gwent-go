@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../core/data/card_repository.dart';
 import '../../../core/data/faction_catalog.dart';
 import '../../../core/models/card.dart';
+import '../../../core/models/collection.dart';
 import '../../../core/models/player.dart';
+import '../../../core/rules/deck_validator.dart';
 import '../../localization.dart';
 import '../../theme/gwent_colors.dart';
 import '../gwent_card.dart';
@@ -19,6 +21,7 @@ const TextStyle deckPaneTitleStyle = TextStyle(
 class DeckCollectionPane extends StatelessWidget {
   const DeckCollectionPane({
     super.key,
+    required this.cards,
     required this.collection,
     required this.counts,
     required this.search,
@@ -30,7 +33,8 @@ class DeckCollectionPane extends StatelessWidget {
     required this.onAdd,
   });
 
-  final List<CardDefinition> collection;
+  final List<CardDefinition> cards;
+  final Collection collection;
   final Map<String, int> counts;
   final String search;
   final CardRow? filter;
@@ -84,11 +88,14 @@ class DeckCollectionPane extends StatelessWidget {
               mainAxisSpacing: 8,
               crossAxisSpacing: 8,
             ),
-            itemCount: collection.length,
+            itemCount: cards.length,
             itemBuilder: (context, index) {
-              final card = collection[index];
+              final card = cards[index];
               final owned = counts[card.id] ?? 0;
-              final canAdd = owned < card.maxCopies;
+              final cap = card.maxCopies < collection.ownedCount(card)
+                  ? card.maxCopies
+                  : collection.ownedCount(card);
+              final canAdd = owned < cap;
               return Stack(
                 clipBehavior: Clip.none,
                 children: [
@@ -101,7 +108,7 @@ class DeckCollectionPane extends StatelessWidget {
                     Positioned(
                       left: -4,
                       top: -4,
-                      child: DeckBadge(text: '$owned/${card.maxCopies}'),
+                      child: DeckBadge(text: '$owned/$cap'),
                     ),
                   if (canAdd)
                     const Positioned(
@@ -271,11 +278,13 @@ class DeckSidePane extends StatelessWidget {
     super.key,
     required this.deck,
     required this.leader,
+    required this.validation,
     required this.onChangeLeader,
   });
 
   final DeckDefinition deck;
   final CardDefinition leader;
+  final DeckValidationResult validation;
   final VoidCallback onChangeLeader;
 
   @override
@@ -283,7 +292,7 @@ class DeckSidePane extends StatelessWidget {
     final strings = context.strings;
     final units = CardRepository.deckUnitCount(deck);
     final specials = CardRepository.deckSpecialCount(deck);
-    final valid = units >= 22 && specials <= 10 && deck.totalCards <= 40;
+    final valid = validation.isValid;
     return ListView(
       children: [
         _surface(
@@ -327,6 +336,17 @@ class DeckSidePane extends StatelessWidget {
                   ),
                 ),
               ),
+              for (final issue in validation.issues)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    '• ${strings.deckIssueMessage(issue)}',
+                    style: const TextStyle(
+                      color: GwentColors.onSurfaceVariant,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
             ],
           ),
         ),

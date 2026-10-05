@@ -6,6 +6,7 @@ import '../../core/models/card.dart';
 import '../../core/models/player.dart';
 import '../../core/persistence/key_value_store.dart';
 import '../../core/persistence/profile_repository.dart';
+import '../../core/rules/deck_validator.dart';
 import '../controllers/settings_controller.dart';
 import '../localization.dart';
 import '../theme/gwent_colors.dart';
@@ -61,29 +62,78 @@ class _HomeScreenState extends State<HomeScreen> {
   DeckDefinition get _deck => _settings.deckFor(_faction);
 
   Future<void> _editDeck() async {
-    final edited = await Navigator.of(context).push<DeckDefinition>(
+    final result = await Navigator.of(context).push<DeckEditorResult>(
       MaterialPageRoute(
-        builder: (_) => DeckEditorScreen(deck: _deck, difficulty: _difficulty),
+        builder: (_) => DeckEditorScreen(
+          deck: _deck,
+          difficulty: _difficulty,
+          collection: _settings.collection,
+        ),
       ),
     );
-    if (edited != null) await _settings.saveDeck(edited);
+    if (result == null) return;
+    await _settings.saveDeck(result.deck);
+    if (result.startGame && mounted) _startMatch(deck: result.deck);
   }
 
-  void _startMatch() {
+  void _startMatch({DeckDefinition? deck}) {
+    final chosen = deck ?? _deck;
+    final validation = DeckValidator.validate(
+      chosen,
+      collection: _settings.collection,
+    );
+    if (!validation.isValid) {
+      _showInvalidDeck(validation);
+      return;
+    }
     final opponentFaction = playableFactions.firstWhere(
-      (f) => f != _faction,
+      (f) => f != chosen.faction,
       orElse: () => CardFaction.monsters,
     );
     final opponentDeck = CardRepository.defaultDeckFor(opponentFaction)!;
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => GameScreen(
-          humanDeck: _deck,
+          humanDeck: chosen,
           opponentDeck: opponentDeck,
           difficulty: _difficulty,
           onFinished: _onMatchFinished,
           onPersist: (snapshot) => _settings.saveMatch(snapshot),
         ),
+      ),
+    );
+  }
+
+  void _showInvalidDeck(DeckValidationResult validation) {
+    final strings = context.strings;
+    showDialog<void>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(strings.invalidDeckTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final issue in validation.issues)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text('• ${strings.deckIssueMessage(issue)}'),
+              ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(strings.cancel),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _editDeck();
+            },
+            child: Text(strings.openDeckEditor),
+          ),
+        ],
       ),
     );
   }

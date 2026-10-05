@@ -88,6 +88,19 @@ change, and immediately when the app is backgrounded or the match is paused).
 `HomeScreen` shows **Continue match** while a snapshot exists; finishing a match
 records the statistics and clears the snapshot.
 
+## Deck building
+
+`DeckValidator` (core) enforces the deck rules and returns language-independent
+[DeckIssue] values that the UI localizes: at least 22 unit cards (heroes count),
+at most 10 special cards and at most 40 cards in total, cards restricted to the
+faction plus neutral/special/weather, and copy limits respected. The deck editor
+and the home screen both refuse to start an invalid deck.
+
+`Collection` models ownership. It defaults to owning every card up to its
+`maxCopies`, and explicit entries can restrict that (and are persisted), so a
+future progression system can hook in without changing the validator or the
+editor. There is no way to acquire cards yet.
+
 ## Localization
 
 All user-facing strings come from `lib/l10n/app_en.arb` through Flutter's
@@ -136,8 +149,9 @@ mind and should be revisited when it is:
   implements the ceiled half as the intended behaviour.
 - **Sound and music** are not implemented; the setting is persisted but has no
   effect yet.
-- **Deck ownership** is not modelled: every collectible card is available up to
-  its maximum number of copies.
+- **No progression:** `Collection` can restrict ownership, but there is no way
+  to acquire cards yet, so it defaults to owning every card up to its copy
+  limit.
 - **Display font:** the mockup uses *Cinzel*; the app currently uses the
   platform serif fallback to avoid shipping a font dependency. Bundling Cinzel
   is a small follow-up.
