@@ -32,6 +32,10 @@ class GwentCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
 
+  /// Keys used by tests to pin the power badge geometry.
+  static const powerBadgeKey = Key('gwent-card-power-badge');
+  static const powerSpriteKey = Key('gwent-card-power-sprite');
+
   double get _height => width * 6.35 / 4.45;
 
   @override
@@ -53,7 +57,10 @@ class GwentCard extends StatelessWidget {
               highlighted: highlighted,
             ),
           ),
-          if (definition.isSpecial || definition.isWeather)
+          // Leaders have no strength, so they carry no power badge; the
+          // special/weather emblems are centred over the artwork instead.
+          if (!definition.isLeader &&
+              (definition.isSpecial || definition.isWeather))
             Positioned.fill(
               child: Center(
                 child: _PowerBadge(
@@ -63,7 +70,7 @@ class GwentCard extends StatelessWidget {
                 ),
               ),
             )
-          else
+          else if (!definition.isLeader)
             Positioned(
               left: -width * 0.1,
               top: -width * 0.1,
@@ -201,22 +208,26 @@ class _PowerBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hero = definition.isHero;
-    final scale = hero ? 1.0 : 1.955;
+    final asset = CardAssets.powerBadge(definition);
     return SizedBox(
+      key: GwentCard.powerBadgeKey,
       width: size,
       height: size,
       child: Stack(
-        clipBehavior: Clip.none,
         alignment: Alignment.center,
         children: [
-          Transform.scale(
-            scale: scale,
-            child: Image.asset(
-              CardAssets.powerBadge(definition),
-              fit: BoxFit.contain,
+          if (hero)
+            Image.asset(
+              asset,
+              width: size,
+              height: size,
+              fit: BoxFit.fill,
               errorBuilder: (context, error, stack) => const SizedBox.shrink(),
-            ),
-          ),
+            )
+          else
+            // Unit, special and weather sprites keep the badge in a corner of
+            // a larger canvas, so crop it instead of scaling the whole image.
+            _SpriteCrop(asset: asset, size: size),
           if (strength != null)
             Text(
               '$strength',
@@ -235,6 +246,54 @@ class _PowerBadge extends StatelessWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class _SpriteCrop extends StatelessWidget {
+  const _SpriteCrop({required this.asset, required this.size});
+
+  final String asset;
+  final double size;
+
+  /// Reference sprites are 215x215 canvases whose badge sits at
+  /// (15, 14)-(125, 125); `power_hero.png` is the only full-canvas sprite.
+  static const double _canvas = 215;
+  static const double _left = 15;
+  static const double _top = 14;
+  static const double _content = 110;
+
+  @override
+  Widget build(BuildContext context) {
+    // Draw the sprite large enough that its badge area matches [size], then
+    // shift the badge origin onto the widget origin and clip the rest.
+    final drawn = size * _canvas / _content;
+    return ClipRect(
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: Transform.translate(
+          offset: Offset(
+            -_left * size / _content,
+            -_top * size / _content,
+          ),
+          child: OverflowBox(
+            alignment: Alignment.topLeft,
+            minWidth: drawn,
+            maxWidth: drawn,
+            minHeight: drawn,
+            maxHeight: drawn,
+            child: Image.asset(
+              asset,
+              key: GwentCard.powerSpriteKey,
+              width: drawn,
+              height: drawn,
+              fit: BoxFit.fill,
+              errorBuilder: (context, error, stack) => const SizedBox.shrink(),
+            ),
+          ),
+        ),
       ),
     );
   }
