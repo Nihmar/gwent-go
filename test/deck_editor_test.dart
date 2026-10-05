@@ -8,6 +8,7 @@ import 'package:gwent_go/core/rules/deck_validator.dart';
 import 'package:gwent_go/l10n/generated/app_localizations.dart';
 import 'package:gwent_go/presentation/localization.dart';
 import 'package:gwent_go/presentation/screens/deck_editor_screen.dart';
+import 'package:gwent_go/presentation/widgets/deck/deck_editor_parts.dart';
 import 'package:gwent_go/presentation/widgets/deck/deck_summary_bar.dart';
 import 'package:gwent_go/presentation/widgets/gwent_card.dart';
 
@@ -109,6 +110,21 @@ void main() {
     await tester.tap(find.byTooltip(strings.removeCopy));
     await tester.pumpAndSettle();
     expect(statValue(tester, DeckSummaryBar.cardsKey), '1 / 40');
+  });
+
+  testWidgets('the copy badge sits in the top-right of the tile', (
+    tester,
+  ) async {
+    await openEditor(tester, deck: smallDeck);
+    await tester.enterText(find.byType(TextField), 'Poor');
+    await tester.pumpAndSettle();
+
+    final card = tester.getRect(tileFor('poor_infantry'));
+    final badge = tester.getRect(find.byType(DeckBadge));
+
+    // Top-right keeps the card's own strength badge (top-left) readable.
+    expect(badge.center.dx, greaterThan(card.center.dx));
+    expect(badge.center.dy, lessThan(card.center.dy));
   });
 
   testWidgets('long-press opens the ability sheet with copy actions', (
