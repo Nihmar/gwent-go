@@ -51,6 +51,52 @@ void main() {
     expect(assetImage('assets/icons/power_normal.png'), findsNothing);
   });
 
+  testWidgets('special cards keep their emblem in the top-left slot', (
+    tester,
+  ) async {
+    const width = 104.0;
+    await tester.pumpWidget(
+      GwentApp(
+        home: Scaffold(
+          body: GwentCard(
+            definition: CardRepository.byId('frost'),
+            width: width,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final card = tester.getRect(find.byType(GwentCard));
+    final badge = tester.getRect(find.byKey(GwentCard.powerBadgeKey));
+
+    // The artwork centre stays clear, like on units and heroes.
+    expect(badge.center.dx, lessThan(card.center.dx));
+    expect(badge.center.dy, lessThan(card.center.dy));
+    expect(badge.width, closeTo(width * 0.32, 0.5));
+  });
+
+  testWidgets('the badge sits inside the card with a margin', (tester) async {
+    const width = 104.0;
+    await tester.pumpWidget(
+      GwentApp(
+        home: Scaffold(
+          body: GwentCard(definition: CardRepository.byId('gryffin'), width: width),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final card = tester.getRect(find.byType(GwentCard));
+    final badge = tester.getRect(find.byKey(GwentCard.powerBadgeKey));
+    final margin = width * 0.06;
+
+    expect(badge.left - card.left, closeTo(margin, 0.5));
+    expect(badge.top - card.top, closeTo(margin, 0.5));
+    expect(card.right - badge.right, greaterThan(0));
+    expect(card.bottom - badge.bottom, greaterThan(0));
+  });
+
   testWidgets('the unit sprite is cropped to the badge area', (tester) async {
     const width = 104.0;
     await tester.pumpWidget(
@@ -64,7 +110,7 @@ void main() {
 
     final badge = tester.getRect(find.byKey(GwentCard.powerBadgeKey));
     final sprite = tester.getRect(find.byKey(GwentCard.powerSpriteKey));
-    final badgeSize = width * 0.44;
+    final badgeSize = badge.width;
 
     // The 215px canvas is drawn so its 110px badge area matches the box, then
     // shifted by the sprite's (15, 14) content origin.

@@ -173,35 +173,42 @@ class _CollectionTile extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Stack(
-          clipBehavior: Clip.none,
-          children: [
-            GwentCard(
-              definition: card,
-              width: deckCollectionCardWidth,
-              dim: !canAdd,
-              onTap: canAdd ? onAdd : null,
-              onLongPress: () => showCardPickerSheet(
-                context,
-                card: card,
-                copies: owned,
-                maxCopies: cap,
-                onAdd: onAdd,
-                onRemove: onRemove,
+        // Fix the Stack to the card so the corner marker hugs the card rather
+        // than the wider grid cell.
+        SizedBox(
+          width: deckCollectionCardWidth,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              GwentCard(
+                definition: card,
+                width: deckCollectionCardWidth,
+                dim: !canAdd,
+                onTap: canAdd ? onAdd : null,
+                onLongPress: () => showCardPickerSheet(
+                  context,
+                  card: card,
+                  copies: owned,
+                  maxCopies: cap,
+                  onAdd: onAdd,
+                  onRemove: onRemove,
+                ),
               ),
-            ),
-            if (owned > 0)
-              Positioned(left: -4, top: -4, child: DeckBadge(text: '$owned/$cap')),
-            Positioned(
-              right: -4,
-              top: -4,
-              child: Icon(
-                canAdd ? Icons.add_circle : Icons.check_circle,
-                color: GwentColors.goldBright,
-                size: 18,
+              // A single status marker in the top-right corner so the card's
+              // own badge in the top-left stays readable.
+              Positioned(
+                right: -4,
+                top: -4,
+                child: owned == 0
+                    ? const Icon(
+                        Icons.add_circle,
+                        color: GwentColors.goldBright,
+                        size: 20,
+                      )
+                    : DeckBadge(text: '$owned/$cap', done: !canAdd),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         const SizedBox(height: 4),
         SizedBox(
@@ -387,25 +394,42 @@ class DeckSidePane extends StatelessWidget {
 
 /// Small gold badge over a collection card.
 class DeckBadge extends StatelessWidget {
-  const DeckBadge({super.key, required this.text});
+  const DeckBadge({super.key, required this.text, this.done = false});
 
   final String text;
+
+  /// Adds a check mark, used when no more copies may be added.
+  final bool done;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: EdgeInsets.only(
+        left: done ? 4 : 6,
+        right: 6,
+        top: 2,
+        bottom: 2,
+      ),
       decoration: BoxDecoration(
         color: GwentColors.gold,
         borderRadius: BorderRadius.circular(999),
       ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: GwentColors.onPrimary,
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (done) ...[
+            const Icon(Icons.check, size: 12, color: GwentColors.onPrimary),
+            const SizedBox(width: 1),
+          ],
+          Text(
+            text,
+            style: const TextStyle(
+              color: GwentColors.onPrimary,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
       ),
     );
   }

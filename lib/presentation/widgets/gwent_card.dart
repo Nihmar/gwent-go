@@ -57,27 +57,18 @@ class GwentCard extends StatelessWidget {
               highlighted: highlighted,
             ),
           ),
-          // Leaders have no strength, so they carry no power badge; the
-          // special/weather emblems are centred over the artwork instead.
-          if (!definition.isLeader &&
-              (definition.isSpecial || definition.isWeather))
-            Positioned.fill(
-              child: Center(
-                child: _PowerBadge(
-                  definition: definition,
-                  strength: null,
-                  size: width * 0.54,
-                ),
-              ),
-            )
-          else if (!definition.isLeader)
+          // Every non-leader card carries its badge in the same top-left
+          // slot: the strength number for units and heroes, the effect emblem
+          // for special and weather cards. It sits inside the frame with a
+          // small margin and leaves the artwork centre visible.
+          if (!definition.isLeader)
             Positioned(
-              left: -width * 0.1,
-              top: -width * 0.1,
+              left: width * 0.06,
+              top: width * 0.06,
               child: _PowerBadge(
                 definition: definition,
                 strength: showStrength ? shownStrength : null,
-                size: width * 0.44,
+                size: width * 0.32,
               ),
             ),
           if (CardAssets.rowIcon(definition.row) case final rowIcon?)
