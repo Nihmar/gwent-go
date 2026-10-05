@@ -217,6 +217,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noCardsFound => 'No cards match your filters';
 
   @override
+  String get localMatch => 'Local match';
+
+  @override
+  String playerSeat(int seat) {
+    return 'Player $seat';
+  }
+
+  @override
+  String passDeviceTitle(String name) {
+    return 'Pass the device to $name';
+  }
+
+  @override
+  String get passDeviceHint =>
+      'The next hand stays hidden until the next player is ready.';
+
+  @override
+  String get passDeviceReady => 'I\'m ready';
+
+  @override
   String get commandWrongPhase => 'This action is not available right now.';
 
   @override
