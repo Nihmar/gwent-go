@@ -29,12 +29,15 @@ class GameScreen extends StatefulWidget {
     this.opponentDeck,
     this.difficulty = Difficulty.normal,
     this.hotseat = false,
+    this.controller,
     this.snapshot,
     this.onFinished,
     this.onPersist,
   }) : assert(
-         snapshot != null || (humanDeck != null && opponentDeck != null),
-         'Provide decks or a snapshot',
+         controller != null ||
+             snapshot != null ||
+             (humanDeck != null && opponentDeck != null),
+         'Provide a controller, decks or a snapshot',
        );
 
   final DeckDefinition? humanDeck;
@@ -44,6 +47,10 @@ class GameScreen extends StatefulWidget {
   /// Two humans share this device; the board hides until the turn's player
   /// confirms the hand-over.
   final bool hotseat;
+
+  /// Pre-built controller, used by the LAN lobby. The screen takes ownership
+  /// and disposes it.
+  final GameController? controller;
 
   /// When set, the match is restored instead of started.
   final Map<String, dynamic>? snapshot;
@@ -68,17 +75,20 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     final snapshot = widget.snapshot;
-    controller = snapshot != null
-        ? GameController.resume(snapshot, hotseat: widget.hotseat)
-        : GameController(
-            humanDeck: widget.humanDeck!,
-            opponentDeck: widget.opponentDeck!,
-            difficulty: widget.difficulty,
-            opponentName: _opponentName(),
-            hotseat: widget.hotseat,
-          );
+    controller =
+        widget.controller ??
+        (snapshot != null
+            ? GameController.resume(snapshot, hotseat: widget.hotseat)
+            : GameController(
+                humanDeck: widget.humanDeck!,
+                opponentDeck: widget.opponentDeck!,
+                difficulty: widget.difficulty,
+                opponentName: _opponentName(),
+                hotseat: widget.hotseat,
+              ));
     controller.addListener(_onChange);
-    if (snapshot == null) controller.start();
+    // An injected controller is already running (a lobby session).
+    if (snapshot == null && widget.controller == null) controller.start();
   }
 
   String _opponentName() => switch (widget.opponentDeck!.faction) {
