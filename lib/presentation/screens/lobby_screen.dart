@@ -67,9 +67,15 @@ class _LobbyScreenState extends State<LobbyScreen> {
         : null;
     if (controller == null) return;
     _openedMatch = true;
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => GameScreen(controller: controller)));
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => GameScreen(
+          controller: controller,
+          // Only a guest can re-dial the host it joined.
+          onReconnect: client == null ? null : _lobby.reconnectGuest,
+        ),
+      ),
+    );
   }
 
   @override

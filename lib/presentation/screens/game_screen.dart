@@ -33,6 +33,8 @@ class GameScreen extends StatefulWidget {
     this.snapshot,
     this.onFinished,
     this.onPersist,
+    this.onReconnect,
+    this.disconnectGrace = const Duration(seconds: 60),
   }) : assert(
          controller != null ||
              snapshot != null ||
@@ -55,6 +57,13 @@ class GameScreen extends StatefulWidget {
   /// When set, the match is restored instead of started.
   final Map<String, dynamic>? snapshot;
 
+  /// Re-dials the opponent after a disconnect; absent in local matches and for
+  /// the host, which can only wait.
+  final Future<bool> Function()? onReconnect;
+
+  /// How long a match waits for an absent opponent before giving up on it.
+  final Duration disconnectGrace;
+
   /// Called once when the match ends, with the winner index or null for a draw.
   final void Function(int? winner)? onFinished;
 
@@ -69,6 +78,8 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   late final GameController controller;
   bool _gameOverShown = false;
   Timer? _saveDebounce;
+  Timer? _disconnectTimer;
+  bool _disconnectShown = false;
 
   @override
   void initState() {
@@ -100,9 +111,62 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     _ => 'Opponent',
   };
 
+  /// Tries to re-dial the host; the session keeps the match either way.
+  Future<void> _reconnect() async {
+    final reconnect = widget.onReconnect;
+    if (reconnect == null) return;
+    final reached = await reconnect();
+    if (!mounted || reached) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.strings.reconnectFailed)),
+    );
+  }
+
+  /// Runs the grace timer while the opponent is away.
+  void _watchOpponent() {
+    if (controller.opponentOnline) {
+      _disconnectTimer?.cancel();
+      _disconnectTimer = null;
+      _disconnectShown = false;
+      return;
+    }
+    if (_disconnectTimer != null || _disconnectShown) return;
+    _disconnectTimer = Timer(widget.disconnectGrace, _onDisconnectElapsed);
+  }
+
+  void _onDisconnectElapsed() {
+    _disconnectTimer = null;
+    if (!mounted || controller.opponentOnline || controller.isGameOver) return;
+    _disconnectShown = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _showOpponentGone());
+  }
+
+  Future<void> _showOpponentGone() async {
+    if (!mounted) return;
+    final strings = context.strings;
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text(strings.opponentGoneTitle),
+        content: Text(strings.opponentGoneBody),
+        actions: [
+          FilledButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _pause();
+            },
+            child: Text(strings.close),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _onChange() {
     if (!mounted) return;
     setState(() {});
+    _watchOpponent();
     if (controller.isGameOver) {
       if (!_gameOverShown) {
         _gameOverShown = true;
@@ -142,6 +206,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _saveDebounce?.cancel();
+    _disconnectTimer?.cancel();
     controller.removeListener(_onChange);
     controller.dispose();
     super.dispose();
@@ -201,7 +266,12 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                       top: 8,
                       left: 12,
                       right: 12,
-                      child: _DisconnectedBanner(onLeave: _pause),
+                      child: _DisconnectedBanner(
+                        onLeave: _pause,
+                        onReconnect: widget.onReconnect == null
+                            ? null
+                            : _reconnect,
+                      ),
                     ),
                   if (controller.isMulligan)
                     MulliganOverlay(controller: controller),
@@ -420,9 +490,12 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
 /// board stays playable-looking but locked; this banner explains why and offers
 /// a way out.
 class _DisconnectedBanner extends StatelessWidget {
-  const _DisconnectedBanner({required this.onLeave});
+  const _DisconnectedBanner({required this.onLeave, this.onReconnect});
 
   final VoidCallback onLeave;
+
+  /// Present when this side can re-dial the opponent itself.
+  final VoidCallback? onReconnect;
 
   @override
   Widget build(BuildContext context) {
@@ -454,6 +527,11 @@ class _DisconnectedBanner extends StatelessWidget {
                 ],
               ),
             ),
+            if (onReconnect != null)
+              FilledButton.tonal(
+                onPressed: onReconnect,
+                child: Text(strings.reconnect),
+              ),
             TextButton(
               onPressed: onLeave,
               child: Text(strings.close),

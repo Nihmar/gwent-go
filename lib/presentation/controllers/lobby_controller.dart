@@ -68,6 +68,9 @@ class LobbyController extends ChangeNotifier {
   MatchTransport? _transport;
   HostSession? _hostSession;
   ClientSession? _clientSession;
+
+  /// Host last joined, so the guest can re-dial it after a disconnect.
+  DiscoveredHost? _joinedHost;
   bool _disposed = false;
 
   LobbyRole get role => _role;
@@ -79,6 +82,28 @@ class LobbyController extends ChangeNotifier {
 
   /// True once a session can drive a game screen.
   bool get isReady => _status == LobbyStatus.ready;
+
+  /// Re-dials the host this guest had joined and resumes the match.
+  ///
+  /// The host answers a returning guest with a fresh projection, so the client
+  /// keeps its session and only swaps the link. Returns false when the host is
+  /// still unreachable, leaving the match open for another attempt.
+  Future<bool> reconnectGuest() async {
+    final host = _joinedHost;
+    final session = _clientSession;
+    if (host == null || session == null || _disposed) return false;
+    try {
+      final transport = await TcpMatchTransport.connect(
+        host.address,
+        port: host.matchPort,
+      ).timeout(connectTimeout);
+      _transport = transport;
+      await session.reconnect(transport);
+      return true;
+    } on Object {
+      return false;
+    }
+  }
 
   // ---------------------------------------------------------------------------
   // Hosting
@@ -165,6 +190,7 @@ class LobbyController extends ChangeNotifier {
       ).timeout(connectTimeout);
       final session = ClientSession(transport: _transport!, deck: deck);
       _clientSession = session;
+      _joinedHost = host;
       final ready = session.events.firstWhere((event) => event is SessionReady);
       session.connect();
       await ready.timeout(connectTimeout);
