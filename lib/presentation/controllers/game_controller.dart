@@ -41,17 +41,29 @@ class GameController extends ChangeNotifier {
     required Difficulty difficulty,
     String opponentName = 'Opponent',
     int? seed,
-  }) : engine = GameEngine(
-         humanDeck: humanDeck,
-         opponentDeck: opponentDeck,
-         difficulty: difficulty,
-         random: seed == null ? null : GameRandom(seed),
-         opponentName: opponentName,
-       ) {
+  }) : this._(
+         GameEngine(
+           humanDeck: humanDeck,
+           opponentDeck: opponentDeck,
+           difficulty: difficulty,
+           random: seed == null ? null : GameRandom(seed),
+           opponentName: opponentName,
+         ),
+       );
+
+  /// Resumes a match from a snapshot produced by [snapshot].
+  factory GameController.resume(Map<String, dynamic> snapshot) {
+    final controller = GameController._(GameEngine.fromJson(snapshot));
+    controller._maybeRunAi();
+    return controller;
+  }
+
+  GameController._(this.engine) : difficulty = engine.human.difficulty {
     _ai = createAi(difficulty);
   }
 
   final GameEngine engine;
+  final Difficulty difficulty;
   late final AiPlayer _ai;
 
   final List<GameEvent> log = [];
@@ -79,6 +91,9 @@ class GameController extends ChangeNotifier {
     _drainEvents();
     notifyListeners();
   }
+
+  /// Serializes the current match so it can be resumed later.
+  Map<String, dynamic> snapshot() => engine.toJson();
 
   // ---------------------------------------------------------------------------
   // Mulligan

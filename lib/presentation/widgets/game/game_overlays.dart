@@ -5,7 +5,7 @@ import '../../controllers/game_controller.dart';
 import '../../localization.dart';
 import '../../theme/gwent_colors.dart';
 import '../gwent_card.dart';
-import 'game_panels.dart';
+import 'game_preview_panel.dart';
 
 /// Bottom preview/action sheet shown on narrow layouts when a card is selected.
 ///

@@ -4,6 +4,9 @@ import '../../core/data/card_repository.dart';
 import '../../core/data/faction_catalog.dart';
 import '../../core/models/card.dart';
 import '../../core/models/player.dart';
+import '../../core/persistence/key_value_store.dart';
+import '../../core/persistence/profile_repository.dart';
+import '../controllers/settings_controller.dart';
 import '../localization.dart';
 import '../theme/gwent_colors.dart';
 import '../widgets/board_background.dart';
@@ -11,27 +14,51 @@ import '../widgets/home/home_widgets.dart';
 import '../widgets/selectors.dart';
 import 'deck_editor_screen.dart';
 import 'game_screen.dart';
+import 'settings_screen.dart';
+import 'stats_screen.dart';
 
-/// Landing screen: pick a difficulty and faction, then start a match or edit
-/// the deck. Layout adapts between a phone column and a desktop/tablet row.
+/// Landing screen: pick a difficulty and faction, then start or continue a
+/// match or edit the deck. Layout adapts between a phone column and a desktop
+/// row.
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.settings});
+
+  /// Injected in production; tests get an in-memory controller by default.
+  final SettingsController? settings;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  Difficulty _difficulty = Difficulty.normal;
-  CardFaction _faction = CardFaction.realms;
-  late DeckDefinition _deck = CardRepository.defaultDeckFor(_faction)!;
+  late final SettingsController _settings;
+  late final bool _ownsSettings;
 
-  void _selectFaction(CardFaction faction) {
-    setState(() {
-      _faction = faction;
-      _deck = CardRepository.defaultDeckFor(faction) ?? _deck;
-    });
+  @override
+  void initState() {
+    super.initState();
+    _ownsSettings = widget.settings == null;
+    _settings =
+        widget.settings ??
+        SettingsController(ProfileRepository(InMemoryKeyValueStore()));
+    _settings.addListener(_onSettings);
+    _settings.load();
   }
+
+  void _onSettings() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _settings.removeListener(_onSettings);
+    if (_ownsSettings) _settings.dispose();
+    super.dispose();
+  }
+
+  Difficulty get _difficulty => _settings.settings.difficulty;
+  CardFaction get _faction => _settings.settings.faction;
+  DeckDefinition get _deck => _settings.deckFor(_faction);
 
   Future<void> _editDeck() async {
     final edited = await Navigator.of(context).push<DeckDefinition>(
@@ -39,12 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (_) => DeckEditorScreen(deck: _deck, difficulty: _difficulty),
       ),
     );
-    if (edited != null) {
-      setState(() {
-        _deck = edited;
-        _faction = edited.faction;
-      });
-    }
+    if (edited != null) await _settings.saveDeck(edited);
   }
 
   void _startMatch() {
@@ -59,8 +81,40 @@ class _HomeScreenState extends State<HomeScreen> {
           humanDeck: _deck,
           opponentDeck: opponentDeck,
           difficulty: _difficulty,
+          onFinished: _onMatchFinished,
+          onPersist: (snapshot) => _settings.saveMatch(snapshot),
         ),
       ),
+    );
+  }
+
+  void _continueMatch() {
+    final snapshot = _settings.savedMatch;
+    if (snapshot == null) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => GameScreen(
+          snapshot: snapshot,
+          onFinished: _onMatchFinished,
+          onPersist: (value) => _settings.saveMatch(value),
+        ),
+      ),
+    );
+  }
+
+  void _onMatchFinished(int? winner) {
+    _settings.recordMatch(winner: winner, humanIndex: 0);
+  }
+
+  void _openStats() {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => StatsScreen(settings: _settings)));
+  }
+
+  void _openSettings() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => SettingsScreen(settings: _settings)),
     );
   }
 
@@ -117,12 +171,16 @@ class _HomeScreenState extends State<HomeScreen> {
               const Spacer(),
               IconButton(
                 tooltip: strings.sound,
-                onPressed: () {},
-                icon: const Icon(Icons.volume_up_outlined),
+                onPressed: _settings.toggleSound,
+                icon: Icon(
+                  _settings.settings.soundEnabled
+                      ? Icons.volume_up_outlined
+                      : Icons.volume_off_outlined,
+                ),
               ),
               IconButton(
                 tooltip: strings.settings,
-                onPressed: _showAbout,
+                onPressed: _openSettings,
                 icon: const Icon(Icons.settings_outlined),
               ),
             ],
@@ -155,7 +213,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 8),
                 DifficultySelector(
                   value: _difficulty,
-                  onChanged: (value) => setState(() => _difficulty = value),
+                  onChanged: _settings.setDifficulty,
                 ),
                 const SizedBox(height: 6),
                 Text(
@@ -168,7 +226,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 18),
                 HomeSectionLabel(strings.faction),
                 const SizedBox(height: 8),
-                FactionSelector(value: _faction, onChanged: _selectFaction),
+                FactionSelector(
+                  value: _faction,
+                  onChanged: _settings.setFaction,
+                ),
               ],
             ),
           ),
@@ -178,6 +239,14 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              if (_settings.hasSavedMatch) ...[
+                TonalActionButton(
+                  onPressed: _continueMatch,
+                  icon: Icons.play_circle_outline,
+                  label: strings.continueMatch,
+                ),
+                const SizedBox(height: 10),
+              ],
               FilledButton.icon(
                 onPressed: _startMatch,
                 style: FilledButton.styleFrom(
@@ -203,7 +272,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   TextButton(
-                    onPressed: _showAbout,
+                    onPressed: _openSettings,
                     child: Text(strings.settings),
                   ),
                   TextButton(onPressed: _showAbout, child: Text(strings.about)),
@@ -270,8 +339,10 @@ class _HomeScreenState extends State<HomeScreen> {
           onDestinationSelected: (index) {
             if (index == 1) {
               _editDeck();
-            } else if (index >= 2) {
-              _showAbout();
+            } else if (index == 2) {
+              _openStats();
+            } else if (index == 3) {
+              _openSettings();
             }
           },
         ),
@@ -304,8 +375,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(width: 8),
                     IconButton(
                       tooltip: strings.sound,
-                      onPressed: () {},
-                      icon: const Icon(Icons.volume_up_outlined),
+                      onPressed: _settings.toggleSound,
+                      icon: Icon(
+                        _settings.settings.soundEnabled
+                            ? Icons.volume_up_outlined
+                            : Icons.volume_off_outlined,
+                      ),
                     ),
                     IconButton(
                       tooltip: strings.about,
@@ -319,6 +394,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   faction: _faction,
                   eyebrow: strings.appTagline,
                   height: 300,
+                  onContinue: _settings.hasSavedMatch ? _continueMatch : null,
                 ),
                 const SizedBox(height: 18),
                 Expanded(
@@ -331,9 +407,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           difficulty: _difficulty,
                           faction: _faction,
                           deck: _deck,
-                          onDifficulty: (value) =>
-                              setState(() => _difficulty = value),
-                          onFaction: _selectFaction,
+                          onDifficulty: _settings.setDifficulty,
+                          onFaction: _settings.setFaction,
                           onStart: _startMatch,
                         ),
                       ),
@@ -343,10 +418,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: DecksPanel(
                           deck: _deck,
                           onManage: _editDeck,
-                          onSelect: (deck) => setState(() {
-                            _deck = deck;
-                            _faction = deck.faction;
-                          }),
+                          onSelect: _settings.saveDeck,
+                          stats: _settings.stats,
                         ),
                       ),
                     ],

@@ -4,7 +4,12 @@ import 'package:gwent_go/app.dart';
 import 'package:gwent_go/core/data/card_repository.dart';
 import 'package:gwent_go/core/models/card.dart';
 import 'package:gwent_go/core/models/player.dart';
+import 'package:gwent_go/core/persistence/key_value_store.dart';
+import 'package:gwent_go/core/persistence/profile_repository.dart';
+import 'package:gwent_go/core/rules/game_engine.dart';
+import 'package:gwent_go/core/rules/game_random.dart';
 import 'package:gwent_go/presentation/controllers/game_controller.dart';
+import 'package:gwent_go/presentation/controllers/settings_controller.dart';
 import 'package:gwent_go/presentation/screens/game_screen.dart';
 import 'package:gwent_go/presentation/screens/home_screen.dart';
 import 'package:gwent_go/presentation/widgets/game/game_hand.dart';
@@ -60,6 +65,28 @@ void main() {
 
       expect(find.text('Deck editor'), findsOneWidget);
       expect(find.text('Save deck'), findsOneWidget);
+    });
+
+    testWidgets('offers to continue a saved match', (tester) async {
+      setSurface(tester, 412, 915);
+      final decks = CardRepository.defaultDecks();
+      final repository = ProfileRepository(InMemoryKeyValueStore());
+      final engine = GameEngine(
+        humanDeck: decks[0],
+        opponentDeck: decks[1],
+        difficulty: Difficulty.normal,
+        random: GameRandom(3),
+      );
+      engine.startMatch();
+      engine.finishMulligan();
+      await repository.saveMatch(engine.toJson());
+      final controller = SettingsController(repository);
+
+      await tester.pumpWidget(GwentApp(home: HomeScreen(settings: controller)));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Continue match'), findsOneWidget);
+      controller.dispose();
     });
   });
 

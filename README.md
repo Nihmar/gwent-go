@@ -20,6 +20,9 @@ The game is playable end to end against the computer:
 - three opponent difficulties (`Easy`, `Normal`, `Hard`) driving a heuristic AI;
 - responsive, widget-composed Material 3 board for phone and desktop;
 - collection browser and deck editor;
+- settings, decks and match statistics persisted with `shared_preferences`;
+- a match can be paused automatically, the app closed, and resumed from the
+  home screen;
 - English UI built on Flutter's localization stack (easy to translate).
 
 ## Project layout

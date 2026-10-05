@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../core/models/card.dart';
@@ -11,42 +13,68 @@ import '../widgets/game/game_hand.dart';
 import '../widgets/game/game_header.dart';
 import '../widgets/game/game_overlays.dart';
 import '../widgets/game/game_panels.dart';
+import '../widgets/game/game_preview_panel.dart';
+import '../widgets/game/game_score_table.dart';
 
 /// The match screen: a widget-composed board that adapts to phone and desktop.
+///
+/// A match can be started fresh (from two decks) or resumed from a snapshot.
+/// While playing, the snapshot is persisted so the app can be closed and the
+/// match continued later.
 class GameScreen extends StatefulWidget {
   const GameScreen({
     super.key,
-    required this.humanDeck,
-    required this.opponentDeck,
-    required this.difficulty,
-  });
+    this.humanDeck,
+    this.opponentDeck,
+    this.difficulty = Difficulty.normal,
+    this.snapshot,
+    this.onFinished,
+    this.onPersist,
+  }) : assert(
+         snapshot != null || (humanDeck != null && opponentDeck != null),
+         'Provide decks or a snapshot',
+       );
 
-  final DeckDefinition humanDeck;
-  final DeckDefinition opponentDeck;
+  final DeckDefinition? humanDeck;
+  final DeckDefinition? opponentDeck;
   final Difficulty difficulty;
+
+  /// When set, the match is restored instead of started.
+  final Map<String, dynamic>? snapshot;
+
+  /// Called once when the match ends, with the winner index or null for a draw.
+  final void Function(int? winner)? onFinished;
+
+  /// Called whenever the match should be persisted.
+  final void Function(Map<String, dynamic> snapshot)? onPersist;
 
   @override
   State<GameScreen> createState() => _GameScreenState();
 }
 
-class _GameScreenState extends State<GameScreen> {
+class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   late final GameController controller;
   bool _gameOverShown = false;
+  Timer? _saveDebounce;
 
   @override
   void initState() {
     super.initState();
-    controller = GameController(
-      humanDeck: widget.humanDeck,
-      opponentDeck: widget.opponentDeck,
-      difficulty: widget.difficulty,
-      opponentName: _opponentName(),
-    );
+    WidgetsBinding.instance.addObserver(this);
+    final snapshot = widget.snapshot;
+    controller = snapshot != null
+        ? GameController.resume(snapshot)
+        : GameController(
+            humanDeck: widget.humanDeck!,
+            opponentDeck: widget.opponentDeck!,
+            difficulty: widget.difficulty,
+            opponentName: _opponentName(),
+          );
     controller.addListener(_onChange);
-    controller.start();
+    if (snapshot == null) controller.start();
   }
 
-  String _opponentName() => switch (widget.opponentDeck.faction) {
+  String _opponentName() => switch (widget.opponentDeck!.faction) {
     CardFaction.monsters => 'Eredin Bréacc Glas',
     CardFaction.realms => 'Foltest',
     CardFaction.nilfgaard => 'Emhyr var Emreis',
@@ -58,14 +86,43 @@ class _GameScreenState extends State<GameScreen> {
   void _onChange() {
     if (!mounted) return;
     setState(() {});
-    if (controller.isGameOver && !_gameOverShown) {
-      _gameOverShown = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) => _showGameOver());
+    if (controller.isGameOver) {
+      if (!_gameOverShown) {
+        _gameOverShown = true;
+        widget.onFinished?.call(controller.state.matchWinner);
+        WidgetsBinding.instance.addPostFrameCallback((_) => _showGameOver());
+      }
+      return;
+    }
+    _schedulePersist();
+  }
+
+  void _schedulePersist() {
+    if (widget.onPersist == null) return;
+    _saveDebounce?.cancel();
+    _saveDebounce = Timer(const Duration(milliseconds: 700), _persistNow);
+  }
+
+  void _persistNow() {
+    if (!mounted || controller.isGameOver) return;
+    widget.onPersist?.call(controller.snapshot());
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached ||
+        state == AppLifecycleState.hidden) {
+      _saveDebounce?.cancel();
+      _persistNow();
     }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _saveDebounce?.cancel();
     controller.removeListener(_onChange);
     controller.dispose();
     super.dispose();
@@ -96,25 +153,36 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
+  void _pause() {
+    _saveDebounce?.cancel();
+    _persistNow();
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     final wide = MediaQuery.sizeOf(context).width >= 1000;
-    return Scaffold(
-      body: BoardBackground(
-        child: SafeArea(
-          child: Stack(
-            children: [
-              wide ? _buildDesktop(context) : _buildPhone(context),
-              if (controller.isMulligan)
-                MulliganOverlay(controller: controller),
-              if (controller.pendingChoice case final choice?)
-                ChoiceOverlay(controller: controller, choice: choice),
-              if (!wide &&
-                  !controller.isMulligan &&
-                  controller.pendingChoice == null &&
-                  controller.selectedCard != null)
-                CardPreviewSheet(controller: controller),
-            ],
+    return PopScope(
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) _persistNow();
+      },
+      child: Scaffold(
+        body: BoardBackground(
+          child: SafeArea(
+            child: Stack(
+              children: [
+                wide ? _buildDesktop(context) : _buildPhone(context),
+                if (controller.isMulligan)
+                  MulliganOverlay(controller: controller),
+                if (controller.pendingChoice case final choice?)
+                  ChoiceOverlay(controller: controller, choice: choice),
+                if (!wide &&
+                    !controller.isMulligan &&
+                    controller.pendingChoice == null &&
+                    controller.selectedCard != null)
+                  CardPreviewSheet(controller: controller),
+              ],
+            ),
           ),
         ),
       ),
@@ -129,7 +197,7 @@ class _GameScreenState extends State<GameScreen> {
     const cardWidth = 42.0;
     return Column(
       children: [
-        GameHeader(controller: controller),
+        GameHeader(controller: controller, compact: true, onPause: _pause),
         GamePlayerStrip(controller: controller, opponent: true),
         Expanded(
           child: SingleChildScrollView(
@@ -231,7 +299,7 @@ class _GameScreenState extends State<GameScreen> {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
         children: [
-          GameHeader(controller: controller, compact: true),
+          GameHeader(controller: controller, compact: true, onPause: _pause),
           const SizedBox(height: 4),
           Expanded(
             child: SingleChildScrollView(

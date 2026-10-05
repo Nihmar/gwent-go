@@ -137,7 +137,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get won => 'Won';
 
   @override
+  String get losses => 'Lost';
+
+  @override
+  String get draws => 'Drawn';
+
+  @override
   String get winRate => 'Win rate';
+
+  @override
+  String get noMatchesYet => 'No matches played yet';
+
+  @override
+  String get resetStats => 'Reset statistics';
+
+  @override
+  String get language => 'Language';
+
+  @override
+  String get pause => 'Pause';
 
   @override
   String get cards => 'cards';

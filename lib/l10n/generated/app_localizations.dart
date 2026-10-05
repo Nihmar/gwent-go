@@ -340,11 +340,47 @@ abstract class AppLocalizations {
   /// **'Won'**
   String get won;
 
+  /// No description provided for @losses.
+  ///
+  /// In en, this message translates to:
+  /// **'Lost'**
+  String get losses;
+
+  /// No description provided for @draws.
+  ///
+  /// In en, this message translates to:
+  /// **'Drawn'**
+  String get draws;
+
   /// No description provided for @winRate.
   ///
   /// In en, this message translates to:
   /// **'Win rate'**
   String get winRate;
+
+  /// No description provided for @noMatchesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No matches played yet'**
+  String get noMatchesYet;
+
+  /// No description provided for @resetStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset statistics'**
+  String get resetStats;
+
+  /// No description provided for @language.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language;
+
+  /// No description provided for @pause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get pause;
 
   /// No description provided for @cards.
   ///
