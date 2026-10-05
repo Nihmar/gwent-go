@@ -812,4 +812,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get opponentName => 'Opponent';
+
+  @override
+  String get opponentDisconnected => 'Opponent disconnected';
+
+  @override
+  String get waitingForOpponent => 'Waiting for them to reconnect…';
 }

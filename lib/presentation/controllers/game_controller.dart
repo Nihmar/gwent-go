@@ -87,7 +87,7 @@ class GameController extends ChangeNotifier {
       throw StateError('the host session has not started a match yet');
     }
     return GameController._(
-      EngineBackend(engine),
+      EngineBackend(engine, peerEvents: session.events),
       localSeat: localSeat,
       driveOpponent: false,
     );
@@ -174,6 +174,9 @@ class GameController extends ChangeNotifier {
   /// Seat waiting for the device, when [hotseat] is on and the turn moved to
   /// the other player. The UI must hide the board until it is confirmed.
   int? get pendingSeat => _pendingSeat;
+
+  /// Whether the other side is reachable; false while a remote peer is gone.
+  bool get opponentOnline => _backend.opponentOnline;
 
   final Difficulty difficulty;
   late final AiPlayer _ai;

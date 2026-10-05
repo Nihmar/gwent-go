@@ -1533,6 +1533,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Opponent'**
   String get opponentName;
+
+  /// No description provided for @opponentDisconnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Opponent disconnected'**
+  String get opponentDisconnected;
+
+  /// No description provided for @waitingForOpponent.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for them to reconnect…'**
+  String get waitingForOpponent;
 }
 
 class _AppLocalizationsDelegate

@@ -90,4 +90,26 @@ void main() {
     expect(remote.engine, isNull);
     expect(remote.snapshot(), isNull);
   });
+
+  test('a lost host takes the board offline until a view comes back', () async {
+    host.submit(const FinishMulliganCommand(0));
+    guest.submit(const FinishMulliganCommand(1));
+    await settle();
+    expect(remote.opponentOnline, isTrue);
+
+    // The host goes away: the guest cannot play on a state it cannot refresh.
+    await host.close();
+    await settle();
+    expect(remote.opponentOnline, isFalse);
+  });
+
+  test('the host sees its guest leave', () async {
+    final local = GameController.host(host, localSeat: 0);
+    expect(local.opponentOnline, isTrue);
+
+    await guest.close();
+    await settle();
+    expect(local.opponentOnline, isFalse);
+    local.dispose();
+  });
 }
