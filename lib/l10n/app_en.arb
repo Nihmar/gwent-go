@@ -1,0 +1,240 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "GWENT",
+  "appTagline": "The Witcher Card Game",
+  "appAbout": "A cross-platform Flutter implementation of classic Gwent: three rounds, two armies, one deck.",
+
+  "play": "Play",
+  "newMatch": "New match",
+  "continueMatch": "Continue match",
+  "stats": "Stats",
+  "threeDifficultyLevels": "3 difficulty levels",
+  "offline": "Offline",
+  "classicRules": "Classic rules",
+  "version": "v0.1.0",
+  "english": "English",
+  "deckCollection": "Deck collection",
+  "manageDecks": "Manage decks",
+  "recentDecks": "Recent decks",
+  "settings": "Settings",
+  "about": "About",
+  "back": "Back",
+  "cancel": "Cancel",
+  "close": "Close",
+  "confirm": "Confirm",
+  "save": "Save",
+  "sound": "Sound",
+  "menu": "Menu",
+
+  "opponentDifficulty": "Opponent difficulty",
+  "easy": "Easy",
+  "normal": "Normal",
+  "hard": "Hard",
+  "difficultyEasyDescription": "Plays greedily and passes late; a forgiving opponent.",
+  "difficultyNormalDescription": "Competent trades and sensible passing decisions.",
+  "difficultyHardDescription": "Strong sequencing, holds finishers and passes at the right time.",
+
+  "faction": "Faction",
+  "factionRealms": "Northern Realms",
+  "factionNilfgaard": "Nilfgaard",
+  "factionMonsters": "Monsters",
+  "factionScoiatael": "Scoia'tael",
+  "factionSkellige": "Skellige",
+
+  "startMatch": "Start match",
+  "startGame": "Start game",
+  "matches": "Matches",
+  "won": "Won",
+  "winRate": "Win rate",
+  "cards": "cards",
+  "strength": "strength",
+
+  "deckEditor": "Deck editor",
+  "deck": "Deck",
+  "deckStats": "Deck stats",
+  "leader": "Leader",
+  "changeLeader": "Change leader",
+  "factionAbility": "Faction ability",
+  "saveDeck": "Save deck",
+  "importDeck": "Import deck",
+  "exportDeck": "Export deck",
+  "searchCollection": "Search collection",
+  "filterAll": "All",
+  "filterUnits": "Units",
+  "filterSpecial": "Special",
+  "filterWeather": "Weather",
+  "filterHeroes": "Heroes",
+  "filterOwned": "Owned",
+  "byRow": "By row",
+  "byStrength": "By strength",
+  "totalCards": "Total cards",
+  "unitCards": "Unit cards",
+  "specialCards": "Special cards",
+  "heroCards": "Hero cards",
+  "totalStrength": "Total strength",
+  "deckValid": "Deck is valid — ready to play",
+  "deckInvalid": "Deck is not valid yet",
+  "cardsOwned": "{owned} cards owned · {distinct} distinct",
+  "@cardsOwned": {
+    "placeholders": {
+      "owned": { "type": "int" },
+      "distinct": { "type": "int" }
+    }
+  },
+  "cardsInDeck": "{count} / {max} cards",
+  "@cardsInDeck": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "max": { "type": "int" }
+    }
+  },
+
+  "round": "Round",
+  "roundOf": "Round {current} of {total}",
+  "@roundOf": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "yourTurn": "Your turn",
+  "opponentTurn": "Opponent turn",
+  "pass": "Pass",
+  "passRound": "Pass round",
+  "points": "Points",
+  "cardsInHand": "Cards in hand",
+  "deckPile": "Deck",
+  "gravePile": "Grave",
+  "weather": "Weather",
+  "leaderReady": "Ready",
+  "leaderUsed": "Used",
+  "cardPreview": "Card preview",
+  "matchScore": "Match score",
+  "you": "You",
+  "playCard": "Play card",
+  "tapCardDetails": "Tap a card for details",
+  "selectRowHint": "Choose a row",
+  "selectTargetHint": "Choose a target",
+  "mulliganTitle": "Choose up to {count} cards to redraw",
+  "@mulliganTitle": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "mulliganConfirm": "Keep hand",
+  "waitingAi": "Opponent is thinking…",
+  "roundWon": "Round won",
+  "roundLost": "Round lost",
+  "roundDrawn": "Round drawn",
+  "victory": "Victory",
+  "defeat": "Defeat",
+  "draw": "Draw",
+  "winnerYou": "You win the match",
+  "winnerOpponent": "{name} wins the match",
+  "@winnerOpponent": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "matchDrawn": "The match is a draw",
+  "finalScore": "Final score",
+  "playAgain": "Play again",
+  "notPlayed": "—",
+  "clearWeatherNotPlayed": "Clear Weather not played",
+  "closeRowAtOne": "Close rows at 1",
+  "pointsAbbrev": "{value} str",
+  "@pointsAbbrev": {
+    "placeholders": {
+      "value": { "type": "int" }
+    }
+  },
+  "opponentSummary": "{faction} · {difficulty} AI",
+  "@opponentSummary": {
+    "placeholders": {
+      "faction": { "type": "String" },
+      "difficulty": { "type": "String" }
+    }
+  },
+  "handAndDeckHint": "{name} has {hand} cards in hand · {deck} in deck",
+  "@handAndDeckHint": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "hand": { "type": "int" },
+      "deck": { "type": "int" }
+    }
+  },
+  "spyDraw": "Spy: drawing 2 cards",
+  "muster": "Muster: playing matching cards",
+  "medic": "Medic: choosing a card to revive",
+  "scorch": "Scorch!",
+  "decoy": "Decoy swapped",
+
+  "rowClose": "Close Combat",
+  "rowRanged": "Ranged Combat",
+  "rowSiege": "Siege Combat",
+  "rowAgile": "Agile",
+  "rowWeather": "Weather",
+  "cardTypeSpecial": "Special Card",
+  "cardTypeWeather": "Weather Card",
+  "cardTypeHero": "Hero",
+  "cardTypeLeader": "Leader Ability",
+  "tagHero": "Hero",
+  "tagSpecial": "Special",
+  "tagWeather": "Weather",
+  "abilityLabel": "Ability",
+
+  "abilityHero": "Not affected by any Special Cards or abilities.",
+  "abilityDecoy": "Swap with a card on the battlefield to return it to your hand.",
+  "abilityHorn": "Doubles the strength of all unit cards in that row. Limited to 1 per row.",
+  "abilityMardroeme": "Triggers transformation of all Berserker cards on the same row.",
+  "abilityBerserker": "Transforms into a bear when a Mardroeme card is on its row.",
+  "abilityScorch": "Discard after playing. Kills the strongest card(s) on the battlefield.",
+  "abilityScorchClose": "Destroy your enemy's strongest Close Combat unit(s) if the combined strength of all their Close Combat units is 10 or more.",
+  "abilityScorchRanged": "Destroy your enemy's strongest Ranged Combat unit(s) if the combined strength of all their Ranged Combat units is 10 or more.",
+  "abilityScorchSiege": "Destroy your enemy's strongest Siege Combat unit(s) if the combined strength of all their Siege Combat units is 10 or more.",
+  "abilityAgile": "Can be placed in either the Close Combat or the Ranged Combat row. Cannot be moved once placed.",
+  "abilityMuster": "Find any cards with the same name in your deck and play them instantly.",
+  "abilitySpy": "Place on your opponent's battlefield (counts towards your opponent's total) and draw 2 cards from your deck.",
+  "abilityMedic": "Choose one card from your discard pile and play it instantly (no Heroes or Special Cards).",
+  "abilityMorale": "Adds +1 to all units in the row (excluding itself).",
+  "abilityBond": "Place next to a card with the same name to double the strength of both cards.",
+  "abilityAvenger": "When this card is removed from the battlefield, it summons a powerful new Unit Card to take its place.",
+  "abilityFrost": "Sets the strength of all Close Combat cards to 1 for both players.",
+  "abilityFog": "Sets the strength of all Ranged Combat cards to 1 for both players.",
+  "abilityRain": "Sets the strength of all Siege Combat cards to 1 for both players.",
+  "abilityStorm": "Reduces the Strength of all Ranged and Siege units to 1.",
+  "abilityClear": "Removes all Weather Cards (Biting Frost, Impenetrable Fog and Torrential Rain) effects.",
+
+  "leaderFoltestKing": "Pick an Impenetrable Fog card from your deck and play it instantly.",
+  "leaderFoltestLord": "Clear any weather effects in play.",
+  "leaderFoltestSiegemaster": "Doubles the strength of all your Siege units (unless a Commander's Horn is also present on that row).",
+  "leaderFoltestSteelforged": "Destroy your enemy's strongest Siege unit(s) if the combined strength of all their Siege units is 10 or more.",
+  "leaderFoltestSon": "Destroy your enemy's strongest Ranged Combat unit(s) if the combined strength of all their Ranged units is 10 or more.",
+  "leaderEmhyrImperial": "Pick a Torrential Rain card from your deck and play it instantly.",
+  "leaderEmhyrEmperor": "Look at 3 random cards from your opponent's hand.",
+  "leaderEmhyrWhiteflame": "Cancel your opponent's Leader Ability.",
+  "leaderEmhyrRelentless": "Draw a card from your opponent's discard pile.",
+  "leaderEmhyrInvader": "Abilities that restore a unit to the battlefield restore a randomly-chosen unit. Affects both players.",
+  "leaderEredinCommander": "Double the strength of all your Close Combat units (unless a Commander's Horn is also present on that row).",
+  "leaderEredinBringer": "Restore a card from your discard pile to your hand.",
+  "leaderEredinDestroyer": "Discard 2 cards and draw 1 card of your choice from your deck.",
+  "leaderEredinKing": "Pick any weather card from your deck and play it instantly.",
+  "leaderEredinTreacherous": "Doubles the strength of all spy cards (affects both players).",
+  "leaderFrancescaQueen": "Destroy your enemy's strongest Close Combat unit(s) if the combined strength of all their Close Combat units is 10 or more.",
+  "leaderFrancescaBeautiful": "Doubles the strength of all your Ranged Combat units (unless a Commander's Horn is also present on that row).",
+  "leaderFrancescaDaisy": "Draw an extra card at the beginning of the battle.",
+  "leaderFrancescaPureblood": "Pick a Biting Frost card from your deck and play it instantly.",
+  "leaderFrancescaHope": "Move agile units to whichever valid row maximizes their strength.",
+  "leaderCrachAnCraite": "Shuffle all cards from each player's graveyard back into their decks.",
+  "leaderKingBran": "Units only lose half their Strength in bad weather conditions.",
+
+  "factionAbilityRealms": "Draw a card from your deck whenever you win a round.",
+  "factionAbilityNilfgaard": "Wins any round that ends in a draw.",
+  "factionAbilityMonsters": "Keeps a random Unit Card out after each round.",
+  "factionAbilityScoiatael": "Decides who takes the first turn.",
+  "factionAbilitySkellige": "2 random cards from the graveyard are placed on the battlefield at the start of the third round.",
+
+  "aiOpponent": "AI opponent",
+  "opponentName": "Opponent"
+}

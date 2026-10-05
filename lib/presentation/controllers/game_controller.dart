@@ -1,0 +1,261 @@
+import 'package:flutter/foundation.dart';
+
+import '../../core/ai/ai.dart';
+import '../../core/ai/ai_players.dart';
+import '../../core/models/card.dart';
+import '../../core/models/game_state.dart';
+import '../../core/models/player.dart';
+import '../../core/rules/game_engine.dart';
+import '../../core/rules/game_event.dart';
+import '../../core/rules/game_random.dart';
+
+/// A choice the UI must collect before a card can be played.
+sealed class PendingChoice {
+  const PendingChoice();
+}
+
+class RowChoice extends PendingChoice {
+  const RowChoice(this.rows);
+  final List<CardRow> rows;
+}
+
+enum TargetKind { battlefield, graveyard }
+
+class TargetChoice extends PendingChoice {
+  const TargetChoice(this.targets, this.kind);
+  final List<CardInstance> targets;
+  final TargetKind kind;
+}
+
+/// Bridges the rules engine to the widget tree.
+///
+/// Owns the human's interaction state (selected card, pending target) and
+/// drives the AI opponent with small delays so its moves are readable.
+class GameController extends ChangeNotifier {
+  GameController({
+    required DeckDefinition humanDeck,
+    required DeckDefinition opponentDeck,
+    required Difficulty difficulty,
+    String opponentName = 'Opponent',
+    int? seed,
+  }) : engine = GameEngine(
+         humanDeck: humanDeck,
+         opponentDeck: opponentDeck,
+         difficulty: difficulty,
+         random: seed == null ? null : GameRandom(seed),
+         opponentName: opponentName,
+       ) {
+    _ai = createAi(difficulty);
+  }
+
+  final GameEngine engine;
+  late final AiPlayer _ai;
+
+  final List<GameEvent> log = [];
+  final List<CardInstance> redrawPicks = [];
+
+  CardInstance? selectedCard;
+  PendingChoice? pendingChoice;
+  bool isAiThinking = false;
+  bool _disposed = false;
+
+  GameState get state => engine.state;
+  PlayerState get human => engine.human;
+  PlayerState get opponent => engine.opponent;
+  bool get isMulligan => state.phase == GamePhase.mulligan;
+  bool get isGameOver => state.phase == GamePhase.gameOver;
+  int get redrawsLeft => GameEngine.maxRedraws - engine.humanRedraws;
+
+  /// Starts the match and enters the mulligan phase.
+  void start() {
+    engine.startMatch();
+    _drainEvents();
+    notifyListeners();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Mulligan
+  // ---------------------------------------------------------------------------
+
+  void toggleRedraw(CardInstance card) {
+    if (!isMulligan) return;
+    if (!redrawPicks.remove(card)) {
+      if (redrawPicks.length >= redrawsLeft) return;
+      redrawPicks.add(card);
+    }
+    notifyListeners();
+  }
+
+  void confirmMulligan() {
+    if (!isMulligan) return;
+    for (final card in redrawPicks) {
+      engine.redraw(human.index, card);
+    }
+    redrawPicks.clear();
+    engine.finishMulligan();
+    _drainEvents();
+    notifyListeners();
+    _maybeRunAi();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Human actions
+  // ---------------------------------------------------------------------------
+
+  void selectCard(CardInstance? card) {
+    selectedCard = card;
+    pendingChoice = null;
+    notifyListeners();
+  }
+
+  void clearSelection() {
+    selectedCard = null;
+    pendingChoice = null;
+    notifyListeners();
+  }
+
+  /// Plays the selected card, asking for a row or target when required.
+  void playSelected({CardRow? row, CardInstance? target}) {
+    final card = selectedCard;
+    if (card == null) return;
+    if (!engine.canPlayCard(human.index, card)) return;
+
+    if (_needsRow(card) && row == null) {
+      pendingChoice = RowChoice(_rowOptions(card));
+      notifyListeners();
+      return;
+    }
+    if (card.hasAbility(Ability.decoy) && target == null) {
+      final targets = _ownBattlefieldUnits();
+      pendingChoice = TargetChoice(targets, TargetKind.battlefield);
+      notifyListeners();
+      return;
+    }
+    if (card.hasAbility(Ability.medic) && target == null) {
+      final graveyard = human.graveyard.where((c) => c.isUnit).toList();
+      if (graveyard.isNotEmpty) {
+        pendingChoice = TargetChoice(graveyard, TargetKind.graveyard);
+        notifyListeners();
+        return;
+      }
+    }
+
+    final played = engine.playCard(
+      human.index,
+      card,
+      targetRow: row,
+      target: target,
+    );
+    if (!played) return;
+    _afterHumanAction();
+  }
+
+  void pass() {
+    if (!engine.isHumanTurn) return;
+    engine.pass(human.index);
+    _afterHumanAction();
+  }
+
+  void activateLeader() {
+    if (!engine.isHumanTurn || !human.leaderAvailable) return;
+    engine.activateLeader(human.index);
+    _afterHumanAction();
+  }
+
+  void _afterHumanAction() {
+    selectedCard = null;
+    pendingChoice = null;
+    _drainEvents();
+    notifyListeners();
+    _maybeRunAi();
+  }
+
+  // ---------------------------------------------------------------------------
+  // AI
+  // ---------------------------------------------------------------------------
+
+  void _maybeRunAi() {
+    if (_disposed) return;
+    if (isGameOver) return;
+    if (state.phase != GamePhase.playing) return;
+    if (!engine.isOpponentTurn) return;
+    isAiThinking = true;
+    notifyListeners();
+    Future<void>.delayed(const Duration(milliseconds: 650), () {
+      if (_disposed || isGameOver) return;
+      if (!engine.isOpponentTurn) {
+        isAiThinking = false;
+        notifyListeners();
+        return;
+      }
+      final action = _ai.decide(engine, opponent);
+      _applyAi(action);
+      isAiThinking = false;
+      _drainEvents();
+      notifyListeners();
+      _maybeRunAi();
+    });
+  }
+
+  void _applyAi(AiAction action) {
+    final applied = switch (action) {
+      AiPlayCard(:final card, :final targetRow, :final target) =>
+        engine.playCard(
+          opponent.index,
+          card,
+          targetRow: targetRow,
+          target: target,
+        ),
+      AiActivateLeader(:final targetRow, :final target) =>
+        engine.activateLeader(
+          opponent.index,
+          targetRow: targetRow,
+          target: target,
+        ),
+      AiPass() => _passAi(),
+    };
+    if (!applied) engine.pass(opponent.index);
+  }
+
+  bool _passAi() {
+    engine.pass(opponent.index);
+    return true;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------------
+
+  bool _needsRow(CardInstance card) =>
+      card.row == CardRow.agile || card.usesRowSpecialSlot;
+
+  List<CardRow> _rowOptions(CardInstance card) {
+    if (card.usesRowSpecialSlot) {
+      return CardRow.combatRows
+          .where((row) => !state.rowState(human.index, row).hasSpecial)
+          .toList();
+    }
+    return const [CardRow.close, CardRow.ranged];
+  }
+
+  List<CardInstance> _ownBattlefieldUnits() {
+    final units = <CardInstance>[];
+    for (final row in state.rowsFor(human.index)) {
+      units.addAll(row.cards.where((c) => c.isUnit));
+    }
+    return units;
+  }
+
+  void _drainEvents() {
+    log.addAll(engine.takeEvents());
+    while (log.length > 40) {
+      log.removeAt(0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+}

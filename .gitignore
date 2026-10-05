@@ -1,1 +1,22 @@
+# Reference implementation — kept locally, never committed.
 gwent-classic-enhanced
+
+# Dart / Flutter
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.iml
+
+# IDE
+.idea/
+.vscode/
+.commandcode/
+
+# Generated localization output is committed on purpose (see lib/l10n/generated).
+!lib/l10n/generated/
+
+# OS
+.DS_Store
+Thumbs.db
