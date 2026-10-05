@@ -93,6 +93,52 @@ void main() {
       controller.dispose();
     });
 
+    test('Invader of the North plays Medic without asking for a target', () {
+      final controller = buildLeaderController(
+        'emhyr_invader_of_the_north',
+        CardFaction.nilfgaard,
+      );
+      controller.start();
+      controller.confirmMulligan();
+      controller.state.currentPlayer = 0;
+
+      controller.human.graveyard
+        ..clear()
+        ..add(makeCard('gryffin', owner: 0))
+        ..add(makeCard('nekker', owner: 0));
+      controller.human.hand
+        ..clear()
+        ..add(makeCard('banner_nurse', owner: 0));
+      controller.selectCard(controller.human.hand.first);
+      controller.playSelected();
+
+      expect(controller.pendingChoice, isNull);
+      expect(controller.human.graveyard, hasLength(1));
+      controller.dispose();
+    });
+
+    test('a normal Medic still asks for its target', () {
+      final controller = buildLeaderController(
+        'foltest_gold',
+        CardFaction.realms,
+      );
+      controller.start();
+      controller.confirmMulligan();
+      controller.state.currentPlayer = 0;
+
+      controller.human.graveyard
+        ..clear()
+        ..add(makeCard('gryffin', owner: 0));
+      controller.human.hand
+        ..clear()
+        ..add(makeCard('banner_nurse', owner: 0));
+      controller.selectCard(controller.human.hand.first);
+      controller.playSelected();
+
+      expect(controller.pendingChoice, isA<TargetChoice>());
+      controller.dispose();
+    });
+
     test('Destroyer of Worlds asks for two discards then a draw', () {
       final controller = buildLeaderController(
         'eredin_gold',

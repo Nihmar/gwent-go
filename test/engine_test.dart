@@ -349,6 +349,38 @@ void main() {
     });
   });
 
+  group('Invader of the North', () {
+    test('Medic revives a random unit, ignoring the requested target', () {
+      final engine = harness(
+        humanFaction: CardFaction.nilfgaard,
+        humanLeader: 'emhyr_invader_of_the_north',
+        random: _AlwaysFirstRandom(),
+      );
+      expect(engine.state.randomRespawn, isTrue);
+      setTurn(engine, 0);
+      setHand(engine, 0, ['banner_nurse']);
+      setDeck(engine, 0, ['geralt']);
+      final graveyard = engine.state.players[0].graveyard
+        ..clear()
+        ..add(makeCard('gryffin', owner: 0))
+        ..add(makeCard('nekker', owner: 0));
+      final requested = graveyard[1];
+      final medic = engine.state.players[0].hand.single;
+
+      expect(engine.playCard(0, medic, target: requested), isTrue);
+
+      // The random pick (index 0) wins over the requested Nekker.
+      expect(
+        engine.state.rowState(0, CardRow.close).cards.map((c) => c.id),
+        contains('gryffin'),
+      );
+      expect(
+        engine.state.players[0].graveyard.map((c) => c.id),
+        contains('nekker'),
+      );
+    });
+  });
+
   group('Manual leader choices', () {
     test('Destroyer of Worlds discards and draws the chosen cards', () {
       final engine = harness(
@@ -498,4 +530,15 @@ class _NoShuffleRandom extends GameRandom {
 
   @override
   void shuffle<T>(List<T> items) {}
+}
+
+/// [GameRandom] whose every draw is index 0, so random picks are predictable.
+class _AlwaysFirstRandom extends GameRandom {
+  _AlwaysFirstRandom() : super(1);
+
+  @override
+  int nextInt(int max) => 0;
+
+  @override
+  double nextDouble() => 0;
 }

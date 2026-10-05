@@ -348,7 +348,9 @@ class GameController extends ChangeNotifier {
       notifyListeners();
       return;
     }
-    if (card.hasAbility(Ability.medic) && target == null) {
+    if (card.hasAbility(Ability.medic) &&
+        target == null &&
+        !state.randomRespawn) {
       final graveyard = human.graveyard.where((c) => c.isUnit).toList();
       if (graveyard.isNotEmpty) {
         pendingChoice = TargetChoice(graveyard, TargetKind.graveyard);
