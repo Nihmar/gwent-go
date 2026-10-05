@@ -83,9 +83,9 @@
 
 .gcard-power {
   position: absolute;
-  left: calc(var(--cw) * -0.1);
-  top: calc(var(--cw) * -0.1);
-  width: calc(var(--cw) * 0.44);
+  left: calc(var(--cw) * 0.06);
+  top: calc(var(--cw) * 0.06);
+  width: calc(var(--cw) * 0.32);
   aspect-ratio: 1;
   background-image: var(--spr);
   background-repeat: no-repeat;
@@ -126,11 +126,9 @@
 }
 
 /* special / weather cards show the emblem centred */
+/* Special and weather cards keep their emblem in the same top-left slot as a
+   unit's strength, so the artwork centre stays visible. */
 .gcard.special .gcard-power {
-  left: 50%;
-  top: 42%;
-  width: 54%;
-  transform: translate(-50%, -50%);
   filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.6));
 }
 
