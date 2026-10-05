@@ -157,7 +157,7 @@ Goal: a peer can be given a view of the match that never contains hidden data.
   `protocolVersion`; refuse a peer that does not match.
 - Add a deterministic `stateHash` for debugging and future verification.
 
-### Phase 3 — Session layer (transport-agnostic)
+### Phase 3 — Session layer (transport-agnostic) *(done)*
 
 Goal: a match can be hosted and joined over an abstract transport, in memory.
 
