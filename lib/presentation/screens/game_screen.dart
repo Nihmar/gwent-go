@@ -112,7 +112,9 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
 
   void _persistNow() {
     if (!mounted || controller.isGameOver) return;
-    widget.onPersist?.call(controller.snapshot());
+    final snapshot = controller.snapshot();
+    if (snapshot == null) return;
+    widget.onPersist?.call(snapshot);
   }
 
   @override

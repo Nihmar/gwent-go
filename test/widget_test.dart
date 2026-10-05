@@ -210,7 +210,7 @@ void main() {
         seed: 3,
       );
       controller.start();
-      controller.engine.finishMulligan(0);
+      controller.engine!.finishMulligan(0);
       controller.state.currentPlayer = 0;
       controller.activateLeader();
       final choice = controller.pendingChoice!;
