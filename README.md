@@ -87,8 +87,11 @@ keytool -genkeypair -v \
 
 Keep the keystore and its passwords backed up somewhere safe: losing them means
 the published app can no longer be updated. `flutter build appbundle` is the
-recommended format for Play Store submissions. The `applicationId` is still the
-`com.example.gwent_go` placeholder and should be changed before publishing.
+recommended format for Play Store submissions.
+
+The Android and Linux application ids are `dev.nihmar.gwentgo`. The iOS, macOS
+and Windows runners still carry the generated `com.example` placeholders and
+should be updated if those platforms are ever enabled.
 
 ## Assets
 
