@@ -112,20 +112,26 @@ void main() {
     expect(statValue(tester, DeckSummaryBar.cardsKey), '1 / 40');
   });
 
-  testWidgets('the copy badge hugs the top-right of the card', (tester) async {
+  testWidgets('name, type, copies and ability sit under the card', (
+    tester,
+  ) async {
     await openEditor(tester, deck: smallDeck);
     await tester.enterText(find.byType(TextField), 'Poor');
     await tester.pumpAndSettle();
 
-    final card = tester.getRect(tileFor('poor_infantry'));
-    final badge = tester.getRect(find.byType(DeckBadge));
+    Finder inCollection(String text) => find.descendant(
+      of: find.byType(DeckCollectionPane),
+      matching: find.text(text),
+    );
 
-    // Top-right keeps the card's own badge (top-left) readable.
-    expect(badge.center.dx, greaterThan(card.center.dx));
-    expect(badge.center.dy, lessThan(card.center.dy));
-    // It hugs the card corner rather than the wider grid cell.
-    expect(badge.right, greaterThan(card.right));
-    expect(badge.right - card.right, lessThan(12));
+    final card = tester.getRect(tileFor('poor_infantry'));
+    final name = tester.getRect(inCollection('Poor Fucking Infantry'));
+
+    // The card face is artwork only; the details live under it.
+    expect(name.top, greaterThan(card.bottom));
+    expect(inCollection('Close Combat'), findsOneWidget);
+    expect(inCollection('1/4'), findsOneWidget);
+    expect(inCollection('Tight Bond'), findsOneWidget);
   });
 
   testWidgets('long-press opens the ability sheet with copy actions', (
