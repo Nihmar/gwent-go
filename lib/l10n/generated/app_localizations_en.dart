@@ -83,6 +83,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get menu => 'Menu';
 
   @override
+  String get backToMenu => 'Main menu';
+
+  @override
   String get opponentDifficulty => 'Opponent difficulty';
 
   @override
