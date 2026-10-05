@@ -217,6 +217,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noCardsFound => 'No cards match your filters';
 
   @override
+  String get commandWrongPhase => 'This action is not available right now.';
+
+  @override
+  String get commandNotYourTurn => 'It is not your turn.';
+
+  @override
+  String get commandPlayerPassed => 'You have already passed this round.';
+
+  @override
+  String get commandUnknownCard => 'That card is no longer in play.';
+
+  @override
+  String get commandCardNotInHand => 'That card is not in your hand.';
+
+  @override
+  String get commandRowOccupied =>
+      'That row already has a card in its special slot.';
+
+  @override
+  String get commandNoTarget => 'Choose a valid target first.';
+
+  @override
+  String get commandLeaderUnavailable =>
+      'Your leader ability is no longer available.';
+
+  @override
+  String get commandNoRedrawsLeft => 'You have no redraws left.';
+
+  @override
   String get searchCollection => 'Search collection';
 
   @override

@@ -496,6 +496,60 @@ abstract class AppLocalizations {
   /// **'No cards match your filters'**
   String get noCardsFound;
 
+  /// No description provided for @commandWrongPhase.
+  ///
+  /// In en, this message translates to:
+  /// **'This action is not available right now.'**
+  String get commandWrongPhase;
+
+  /// No description provided for @commandNotYourTurn.
+  ///
+  /// In en, this message translates to:
+  /// **'It is not your turn.'**
+  String get commandNotYourTurn;
+
+  /// No description provided for @commandPlayerPassed.
+  ///
+  /// In en, this message translates to:
+  /// **'You have already passed this round.'**
+  String get commandPlayerPassed;
+
+  /// No description provided for @commandUnknownCard.
+  ///
+  /// In en, this message translates to:
+  /// **'That card is no longer in play.'**
+  String get commandUnknownCard;
+
+  /// No description provided for @commandCardNotInHand.
+  ///
+  /// In en, this message translates to:
+  /// **'That card is not in your hand.'**
+  String get commandCardNotInHand;
+
+  /// No description provided for @commandRowOccupied.
+  ///
+  /// In en, this message translates to:
+  /// **'That row already has a card in its special slot.'**
+  String get commandRowOccupied;
+
+  /// No description provided for @commandNoTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a valid target first.'**
+  String get commandNoTarget;
+
+  /// No description provided for @commandLeaderUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Your leader ability is no longer available.'**
+  String get commandLeaderUnavailable;
+
+  /// No description provided for @commandNoRedrawsLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'You have no redraws left.'**
+  String get commandNoRedrawsLeft;
+
   /// No description provided for @searchCollection.
   ///
   /// In en, this message translates to:
