@@ -85,24 +85,17 @@
   position: absolute;
   left: calc(var(--cw) * 0.06);
   top: calc(var(--cw) * 0.06);
-  width: calc(var(--cw) * 0.32);
+  width: calc(var(--cw) * 0.26);
   aspect-ratio: 1;
   background-image: var(--spr);
   background-repeat: no-repeat;
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.65));
 }
 
-/* non-hero sprites have their content at (15,14)-(125,125) of a 215x215 canvas */
-.gcard-power.is-unit {
-  background-size: 195.45%;
-  background-position: 14.29% 13.33%;
-}
-
-.gcard-power.is-hero {
-  background-size: 100% 100%;
-  background-position: center;
-}
-
+/* all sprites keep their disc at (15,14)-(125,125) of a 215x215 canvas,
+   heroes included, so one crop centres them under the strength number */
+.gcard-power.is-unit,
+.gcard-power.is-hero,
 .gcard-power.is-special {
   background-size: 195.45%;
   background-position: 14.29% 13.33%;
@@ -113,7 +106,7 @@
   inset: 0;
   display: grid;
   place-items: center;
-  font-size: calc(var(--cw) * 0.175);
+  font-size: calc(var(--cw) * 0.115);
   font-weight: 700;
   line-height: 1;
   color: #221806;
