@@ -83,22 +83,28 @@
 
 .gcard-power {
   position: absolute;
-  left: calc(var(--cw) * 0.06);
-  top: calc(var(--cw) * 0.06);
-  width: calc(var(--cw) * 0.26);
+  left: calc(var(--cw) * 0.045);
+  top: calc(var(--cw) * 0.045);
+  width: calc(var(--cw) * 0.24);
   aspect-ratio: 1;
   background-image: var(--spr);
   background-repeat: no-repeat;
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.65));
 }
 
-/* all sprites keep their disc at (15,14)-(125,125) of a 215x215 canvas,
-   heroes included, so one crop centres them under the strength number */
+/* units and specials are cropped to the disc at (15,14)-(125,125) of the
+   215x215 canvas, so it fills the slot under the strength number */
 .gcard-power.is-unit,
-.gcard-power.is-hero,
 .gcard-power.is-special {
   background-size: 195.45%;
   background-position: 14.29% 13.33%;
+}
+
+/* heroes keep their rays: a 150px window scaled so the 88px disc matches the
+   slot, positioned so the disc centre (69.2, 68.8) lands on the slot centre */
+.gcard-power.is-hero {
+  background-size: 143.333% 143.333%;
+  background-position: -8.92% -9.54%;
 }
 
 .gcard-power > span {
@@ -106,7 +112,7 @@
   inset: 0;
   display: grid;
   place-items: center;
-  font-size: calc(var(--cw) * 0.115);
+  font-size: calc(var(--cw) * 0.105);
   font-weight: 700;
   line-height: 1;
   color: #221806;
