@@ -5,11 +5,12 @@ part of 'game_engine.dart';
 /// An extension keeps the helper surface out of the main resolver file while
 /// still allowing direct access to the engine's private state.
 extension _ZoneHelpers on _AbilityResolver {
-  bool draw(PlayerState player, int count) {
-    var drawn = false;
+  /// Draws up to [count] cards and returns how many were actually drawn.
+  int draw(PlayerState player, int count) {
+    var drawn = 0;
     for (var i = 0; i < count && player.deck.isNotEmpty; i++) {
       player.hand.add(player.deck.removeAt(0));
-      drawn = true;
+      drawn++;
     }
     return drawn;
   }

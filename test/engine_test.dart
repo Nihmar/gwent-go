@@ -3,6 +3,7 @@ import 'package:gwent_go/core/models/card.dart';
 import 'package:gwent_go/core/models/game_state.dart';
 import 'package:gwent_go/core/models/player.dart';
 import 'package:gwent_go/core/rules/game_engine.dart';
+import 'package:gwent_go/core/rules/game_event.dart';
 import 'package:gwent_go/core/rules/game_random.dart';
 import 'package:gwent_go/core/rules/scoring.dart';
 
@@ -231,6 +232,34 @@ void main() {
       engine.playCard(0, engine.human.hand.first);
       expect(engine.human.graveyard.map((c) => c.id), contains('frost'));
       expect(engine.state.weatherCards.length, 1);
+    });
+  });
+
+  group('Draw events', () {
+    test('Spy reports the number of cards actually drawn', () {
+      final engine = harness();
+      setTurn(engine, 0);
+      setHand(engine, 0, ['stennis']);
+      setDeck(engine, 0, ['geralt']);
+      engine.takeEvents();
+      final spy = engine.human.hand.first;
+
+      expect(engine.playCard(0, spy), isTrue);
+      final draws = engine.takeEvents().whereType<CardsDrawn>().toList();
+      expect(draws, hasLength(1));
+      expect(draws.single.count, 1);
+    });
+
+    test('Spy does not report a draw with an empty deck', () {
+      final engine = harness();
+      setTurn(engine, 0);
+      setHand(engine, 0, ['stennis']);
+      setDeck(engine, 0, []);
+      engine.takeEvents();
+      final spy = engine.human.hand.first;
+
+      expect(engine.playCard(0, spy), isTrue);
+      expect(engine.takeEvents().whereType<CardsDrawn>(), isEmpty);
     });
   });
 
