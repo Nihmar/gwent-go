@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import '../data/card_repository.dart';
 import '../models/card.dart';
+import '../models/collection.dart';
 import '../models/player.dart';
 import 'key_value_store.dart';
 
@@ -86,6 +87,7 @@ class ProfileRepository {
   static const _keyLosses = 'stats.losses';
   static const _keyDraws = 'stats.draws';
   static const _keyMatch = 'match.current';
+  static const _keyCollection = 'collection.owned';
 
   String _deckKey(CardFaction faction) => 'deck.${faction.name}';
 
@@ -171,6 +173,20 @@ class ProfileRepository {
 
   Future<void> clearMatch() async {
     await _store.remove(_keyMatch);
+  }
+
+  Future<Collection> loadCollection() async {
+    final raw = await _store.getString(_keyCollection);
+    if (raw == null || raw.isEmpty) return Collection.full;
+    try {
+      return Collection.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+    } on FormatException {
+      return Collection.full;
+    }
+  }
+
+  Future<void> saveCollection(Collection collection) async {
+    await _store.setString(_keyCollection, jsonEncode(collection.toJson()));
   }
 }
 
