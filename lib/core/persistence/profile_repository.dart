@@ -106,13 +106,9 @@ class ProfileRepository {
   Future<DeckDefinition?> loadDeck(CardFaction faction) async {
     final raw = await _store.getString(_deckKey(faction));
     if (raw == null || raw.isEmpty) return null;
-    try {
-      return deckFromJson(
-        (jsonDecode(raw) as Map).cast<String, Object?>(),
-      );
-    } on FormatException {
-      return null;
-    }
+    final json = _decodeObject(raw);
+    if (json == null) return null;
+    return deckFromJson(json);
   }
 
   Future<void> saveDeck(DeckDefinition deck) async {
@@ -154,11 +150,7 @@ class ProfileRepository {
   Future<Map<String, dynamic>?> loadMatch() async {
     final raw = await _store.getString(_keyMatch);
     if (raw == null || raw.isEmpty) return null;
-    try {
-      return jsonDecode(raw) as Map<String, dynamic>;
-    } on FormatException {
-      return null;
-    }
+    return _decodeObject(raw);
   }
 
   Future<void> saveMatch(Map<String, dynamic> snapshot) async {
@@ -172,11 +164,9 @@ class ProfileRepository {
   Future<Collection> loadCollection() async {
     final raw = await _store.getString(_keyCollection);
     if (raw == null || raw.isEmpty) return Collection.full;
-    try {
-      return Collection.fromJson(jsonDecode(raw) as Map<String, dynamic>);
-    } on FormatException {
-      return Collection.full;
-    }
+    final json = _decodeObject(raw);
+    if (json == null) return Collection.full;
+    return Collection.fromJson(json);
   }
 
   Future<void> saveCollection(Collection collection) async {
@@ -189,4 +179,17 @@ CardFaction _factionFromName(String? name) {
     if (faction.name == name) return faction;
   }
   return AppSettings.defaults.faction;
+}
+
+/// Decodes a stored JSON object, or null when the value is not one.
+///
+/// Never throws: a value that is valid JSON but not an object, or not JSON at
+/// all, is treated as absent so a corrupted store cannot crash startup.
+Map<String, dynamic>? _decodeObject(String raw) {
+  try {
+    final decoded = jsonDecode(raw);
+    return decoded is Map ? decoded.cast<String, dynamic>() : null;
+  } on FormatException {
+    return null;
+  }
 }
