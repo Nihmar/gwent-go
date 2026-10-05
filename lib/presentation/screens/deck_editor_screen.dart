@@ -46,7 +46,7 @@ class _DeckEditorScreenState extends State<DeckEditorScreen> {
   late final Map<String, int> _counts = Map.of(widget.deck.cardCounts);
   late CardDefinition _leader = widget.deck.leader;
   String _search = '';
-  CardRow? _filter;
+  CollectionFilter _filter = CollectionFilter.all;
   bool _onlyOwned = false;
 
   CardFaction get _faction => widget.deck.faction;
@@ -54,10 +54,7 @@ class _DeckEditorScreenState extends State<DeckEditorScreen> {
   List<CardDefinition> get _bank {
     final query = _search.toLowerCase();
     return CardRepository.collectionFor(_faction).where((card) {
-      if (_filter != null) {
-        if (_filter == CardRow.leader) return false;
-        if (card.row != _filter) return false;
-      }
+      if (!_matchesFilter(card, _filter)) return false;
       if (_onlyOwned && (_counts[card.id] ?? 0) == 0) return false;
       if (query.isNotEmpty && !card.name.toLowerCase().contains(query)) {
         return false;
@@ -65,6 +62,15 @@ class _DeckEditorScreenState extends State<DeckEditorScreen> {
       return true;
     }).toList();
   }
+
+  bool _matchesFilter(CardDefinition card, CollectionFilter filter) =>
+      switch (filter) {
+        CollectionFilter.all => true,
+        CollectionFilter.units => card.isUnit,
+        CollectionFilter.special => card.isSpecial,
+        CollectionFilter.weather => card.isWeather,
+        CollectionFilter.heroes => card.isHero,
+      };
 
   DeckDefinition _build() => DeckDefinition(
     id: widget.deck.id,
@@ -246,7 +252,7 @@ class _DeckEditorScreenState extends State<DeckEditorScreen> {
     filter: _filter,
     onlyOwned: _onlyOwned,
     onSearchChanged: (value) => setState(() => _search = value),
-    onFilterChanged: (row) => setState(() => _filter = row),
+    onFilterChanged: (filter) => setState(() => _filter = filter),
     onOnlyOwnedChanged: (value) => setState(() => _onlyOwned = value),
     onAdd: _add,
   );

@@ -16,6 +16,12 @@ const TextStyle deckPaneTitleStyle = TextStyle(
   letterSpacing: 1.4,
 );
 
+/// Category filters for the collection pane.
+///
+/// A single [CardRow] cannot express "all units" or "heroes", so the filter is
+/// its own type independent of the row model.
+enum CollectionFilter { all, units, special, weather, heroes }
+
 /// Search, filters and the collectible grid.
 class DeckCollectionPane extends StatelessWidget {
   const DeckCollectionPane({
@@ -36,10 +42,10 @@ class DeckCollectionPane extends StatelessWidget {
   final Collection collection;
   final Map<String, int> counts;
   final String search;
-  final CardRow? filter;
+  final CollectionFilter filter;
   final bool onlyOwned;
   final ValueChanged<String> onSearchChanged;
-  final ValueChanged<CardRow?> onFilterChanged;
+  final ValueChanged<CollectionFilter> onFilterChanged;
   final ValueChanged<bool> onOnlyOwnedChanged;
   final ValueChanged<CardDefinition> onAdd;
 
@@ -67,10 +73,11 @@ class DeckCollectionPane extends StatelessWidget {
           spacing: 6,
           runSpacing: 6,
           children: [
-            _filterChip(strings.filterAll, null),
-            _filterChip(strings.filterUnits, CardRow.close),
-            _filterChip(strings.filterSpecial, CardRow.special),
-            _filterChip(strings.filterWeather, CardRow.weather),
+            _filterChip(strings.filterAll, CollectionFilter.all),
+            _filterChip(strings.filterUnits, CollectionFilter.units),
+            _filterChip(strings.filterSpecial, CollectionFilter.special),
+            _filterChip(strings.filterWeather, CollectionFilter.weather),
+            _filterChip(strings.filterHeroes, CollectionFilter.heroes),
             FilterChip(
               label: Text(strings.filterOwned),
               selected: onlyOwned,
@@ -128,10 +135,10 @@ class DeckCollectionPane extends StatelessWidget {
     );
   }
 
-  Widget _filterChip(String label, CardRow? row) => ChoiceChip(
+  Widget _filterChip(String label, CollectionFilter value) => ChoiceChip(
     label: Text(label),
-    selected: filter == row,
-    onSelected: (_) => onFilterChanged(row),
+    selected: filter == value,
+    onSelected: (_) => onFilterChanged(value),
   );
 }
 
