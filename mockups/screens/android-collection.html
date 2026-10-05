@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Gwent Go — Android collection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/theme.css">
+<link rel="stylesheet" href="../css/m3.css">
+<link rel="stylesheet" href="../css/gwent-card.css">
+<link rel="stylesheet" href="../css/gwent-board.css">
+<link rel="stylesheet" href="../css/deck-editor.css">
+</head>
+<body class="screen">
+<div class="canvas" style="width:412px;height:915px">
+  <div class="board-bg"></div>
+  <div class="shell">
+
+    <div class="status-bar">
+      <span>14:32</span>
+      <div class="sys-icons">
+        <svg viewBox="0 0 24 24"><path d="M3 18h3v-5H3zM8.5 18h3V9h-3zM14 18h3V5h-3zM19.5 18h3V12h-3z"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M12 18.5 9.6 16a3.6 3.6 0 0 1 4.8 0zM12 12.2a7.6 7.6 0 0 0-5.4 2.2l-1.9-1.9a10.3 10.3 0 0 1 14.6 0l-1.9 1.9a7.6 7.6 0 0 0-5.4-2.2zM12 5.6c-3.6 0-6.9 1.3-9.4 3.5L.7 7.2A15.7 15.7 0 0 1 12 3.2c4.3 0 8.3 1.5 11.3 4l-1.9 1.9A13.2 13.2 0 0 0 12 5.6z"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M4 8h13.5c1.1 0 2 .9 2 2v4c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2v-4c0-1.1.9-2 2-2zm18 2.5v3a1.8 1.8 0 0 0 0-3z"/></svg>
+      </div>
+    </div>
+
+    <div class="de-bar">
+      <button class="icon-btn" title="Back">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      </button>
+      <i class="faction-badge" style="background-image:url('../../gwent-classic-enhanced/img/icons/deck_shield_realms.png')"></i>
+      <div class="de-heading">
+        <span class="de-title truncate">Deck editor</span>
+        <span class="de-sub truncate">Foltest Siege · Northern Realms</span>
+      </div>
+      <button class="icon-btn" title="More">
+        <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+      </button>
+    </div>
+
+    <div class="de-modes">
+      <div class="segmented">
+        <button class="selected">Collection</button>
+        <button>Deck (27)</button>
+      </div>
+    </div>
+
+    <div class="de-body">
+      <div class="search-bar">
+        <svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+        <input placeholder="Search collection" value="">
+        <svg class="ic ic-18" viewBox="0 0 24 24"><path d="M4 7h16M7 12h10M10 17h4"/></svg>
+      </div>
+
+      <div class="hstack" style="gap:6px;flex-wrap:wrap">
+        <span class="chip sm selected">All</span>
+        <span class="chip sm">Units</span>
+        <span class="chip sm">Special</span>
+        <span class="chip sm">Weather</span>
+        <span class="chip sm">Heroes</span>
+        <span class="chip sm">Owned</span>
+      </div>
+
+      <div class="scroll-y" style="flex:1;min-height:0">
+        <div class="de-grid">
+
+          <div class="tile in-deck full" title="At copy limit">
+            <div class="gcard hero" style="--cw:112px;--art:url('../../gwent-classic-enhanced/img/sm/neutral_geralt.jpg')">
+              <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+              <div class="gcard-power is-hero" style="--spr:url('../../gwent-classic-enhanced/img/icons/power_hero.png')"><span>15</span></div>
+              <i class="gcard-rowtag" style="--ic:url('../../gwent-classic-enhanced/img/icons/card_row_close.png')"></i>
+              <div class="gcard-name">Geralt of Rivia</div>
+            </div>
+            <span class="tile-abil">Hero</span>
+            <span class="badge copies">1/1</span>
+            <span class="check"><svg class="ic" viewBox="0 0 24 24"><path d="m5 13 4 4 10-11"/></svg></span>
+          </div>
+
+          <div class="tile in-deck full" title="At copy limit">
+            <div class="gcard hero" style="--cw:112px;--art:url('../../gwent-classic-enhanced/img/sm/realms_vernon.jpg')">
+              <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+              <div class="gcard-power is-hero" style="--spr:url('../../gwent-classic-enhanced/img/icons/power_hero.png')"><span>10</span></div>
+              <i class="gcard-rowtag" style="--ic:url('../../gwent-classic-enhanced/img/icons/card_row_close.png')"></i>
+              <div class="gcard-name">Vernon Roche</div>
+            </div>
+            <span class="tile-abil">Hero</span>
+            <span class="badge copies">1/1</span>
+            <span class="check"><svg class="ic" viewBox="0 0 24 24"><path d="m5 13 4 4 10-11"/></svg></span>
+          </div>
+
+          <div class="tile in-deck full" title="At copy limit">
+            <div class="gcard" style="--cw:112px;--art:url('../../gwent-classic-enhanced/img/sm/realms_blue_stripes.jpg')">
+              <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+              <div class="gcard-power is-unit" style="--spr:url('../../gwent-classic-enhanced/img/icons/power_normal.png')"><span>4</span></div>
+              <i class="gcard-rowtag" style="--ic:url('../../gwent-classic-enhanced/img/icons/card_row_close.png')"></i>
+              <i class="gcard-abiltag" style="--ic:url('../../gwent-classic-enhanced/img/icons/card_ability_bond.png')"></i>
+              <div class="gcard-name">Blue Stripes Commando</div>
+            </div>
+            <span class="tile-abil">Tight Bond</span>
+            <span class="badge copies">3/3</span>
+            <span class="check"><svg class="ic" viewBox="0 0 24 24"><path d="m5 13 4 4 10-11"/></svg></span>
+          </div>
+
+          <div class="tile" title="Add to deck">
+            <div class="gcard" style="--cw:112px;--art:url('../../gwent-classic-enhanced/img/sm/realms_dijkstra.jpg')">
+              <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+              <div class="gcard-power is-unit" style="--spr:url('../../gwent-classic-enhanced/img/icons/power_normal.png')"><span>4</span></div>
+              <i class="gcard-rowtag" style="--ic:url('../../gwent-classic-enhanced/img/icons/card_row_close.png')"></i>
+              <i class="gcard-abiltag" style="--ic:url('../../gwent-classic-enhanced/img/icons/card_ability_spy.png')"></i>
+              <div class="gcard-name">Sigismund Dijkstra</div>
+            </div>
+            <span class="tile-abil">Spy</span>
+            <span class="add"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          </div>
+
+          <div class="tile" title="Add to deck">
+            <div class="gcard" style="--cw:112px;--art:url('../../gwent-classic-enhanced/img/sm/realms_yarpen.jpg')">
+              <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+              <div class="gcard-power is-unit" style="--spr:url('../../gwent-classic-enhanced/img/icons/power_normal.png')"><span>2</span></div>
+              <i class="gcard-rowtag" style="--ic:url('../../gwent-classic-enhanced/img/icons/card_row_close.png')"></i>
+              <div class="gcard-name">Yarpen Zigrin</div>
+            </div>
+            <span class="tile-abil"></span>
+            <span class="add"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          </div>
+
+          <div class="tile in-deck full" title="At copy limit">
+            <div class="gcard hero" style="--cw:112px;--art:url('../../gwent-classic-enhanced/img/sm/realms_philippa.jpg')">
+              <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+              <div class="gcard-power is-hero" style="--spr:url('../../gwent-classic-enhanced/img/icons/power_hero.png')"><span>10</span></div>
+              <i class="gcard-rowtag" style="--ic:url('../../gwent-classic-enhanced/img/icons/card_row_ranged.png')"></i>
+              <div class="gcard-name">Philippa Eilhart</div>
+            </div>
+            <span class="tile-abil">Hero</span>
+            <span class="badge copies">1/1</span>
+            <span class="check"><svg class="ic" viewBox="0 0 24 24"><path d="m5 13 4 4 10-11"/></svg></span>
+          </div>
+
+          <div class="tile in-deck full" title="At copy limit">
+            <div class="gcard" style="--cw:112px;--art:url('../../gwent-classic-enhanced/img/sm/realms_crinfrid.jpg')">
+              <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+              <div class="gcard-power is-unit" style="--spr:url('../../gwent-classic-enhanced/img/icons/power_normal.png')"><span>5</span></div>
+              <i class="gcard-rowtag" style="--ic:url('../../gwent-classic-enhanced/img/icons/card_row_ranged.png')"></i>
+              <i class="gcard-abiltag" style="--ic:url('../../gwent-classic-enhanced/img/icons/card_ability_bond.png')"></i>
+              <div class="gcard-name">Crinfrid Reavers Dragon Hunter</div>
+            </div>
+            <span class="tile-abil">Tight Bond</span>
+            <span class="badge copies">3/3</span>
+            <span class="check"><svg class="ic" viewBox="0 0 24 24"><path d="m5 13 4 4 10-11"/></svg></span>
+          </div>
+
+          <div class="tile" title="Add to deck">
+            <div class="gcard" style="--cw:112px;--art:url('../../gwent-classic-enhanced/img/sm/realms_dethmold.jpg')">
+              <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+              <div class="gcard-power is-unit" style="--spr:url('../../gwent-classic-enhanced/img/icons/power_normal.png')"><span>6</span></div>
+              <i class="gcard-rowtag" style="--ic:url('../../gwent-classic-enhanced/img/icons/card_row_ranged.png')"></i>
+              <div class="gcard-name">Dethmold</div>
+            </div>
+            <span class="tile-abil"></span>
+            <span class="add"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          </div>
+
+          <div class="tile in-deck full" title="At copy limit">
+            <div class="gcard" style="--cw:112px;--art:url('../../gwent-classic-enhanced/img/sm/realms_ballista.jpg')">
+              <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+              <div class="gcard-power is-unit" style="--spr:url('../../gwent-classic-enhanced/img/icons/power_normal.png')"><span>6</span></div>
+              <i class="gcard-rowtag" style="--ic:url('../../gwent-classic-enhanced/img/icons/card_row_siege.png')"></i>
+              <div class="gcard-name">Ballista</div>
+            </div>
+            <span class="tile-abil"></span>
+            <span class="badge copies">1/1</span>
+            <span class="check"><svg class="ic" viewBox="0 0 24 24"><path d="m5 13 4 4 10-11"/></svg></span>
+          </div>
+
+          <div class="tile in-deck full" title="At copy limit">
+            <div class="gcard" style="--cw:112px;--art:url('../../gwent-classic-enhanced/img/sm/realms_catapult_1.jpg')">
+              <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+              <div class="gcard-power is-unit" style="--spr:url('../../gwent-classic-enhanced/img/icons/power_normal.png')"><span>8</span></div>
+              <i class="gcard-rowtag" style="--ic:url('../../gwent-classic-enhanced/img/icons/card_row_siege.png')"></i>
+              <i class="gcard-abiltag" style="--ic:url('../../gwent-classic-enhanced/img/icons/card_ability_bond.png')"></i>
+              <div class="gcard-name">Catapult</div>
+            </div>
+            <span class="tile-abil">Tight Bond</span>
+            <span class="badge copies">2/2</span>
+            <span class="check"><svg class="ic" viewBox="0 0 24 24"><path d="m5 13 4 4 10-11"/></svg></span>
+          </div>
+
+          <div class="tile in-deck full" title="At copy limit">
+            <div class="gcard" style="--cw:112px;--art:url('../../gwent-classic-enhanced/img/sm/realms_banner_nurse.jpg')">
+              <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+              <div class="gcard-power is-unit" style="--spr:url('../../gwent-classic-enhanced/img/icons/power_normal.png')"><span>5</span></div>
+              <i class="gcard-rowtag" style="--ic:url('../../gwent-classic-enhanced/img/icons/card_row_siege.png')"></i>
+              <i class="gcard-abiltag" style="--ic:url('../../gwent-classic-enhanced/img/icons/card_ability_medic.png')"></i>
+              <div class="gcard-name">Dun Banner Medic</div>
+            </div>
+            <span class="tile-abil">Medic</span>
+            <span class="badge copies">1/1</span>
+            <span class="check"><svg class="ic" viewBox="0 0 24 24"><path d="m5 13 4 4 10-11"/></svg></span>
+          </div>
+
+          <div class="tile in-deck" title="Add another copy">
+            <div class="gcard" style="--cw:112px;--art:url('../../gwent-classic-enhanced/img/sm/realms_kaedwen_siege.jpg')">
+              <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+              <div class="gcard-power is-unit" style="--spr:url('../../gwent-classic-enhanced/img/icons/power_normal.png')"><span>1</span></div>
+              <i class="gcard-rowtag" style="--ic:url('../../gwent-classic-enhanced/img/icons/card_row_siege.png')"></i>
+              <i class="gcard-abiltag" style="--ic:url('../../gwent-classic-enhanced/img/icons/card_ability_morale.png')"></i>
+              <div class="gcard-name">Kaedweni Siege Expert</div>
+            </div>
+            <span class="tile-abil">Morale</span>
+            <span class="badge copies">2/3</span>
+            <span class="add"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          </div>
+
+          <div class="tile" title="Add to deck">
+            <div class="gcard" style="--cw:112px;--art:url('../../gwent-classic-enhanced/img/sm/realms_trebuchet.jpg')">
+              <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+              <div class="gcard-power is-unit" style="--spr:url('../../gwent-classic-enhanced/img/icons/power_normal.png')"><span>6</span></div>
+              <i class="gcard-rowtag" style="--ic:url('../../gwent-classic-enhanced/img/icons/card_row_siege.png')"></i>
+              <div class="gcard-name">Trebuchet</div>
+            </div>
+            <span class="tile-abil"></span>
+            <span class="add"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          </div>
+
+          <div class="tile in-deck full" title="At copy limit">
+            <div class="gcard special" style="--cw:112px;--art:url('../../gwent-classic-enhanced/img/sm/weather_frost.jpg')">
+              <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+              <div class="gcard-power is-special" style="--spr:url('../../gwent-classic-enhanced/img/icons/power_frost.png')"></div>
+              <div class="gcard-name">Biting Frost</div>
+            </div>
+            <span class="tile-abil"></span>
+            <span class="badge copies">1/1</span>
+            <span class="check"><svg class="ic" viewBox="0 0 24 24"><path d="m5 13 4 4 10-11"/></svg></span>
+          </div>
+
+          <div class="tile in-deck full" title="At copy limit">
+            <div class="gcard special" style="--cw:112px;--art:url('../../gwent-classic-enhanced/img/sm/special_decoy.jpg')">
+              <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+              <div class="gcard-power is-special" style="--spr:url('../../gwent-classic-enhanced/img/icons/power_decoy.png')"></div>
+              <div class="gcard-name">Decoy</div>
+            </div>
+            <span class="tile-abil"></span>
+            <span class="badge copies">3/3</span>
+            <span class="check"><svg class="ic" viewBox="0 0 24 24"><path d="m5 13 4 4 10-11"/></svg></span>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="de-hint">Tap to add · long-press for the full ability</div>
+    </div>
+
+    <div class="de-bottom">
+      <div class="de-progress"><i style="width:68%"></i></div>
+      <div class="de-stats">
+        <div class="de-stat"><span class="k">Cards</span><span class="v">27/40</span></div>
+        <div class="de-stat warn"><span class="k">Units</span><span class="v">20/22</span></div>
+        <div class="de-stat ok"><span class="k">Special</span><span class="v">7/10</span></div>
+        <div class="de-stat"><span class="k">Strength</span><span class="v">108</span></div>
+      </div>
+      <div class="de-alert">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M12 4 2.5 20h19z"/><path d="M12 10v4M12 17h.01"/></svg>
+        Add 2 more unit cards to play
+      </div>
+      <div class="de-buttons">
+        <button class="btn tonal">Save deck</button>
+        <button class="btn filled" disabled>Start game</button>
+      </div>
+    </div>
+
+    <div class="gesture-bar"><i></i></div>
+  </div>
+</div>
+</body>
+</html>

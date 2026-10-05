@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Gwent Go — Android card sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/theme.css">
+<link rel="stylesheet" href="../css/m3.css">
+<link rel="stylesheet" href="../css/gwent-card.css">
+<link rel="stylesheet" href="../css/gwent-board.css">
+<link rel="stylesheet" href="../css/deck-editor.css">
+</head>
+<body class="screen">
+<div class="canvas" style="width:412px;height:915px">
+
+  <!-- the collection screen behind the sheet, dimmed by the scrim -->
+  <iframe src="android-collection.html" title="Collection behind the card sheet" style="position:absolute;inset:0;width:412px;height:915px;border:0"></iframe>
+  <div class="sheet-scrim"></div>
+
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+
+    <div class="sheet-head">
+      <div class="gcard" style="--cw:104px;--art:url('../../gwent-classic-enhanced/img/sm/realms_banner_nurse.jpg')">
+        <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+        <div class="gcard-power is-unit" style="--spr:url('../../gwent-classic-enhanced/img/icons/power_normal.png')"><span>5</span></div>
+        <i class="gcard-rowtag" style="--ic:url('../../gwent-classic-enhanced/img/icons/card_row_siege.png')"></i>
+        <i class="gcard-abiltag" style="--ic:url('../../gwent-classic-enhanced/img/icons/card_ability_medic.png')"></i>
+        <div class="gcard-name">Dun Banner Medic</div>
+      </div>
+      <div class="sheet-info">
+        <span class="t-title-m">Dun Banner Medic</span>
+        <span class="t-body-s muted">Siege Combat · 5 strength</span>
+        <div class="hstack" style="gap:6px;margin-top:6px">
+          <span class="chip sm gold">Medic</span>
+        </div>
+      </div>
+      <button class="icon-btn" title="Close">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+
+    <div class="surface pad sheet-ability">
+      <span class="surface-title">Ability</span>
+      <p class="t-body-s">Choose one card from your discard pile and play it instantly (no Heroes or Special Cards).</p>
+    </div>
+
+    <div class="sheet-copy">
+      <span class="t-body-s muted">In deck <b>1 / 1</b> · at copy limit</span>
+      <span class="spacer"></span>
+      <button class="btn tonal sm">Remove one</button>
+      <button class="btn filled sm" disabled>Add copy</button>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
