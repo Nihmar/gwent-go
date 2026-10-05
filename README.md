@@ -19,8 +19,11 @@ The game is playable end to end against the computer:
 - three mutually exclusive rounds, passing, card advantage and round gems;
 - three opponent difficulties (`Easy`, `Normal`, `Hard`) driving a heuristic AI;
 - responsive, widget-composed Material 3 board for phone and desktop;
-- collection browser and deck editor with rule validation (22 unit cards
-  minimum, 10 special cards, 40 cards maximum) and a collection ownership model;
+- a touch-first deck editor: a persistent summary bar with counts, strength and
+  validation, ability labels on every collection card and an ability sheet on
+  long-press, plus quantity steppers instead of tap-to-remove;
+- deck building rules (22 unit cards minimum, 10 special cards, 40 cards
+  maximum) with a collection ownership model;
 - settings, decks and match statistics persisted with `shared_preferences`;
 - a match can be paused automatically, the app closed, and resumed from the
   home screen;

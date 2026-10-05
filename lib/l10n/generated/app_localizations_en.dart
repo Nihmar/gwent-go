@@ -197,6 +197,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saveDeck => 'Save deck';
 
   @override
+  String get addCopy => 'Add copy';
+
+  @override
+  String get removeCopy => 'Remove one';
+
+  @override
+  String get atCopyLimit => 'At copy limit';
+
+  @override
+  String inDeckCount(int copies, int max) {
+    return '$copies of $max in deck';
+  }
+
+  @override
+  String get deckEditorHint => 'Tap to add · long-press for the full ability';
+
+  @override
+  String get noCardsFound => 'No cards match your filters';
+
+  @override
   String get searchCollection => 'Search collection';
 
   @override
@@ -485,6 +505,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get abilityLabel => 'Ability';
+
+  @override
+  String get abilityTagBond => 'Tight Bond';
+
+  @override
+  String get abilityTagSpy => 'Spy';
+
+  @override
+  String get abilityTagMedic => 'Medic';
+
+  @override
+  String get abilityTagMorale => 'Morale';
+
+  @override
+  String get abilityTagMuster => 'Muster';
+
+  @override
+  String get abilityTagAvenger => 'Avenger';
+
+  @override
+  String get abilityTagBerserker => 'Berserker';
+
+  @override
+  String get abilityTagHorn => 'Commander\'s Horn';
+
+  @override
+  String get abilityTagMardroeme => 'Mardroeme';
+
+  @override
+  String get abilityTagScorch => 'Scorch';
+
+  @override
+  String get abilityTagAgile => 'Agile';
 
   @override
   String get abilityHero => 'Not affected by any Special Cards or abilities.';

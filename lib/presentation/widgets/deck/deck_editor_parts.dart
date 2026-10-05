@@ -8,6 +8,7 @@ import '../../../core/rules/deck_validator.dart';
 import '../../localization.dart';
 import '../../theme/gwent_colors.dart';
 import '../gwent_card.dart';
+import 'card_picker_sheet.dart';
 
 const TextStyle deckPaneTitleStyle = TextStyle(
   color: GwentColors.onSurfaceVariant,
@@ -16,6 +17,9 @@ const TextStyle deckPaneTitleStyle = TextStyle(
   letterSpacing: 1.4,
 );
 
+/// Card width used by the collection grid.
+const double deckCollectionCardWidth = 104;
+
 /// Category filters for the collection pane.
 ///
 /// A single [CardRow] cannot express "all units" or "heroes", so the filter is
@@ -23,6 +27,9 @@ const TextStyle deckPaneTitleStyle = TextStyle(
 enum CollectionFilter { all, units, special, weather, heroes }
 
 /// Search, filters and the collectible grid.
+///
+/// Tapping a tile adds a copy, long-pressing opens the ability sheet so the
+/// effect text is readable without leaving the collection.
 class DeckCollectionPane extends StatelessWidget {
   const DeckCollectionPane({
     super.key,
@@ -36,6 +43,7 @@ class DeckCollectionPane extends StatelessWidget {
     required this.onFilterChanged,
     required this.onOnlyOwnedChanged,
     required this.onAdd,
+    required this.onRemove,
   });
 
   final List<CardDefinition> cards;
@@ -48,6 +56,11 @@ class DeckCollectionPane extends StatelessWidget {
   final ValueChanged<CollectionFilter> onFilterChanged;
   final ValueChanged<bool> onOnlyOwnedChanged;
   final ValueChanged<CardDefinition> onAdd;
+  final ValueChanged<CardDefinition> onRemove;
+
+  int _cap(CardDefinition card) => card.maxCopies < collection.ownedCount(card)
+      ? card.maxCopies
+      : collection.ownedCount(card);
 
   @override
   Widget build(BuildContext context) {
@@ -85,51 +98,45 @@ class DeckCollectionPane extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 10),
-        Expanded(
-          child: GridView.builder(
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 108,
-              childAspectRatio: 4.45 / 6.35,
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8,
-            ),
-            itemCount: cards.length,
-            itemBuilder: (context, index) {
-              final card = cards[index];
-              final owned = counts[card.id] ?? 0;
-              final cap = card.maxCopies < collection.ownedCount(card)
-                  ? card.maxCopies
-                  : collection.ownedCount(card);
-              final canAdd = owned < cap;
-              return Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  GwentCard(
-                    definition: card,
-                    width: 96,
-                    onTap: canAdd ? () => onAdd(card) : null,
-                  ),
-                  if (owned > 0)
-                    Positioned(
-                      left: -4,
-                      top: -4,
-                      child: DeckBadge(text: '$owned/$cap'),
-                    ),
-                  if (canAdd)
-                    const Positioned(
-                      right: -4,
-                      top: -4,
-                      child: Icon(
-                        Icons.add_circle,
-                        color: GwentColors.goldBright,
-                        size: 18,
-                      ),
-                    ),
-                ],
-              );
-            },
+        const SizedBox(height: 4),
+        Text(
+          strings.deckEditorHint,
+          style: const TextStyle(
+            color: GwentColors.onSurfaceVariant,
+            fontSize: 11,
           ),
+        ),
+        const SizedBox(height: 6),
+        Expanded(
+          child: cards.isEmpty
+              ? Center(
+                  child: Text(
+                    strings.noCardsFound,
+                    style: const TextStyle(
+                      color: GwentColors.onSurfaceVariant,
+                    ),
+                  ),
+                )
+              : GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 124,
+                    mainAxisExtent:
+                        deckCollectionCardWidth * 6.35 / 4.45 + 24,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 8,
+                  ),
+                  itemCount: cards.length,
+                  itemBuilder: (context, index) {
+                    final card = cards[index];
+                    return _CollectionTile(
+                      card: card,
+                      owned: counts[card.id] ?? 0,
+                      cap: _cap(card),
+                      onAdd: () => onAdd(card),
+                      onRemove: () => onRemove(card),
+                    );
+                  },
+                ),
         ),
       ],
     );
@@ -142,74 +149,74 @@ class DeckCollectionPane extends StatelessWidget {
   );
 }
 
-/// The deck itself, grouped by row.
-class DeckListPane extends StatelessWidget {
-  const DeckListPane({
-    super.key,
-    required this.counts,
+/// One collection card with its copy state and ability label.
+class _CollectionTile extends StatelessWidget {
+  const _CollectionTile({
+    required this.card,
+    required this.owned,
+    required this.cap,
+    required this.onAdd,
     required this.onRemove,
-    required this.onChangeLeader,
-    required this.showChangeLeader,
   });
 
-  final Map<String, int> counts;
-  final ValueChanged<CardDefinition> onRemove;
-  final VoidCallback onChangeLeader;
-  final bool showChangeLeader;
-
-  int get _total => counts.values.fold(0, (a, b) => a + b);
-
-  List<CardDefinition> _cardsForRow(CardRow row) {
-    final result = <CardDefinition>[];
-    counts.forEach((id, count) {
-      final card = CardRepository.byId(id);
-      // Every card belongs to the group of its declared row. Weather cards
-      // have their own row, so they must not also be listed under special.
-      if (card.row != row) return;
-      for (var i = 0; i < count; i++) {
-        result.add(card);
-      }
-    });
-    return result;
-  }
+  final CardDefinition card;
+  final int owned;
+  final int cap;
+  final VoidCallback onAdd;
+  final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
     final strings = context.strings;
-    var strength = 0;
-    counts.forEach((id, count) {
-      strength += CardRepository.byId(id).baseStrength * count;
-    });
+    final canAdd = owned < cap;
+    final tags = strings.abilityTags(card);
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Row(
+        Stack(
+          clipBehavior: Clip.none,
           children: [
-            Text(strings.deck.toUpperCase(), style: deckPaneTitleStyle),
-            const SizedBox(width: 10),
-            Chip(label: Text('$_total / 40')),
-            const SizedBox(width: 6),
-            Chip(label: Text('$strength ${strings.strength}')),
-            const Spacer(),
-            if (showChangeLeader)
-              TextButton(
-                onPressed: onChangeLeader,
-                child: Text(strings.changeLeader),
+            GwentCard(
+              definition: card,
+              width: deckCollectionCardWidth,
+              dim: !canAdd,
+              onTap: canAdd ? onAdd : null,
+              onLongPress: () => showCardPickerSheet(
+                context,
+                card: card,
+                copies: owned,
+                maxCopies: cap,
+                onAdd: onAdd,
+                onRemove: onRemove,
               ),
+            ),
+            if (owned > 0)
+              Positioned(left: -4, top: -4, child: DeckBadge(text: '$owned/$cap')),
+            Positioned(
+              right: -4,
+              top: -4,
+              child: Icon(
+                canAdd ? Icons.add_circle : Icons.check_circle,
+                color: GwentColors.goldBright,
+                size: 18,
+              ),
+            ),
           ],
         ),
-        const SizedBox(height: 10),
-        Expanded(
-          child: ListView(
-            children: [
-              for (final row in CardRow.values)
-                if (_cardsForRow(row).isNotEmpty)
-                  _DeckGroup(
-                    row: row,
-                    cards: _cardsForRow(row),
-                    onRemove: onRemove,
-                  ),
-            ],
+        const SizedBox(height: 4),
+        SizedBox(
+          height: 15,
+          child: Text(
+            tags.join(' · '),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: GwentColors.gold,
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.3,
+            ),
           ),
         ),
       ],
@@ -217,68 +224,7 @@ class DeckListPane extends StatelessWidget {
   }
 }
 
-class _DeckGroup extends StatelessWidget {
-  const _DeckGroup({
-    required this.row,
-    required this.cards,
-    required this.onRemove,
-  });
-
-  final CardRow row;
-  final List<CardDefinition> cards;
-  final ValueChanged<CardDefinition> onRemove;
-
-  @override
-  Widget build(BuildContext context) {
-    final strings = context.strings;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: GwentColors.surfaceLow,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: GwentColors.outlineVariant.withValues(alpha: 0.4),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                strings.rowName(row),
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(width: 8),
-              Chip(
-                label: Text('${cards.length}'),
-                visualDensity: VisualDensity.compact,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 2,
-            runSpacing: 6,
-            children: [
-              for (final card in cards)
-                GwentCard(
-                  definition: card,
-                  width: 52,
-                  showName: false,
-                  onTap: () => onRemove(card),
-                ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Stats, leader and faction ability for the edited deck.
+/// Stats, leader and faction ability for the edited deck (wide layout).
 class DeckSidePane extends StatelessWidget {
   const DeckSidePane({
     super.key,

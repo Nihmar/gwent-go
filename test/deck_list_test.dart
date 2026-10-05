@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gwent_go/app.dart';
-import 'package:gwent_go/presentation/widgets/deck/deck_editor_parts.dart';
+import 'package:gwent_go/core/data/card_repository.dart';
+import 'package:gwent_go/core/models/collection.dart';
+import 'package:gwent_go/presentation/widgets/deck/deck_list_pane.dart';
 import 'package:gwent_go/presentation/widgets/gwent_card.dart';
 
 void main() {
@@ -17,9 +19,13 @@ void main() {
         home: Scaffold(
           body: DeckListPane(
             counts: const {'frost': 1, 'horn': 1, 'geralt': 1},
+            collection: Collection.full,
+            leader: CardRepository.byId('foltest_gold'),
+            onAdd: (_) {},
             onRemove: (_) {},
             onChangeLeader: () {},
-            showChangeLeader: false,
+            showLeaderSlot: false,
+            showHeader: false,
           ),
         ),
       ),
