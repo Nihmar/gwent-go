@@ -4,7 +4,10 @@ import 'dart:math';
 ///
 /// Passing a seed makes a whole match reproducible, which the tests rely on.
 class GameRandom {
-  GameRandom([int? seed]) : _random = seed == null ? Random() : Random(seed);
+  GameRandom([this.seed]) : _random = seed == null ? Random() : Random(seed);
+
+  /// Seed used to build the generator, when one was provided.
+  final int? seed;
 
   final Random _random;
 
