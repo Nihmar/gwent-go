@@ -81,6 +81,15 @@
   "noCardsFound": "No cards match your filters",
 
   "localMatch": "Local match",
+  "lanMatch": "LAN match",
+  "hostMatch": "Host match",
+  "joinMatch": "Join match",
+  "hosting": "Waiting for a guest to join…",
+  "searchingHosts": "Searching the local network…",
+  "joinAddress": "Host address",
+  "noHostsFound": "No match found on this network",
+  "lobbyFailed": "Could not start the match",
+  "cancelHosting": "Stop hosting",
   "playerSeat": "Player {seat}",
   "@playerSeat": {
     "placeholders": {

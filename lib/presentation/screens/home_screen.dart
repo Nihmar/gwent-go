@@ -15,6 +15,7 @@ import '../widgets/home/home_widgets.dart';
 import '../widgets/selectors.dart';
 import 'deck_editor_screen.dart';
 import 'game_screen.dart';
+import 'lobby_screen.dart';
 import 'settings_screen.dart';
 import 'stats_screen.dart';
 
@@ -155,6 +156,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _onMatchFinished(int? winner) {
     _settings.recordMatch(winner: winner, humanIndex: 0);
+  }
+
+  void _openLobby() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => LobbyScreen(settings: _settings),
+      ),
+    );
   }
 
   void _openStats() {
@@ -320,6 +329,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 10),
               TonalActionButton(
+                onPressed: _openLobby,
+                icon: Icons.wifi_tethering,
+                label: strings.lanMatch,
+              ),
+              const SizedBox(height: 10),
+              TonalActionButton(
                 onPressed: _editDeck,
                 icon: Icons.grid_view_rounded,
                 label: strings.deckCollection,
@@ -468,6 +483,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           onFaction: _settings.setFaction,
                           onStart: _startMatch,
                           onStartLocal: () => _startMatch(hotseat: true),
+                          onStartLan: _openLobby,
                         ),
                       ),
                       const SizedBox(width: 18),

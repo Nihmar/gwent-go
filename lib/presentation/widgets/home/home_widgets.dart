@@ -224,6 +224,7 @@ class NewMatchPanel extends StatelessWidget {
     required this.onFaction,
     required this.onStart,
     required this.onStartLocal,
+    required this.onStartLan,
   });
 
   final Difficulty difficulty;
@@ -235,6 +236,9 @@ class NewMatchPanel extends StatelessWidget {
 
   /// Starts a match where two humans share the device.
   final VoidCallback onStartLocal;
+
+  /// Opens the LAN lobby.
+  final VoidCallback onStartLan;
 
   @override
   Widget build(BuildContext context) {
@@ -261,27 +265,30 @@ class NewMatchPanel extends StatelessWidget {
           const SizedBox(height: 8),
           FactionSelector(value: faction, onChanged: onFaction),
           const Spacer(),
-          Row(
+          Text(
+            '${strings.factionName(faction)} · ${deck.leader.name}',
+            style: const TextStyle(
+              color: GwentColors.onSurfaceVariant,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
             children: [
               FilledButton.icon(
                 onPressed: onStart,
                 icon: const Icon(Icons.double_arrow_rounded),
                 label: Text(strings.startMatch),
               ),
-              const SizedBox(width: 8),
               TextButton(
                 onPressed: onStartLocal,
                 child: Text(strings.localMatch),
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  '${strings.factionName(faction)} · ${deck.leader.name}',
-                  style: const TextStyle(
-                    color: GwentColors.onSurfaceVariant,
-                    fontSize: 12,
-                  ),
-                ),
+              TextButton(
+                onPressed: onStartLan,
+                child: Text(strings.lanMatch),
               ),
             ],
           ),

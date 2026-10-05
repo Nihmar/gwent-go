@@ -220,6 +220,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localMatch => 'Local match';
 
   @override
+  String get lanMatch => 'LAN match';
+
+  @override
+  String get hostMatch => 'Host match';
+
+  @override
+  String get joinMatch => 'Join match';
+
+  @override
+  String get hosting => 'Waiting for a guest to join…';
+
+  @override
+  String get searchingHosts => 'Searching the local network…';
+
+  @override
+  String get joinAddress => 'Host address';
+
+  @override
+  String get noHostsFound => 'No match found on this network';
+
+  @override
+  String get lobbyFailed => 'Could not start the match';
+
+  @override
+  String get cancelHosting => 'Stop hosting';
+
+  @override
   String playerSeat(int seat) {
     return 'Player $seat';
   }
