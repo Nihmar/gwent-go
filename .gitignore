@@ -20,3 +20,7 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+
+# Local screenshots, never committed
+/Screenshot*.jpg
+/Screenshot*.png
