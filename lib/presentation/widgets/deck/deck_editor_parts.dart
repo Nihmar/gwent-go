@@ -20,6 +20,10 @@ const TextStyle deckPaneTitleStyle = TextStyle(
 /// Card width used by the collection grid.
 const double deckCollectionCardWidth = 104;
 
+/// Height reserved under each collection card for the name, type, copies and
+/// ability label.
+const double deckCollectionTextHeight = 64;
+
 /// Category filters for the collection pane.
 ///
 /// A single [CardRow] cannot express "all units" or "heroes", so the filter is
@@ -121,7 +125,8 @@ class DeckCollectionPane extends StatelessWidget {
                   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                     maxCrossAxisExtent: 124,
                     mainAxisExtent:
-                        deckCollectionCardWidth * 6.35 / 4.45 + 24,
+                        deckCollectionCardWidth * 6.35 / 4.45 +
+                        deckCollectionTextHeight,
                     mainAxisSpacing: 12,
                     crossAxisSpacing: 8,
                   ),
@@ -183,6 +188,9 @@ class _CollectionTile extends StatelessWidget {
               GwentCard(
                 definition: card,
                 width: deckCollectionCardWidth,
+                // Name, type and copies live under the card, so the artwork
+                // stays unobstructed.
+                showName: false,
                 dim: !canAdd,
                 onTap: canAdd ? onAdd : null,
                 onLongPress: () => showCardPickerSheet(
@@ -194,40 +202,95 @@ class _CollectionTile extends StatelessWidget {
                   onRemove: onRemove,
                 ),
               ),
-              // A single status marker in the top-right corner so the card's
-              // own badge in the top-left stays readable.
               Positioned(
                 right: -4,
                 top: -4,
-                child: owned == 0
-                    ? const Icon(
-                        Icons.add_circle,
-                        color: GwentColors.goldBright,
-                        size: 20,
-                      )
-                    : DeckBadge(text: '$owned/$cap', done: !canAdd),
+                child: Icon(
+                  canAdd ? Icons.add_circle : Icons.check_circle,
+                  color: GwentColors.goldBright,
+                  size: 20,
+                ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 5),
         SizedBox(
-          height: 15,
-          child: Text(
-            tags.join(' · '),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: GwentColors.gold,
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.3,
-            ),
+          width: deckCollectionCardWidth,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: 29,
+                child: Text(
+                  card.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    height: 1.25,
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 15,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        _typeLine(context),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: GwentColors.onSurfaceVariant,
+                          fontSize: 10.5,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '$owned/$cap',
+                      style: TextStyle(
+                        color: owned > 0
+                            ? GwentColors.goldBright
+                            : GwentColors.onSurfaceVariant,
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 14,
+                child: Text(
+                  tags.join(' · '),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: GwentColors.gold,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],
     );
+  }
+
+  /// Row or card type shown under the name, without the hero suffix that the
+  /// ability label already carries.
+  String _typeLine(BuildContext context) {
+    final strings = context.strings;
+    if (card.isLeader) return strings.cardTypeLeader;
+    if (card.isWeather) return strings.cardTypeWeather;
+    if (card.isSpecial) return strings.cardTypeSpecial;
+    return strings.rowName(card.row);
   }
 }
 
@@ -390,47 +453,4 @@ class DeckSidePane extends StatelessWidget {
       ],
     ),
   );
-}
-
-/// Small gold badge over a collection card.
-class DeckBadge extends StatelessWidget {
-  const DeckBadge({super.key, required this.text, this.done = false});
-
-  final String text;
-
-  /// Adds a check mark, used when no more copies may be added.
-  final bool done;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(
-        left: done ? 4 : 6,
-        right: 6,
-        top: 2,
-        bottom: 2,
-      ),
-      decoration: BoxDecoration(
-        color: GwentColors.gold,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (done) ...[
-            const Icon(Icons.check, size: 12, color: GwentColors.onPrimary),
-            const SizedBox(width: 1),
-          ],
-          Text(
-            text,
-            style: const TextStyle(
-              color: GwentColors.onPrimary,
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

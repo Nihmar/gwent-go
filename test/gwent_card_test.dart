@@ -12,6 +12,22 @@ void main() {
         (widget.image as AssetImage).assetName == asset,
   );
 
+  Future<Rect> pumpBadge(WidgetTester tester, String cardId) async {
+    const width = 104.0;
+    await tester.pumpWidget(
+      GwentApp(
+        home: Scaffold(
+          body: GwentCard(
+            definition: CardRepository.byId(cardId),
+            width: width,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    return tester.getRect(find.byType(GwentCard));
+  }
+
   testWidgets('leaders carry no power badge', (tester) async {
     await tester.pumpWidget(
       GwentApp(
@@ -35,91 +51,69 @@ void main() {
   });
 
   testWidgets('heroes use the hero power badge', (tester) async {
-    await tester.pumpWidget(
-      GwentApp(
-        home: Scaffold(
-          body: GwentCard(
-            definition: CardRepository.byId('geralt'),
-            width: 80,
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
+    await pumpBadge(tester, 'geralt');
 
     expect(assetImage('assets/icons/power_hero.png'), findsOneWidget);
     expect(assetImage('assets/icons/power_normal.png'), findsNothing);
   });
 
-  testWidgets('special cards keep their emblem in the top-left slot', (
+  testWidgets('the badge sits in the top-left corner of every card type', (
     tester,
   ) async {
-    const width = 104.0;
-    await tester.pumpWidget(
-      GwentApp(
-        home: Scaffold(
-          body: GwentCard(
-            definition: CardRepository.byId('frost'),
-            width: width,
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
+    for (final id in ['gryffin', 'geralt', 'frost']) {
+      final card = await pumpBadge(tester, id);
+      final badge = tester.getRect(find.byKey(GwentCard.powerBadgeKey));
 
-    final card = tester.getRect(find.byType(GwentCard));
-    final badge = tester.getRect(find.byKey(GwentCard.powerBadgeKey));
-
-    // The artwork centre stays clear, like on units and heroes.
-    expect(badge.center.dx, lessThan(card.center.dx));
-    expect(badge.center.dy, lessThan(card.center.dy));
-    expect(badge.width, closeTo(width * 0.32, 0.5));
+      expect(badge.width, closeTo(card.width * 0.24, 0.5), reason: id);
+      expect(
+        badge.left - card.left,
+        closeTo(card.width * 0.045, 0.5),
+        reason: id,
+      );
+      expect(badge.top - card.top, closeTo(card.width * 0.045, 0.5), reason: id);
+      // Top-left, so the artwork centre stays clear.
+      expect(badge.center.dx, lessThan(card.center.dx), reason: id);
+      expect(badge.center.dy, lessThan(card.center.dy), reason: id);
+    }
   });
 
-  testWidgets('the badge sits inside the card with a margin', (tester) async {
+  testWidgets('unit sprites are cropped to the disc', (tester) async {
     const width = 104.0;
-    await tester.pumpWidget(
-      GwentApp(
-        home: Scaffold(
-          body: GwentCard(definition: CardRepository.byId('gryffin'), width: width),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    final card = tester.getRect(find.byType(GwentCard));
-    final badge = tester.getRect(find.byKey(GwentCard.powerBadgeKey));
-    final margin = width * 0.06;
-
-    expect(badge.left - card.left, closeTo(margin, 0.5));
-    expect(badge.top - card.top, closeTo(margin, 0.5));
-    expect(card.right - badge.right, greaterThan(0));
-    expect(card.bottom - badge.bottom, greaterThan(0));
-  });
-
-  testWidgets('the unit sprite is cropped to the badge area', (tester) async {
-    const width = 104.0;
-    await tester.pumpWidget(
-      GwentApp(
-        home: Scaffold(
-          body: GwentCard(definition: CardRepository.byId('gryffin'), width: width),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
+    await pumpBadge(tester, 'gryffin');
 
     final badge = tester.getRect(find.byKey(GwentCard.powerBadgeKey));
     final sprite = tester.getRect(find.byKey(GwentCard.powerSpriteKey));
-    final badgeSize = badge.width;
 
-    // The 215px canvas is drawn so its 110px badge area matches the box, then
-    // shifted by the sprite's (15, 14) content origin.
-    expect(sprite.width, closeTo(badgeSize * 215 / 110, 0.5));
-    expect(sprite.left, closeTo(badge.left - 15 * badgeSize / 110, 0.5));
-    expect(sprite.top, closeTo(badge.top - 14 * badgeSize / 110, 0.5));
+    // The 215px canvas is drawn so its 110px disc matches the badge box, then
+    // shifted so the disc centre (69.2, 68.8) lands on the badge centre.
+    expect(sprite.width, closeTo(width * 0.24 * 215 / 110, 0.5));
+    expect(sprite.left + 69.2 / 215 * sprite.width, closeTo(badge.center.dx, 0.5));
+    expect(sprite.top + 68.8 / 215 * sprite.height, closeTo(badge.center.dy, 0.5));
 
-    // The strength sits in the middle of the badge box, i.e. of the circle.
+    // The strength sits in the middle of the disc.
     final number = tester.getRect(find.text('5'));
+    expect(number.center.dx, closeTo(badge.center.dx, 0.5));
+    expect(number.center.dy, closeTo(badge.center.dy, 0.5));
+  });
+
+  testWidgets('hero sprites keep their rays around the disc', (tester) async {
+    const width = 104.0;
+    await pumpBadge(tester, 'geralt');
+
+    final badge = tester.getRect(find.byKey(GwentCard.powerBadgeKey));
+    final sprite = tester.getRect(find.byKey(GwentCard.powerSpriteKey));
+
+    // The 88px hero disc is scaled to the badge, so the surrounding rays make
+    // the sprite well over twice the badge box.
+    expect(sprite.width, closeTo(width * 0.24 * 215 / 88, 0.5));
+    expect(sprite.width, greaterThan(badge.width * 2));
+    expect(sprite.left, lessThan(badge.left));
+
+    // The disc centre still lands on the badge, under the number.
+    expect(sprite.left + 69.2 / 215 * sprite.width, closeTo(badge.center.dx, 0.5));
+    expect(sprite.top + 68.8 / 215 * sprite.height, closeTo(badge.center.dy, 0.5));
+
+    final number = tester.getRect(find.text('15'));
     expect(number.center.dx, closeTo(badge.center.dx, 0.5));
     expect(number.center.dy, closeTo(badge.center.dy, 0.5));
   });
