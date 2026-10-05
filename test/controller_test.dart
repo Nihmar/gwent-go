@@ -124,6 +124,52 @@ void main() {
       controller.dispose();
     });
 
+    test('Destroyer of Worlds accepts a single card when the hand is short', () {
+      final controller = buildLeaderController(
+        'eredin_gold',
+        CardFaction.monsters,
+      );
+      controller.start();
+      controller.confirmMulligan();
+      controller.state.currentPlayer = 0;
+
+      controller.human.hand
+        ..clear()
+        ..add(makeCard('gryffin', owner: 0));
+
+      controller.activateLeader();
+      final discardChoice = controller.pendingChoice as TargetChoice;
+      expect(discardChoice.kind, TargetKind.hand);
+      expect(discardChoice.requiredCount, 1);
+
+      final discard = controller.human.hand.first;
+      controller.chooseTargets([discard]);
+      final drawChoice = controller.pendingChoice as TargetChoice;
+      expect(drawChoice.kind, TargetKind.deck);
+
+      controller.chooseTargets([controller.human.deck.first]);
+      expect(controller.human.leaderUsed, isTrue);
+      expect(controller.human.graveyard.map((c) => c.id), contains('gryffin'));
+      controller.dispose();
+    });
+
+    test('Destroyer of Worlds skips the discard with an empty hand', () {
+      final controller = buildLeaderController(
+        'eredin_gold',
+        CardFaction.monsters,
+      );
+      controller.start();
+      controller.confirmMulligan();
+      controller.state.currentPlayer = 0;
+
+      controller.human.hand.clear();
+      controller.activateLeader();
+
+      final choice = controller.pendingChoice as TargetChoice;
+      expect(choice.kind, TargetKind.deck);
+      controller.dispose();
+    });
+
     test('ability effects register a flash for affected cards', () {
       final controller = buildController();
       controller.start();
