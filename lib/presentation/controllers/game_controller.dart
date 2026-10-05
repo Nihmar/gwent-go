@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 import '../../core/ai/ai.dart';
 import '../../core/ai/ai_players.dart';
@@ -8,6 +8,7 @@ import '../../core/models/player.dart';
 import '../../core/rules/game_engine.dart';
 import '../../core/rules/game_event.dart';
 import '../../core/rules/game_random.dart';
+import '../theme/gwent_colors.dart';
 
 /// A choice the UI must collect before a card can be played.
 sealed class PendingChoice {
@@ -74,6 +75,15 @@ class GameController extends ChangeNotifier {
   bool isAiThinking = false;
   bool _disposed = false;
   List<CardInstance> _destroyerDiscard = const [];
+
+  final Map<int, int> _flashCounters = {};
+  final Map<int, Color> _flashColors = {};
+
+  /// Per-card effect counter; increments every time an ability affects the card.
+  int flashCounter(int uid) => _flashCounters[uid] ?? 0;
+
+  /// Colour of the last ability that affected the card, or null.
+  Color? flashColorFor(int uid) => _flashColors[uid];
 
   /// True while the player is choosing cards for a leader ability.
   bool get isChoosingForLeader => pendingChoice != null && selectedCard == null;
@@ -339,7 +349,16 @@ class GameController extends ChangeNotifier {
   }
 
   void _drainEvents() {
-    log.addAll(engine.takeEvents());
+    for (final event in engine.takeEvents()) {
+      log.add(event);
+      if (event is AbilityTriggered && event.cards.isNotEmpty) {
+        final color = GwentColors.abilityEffect(event.ability);
+        for (final card in event.cards) {
+          _flashCounters[card.uid] = (_flashCounters[card.uid] ?? 0) + 1;
+          _flashColors[card.uid] = color;
+        }
+      }
+    }
     while (log.length > 40) {
       log.removeAt(0);
     }

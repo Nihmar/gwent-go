@@ -124,6 +124,30 @@ void main() {
       controller.dispose();
     });
 
+    test('ability effects register a flash for affected cards', () {
+      final controller = buildController();
+      controller.start();
+      controller.engine.finishMulligan();
+      controller.state.currentPlayer = 0;
+
+      final strong = makeCard('fiend', owner: controller.opponent.index);
+      final weak = makeCard('gryffin', owner: controller.opponent.index);
+      controller.state
+          .rowState(controller.opponent.index, CardRow.close)
+          .cards
+          .addAll([strong, weak]);
+      controller.human.hand
+        ..clear()
+        ..add(makeCard('scorch', owner: 0));
+      controller.selectCard(controller.human.hand.first);
+      controller.playSelected();
+
+      expect(controller.flashCounter(strong.uid), greaterThan(0));
+      expect(controller.flashColorFor(strong.uid), isNotNull);
+      expect(controller.flashCounter(weak.uid), 0);
+      controller.dispose();
+    });
+
     test('Emhyr the Relentless asks for an opponent graveyard card', () {
       final controller = buildLeaderController(
         'emhyr_gold',
