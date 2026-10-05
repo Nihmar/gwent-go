@@ -104,11 +104,13 @@ class GameController extends ChangeNotifier {
     Map<String, dynamic> snapshot, {
     int localSeat = 0,
     bool hotseat = false,
+    SoundService? sounds,
   }) {
     final controller = GameController._(
       EngineBackend(GameEngine.fromJson(snapshot)),
       localSeat: localSeat,
       hotseat: hotseat,
+      sounds: sounds,
     );
     controller._runAiMulligan();
     controller._driver.onStateChanged();
@@ -163,7 +165,8 @@ class GameController extends ChangeNotifier {
 
   final MatchBackend _backend;
 
-  /// Sound effects for local matches; absent when nothing is injected.
+  /// Sound effects for local matches. Borrowed, not owned: the caller (the app)
+  /// disposes the service so it survives across matches.
   final SoundService? _sounds;
 
   /// The authoritative engine, when this client owns the match.
@@ -511,7 +514,6 @@ class GameController extends ChangeNotifier {
 
   @override
   void dispose() {
-    unawaited(_sounds?.dispose() ?? Future<void>.value());
     _disposed = true;
     _backend.onChanged = null;
     _driver.dispose();

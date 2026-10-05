@@ -165,8 +165,10 @@ unchanged.
 - **King Bran** is described as "units only lose half their Strength in bad
   weather"; the reference implementation does not apply it, so this project
   implements the ceiled half as the intended behaviour.
-- **Sound and music** are not implemented; the setting is persisted but has no
-  effect yet.
+- **Sound effects:** match events are mapped to cues and played by an
+  asset-backed player behind `SoundPlayer`, and the sound setting is honoured
+  live. The cue files are not recorded yet, so playback is silent until they are
+  dropped into `assets/audio/` (see the README there). Music is not implemented.
 - **No progression:** `Collection` can restrict ownership, but there is no way
   to acquire cards yet, so it defaults to owning every card up to its copy
   limit.

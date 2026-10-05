@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/models/card.dart';
 import '../../core/models/player.dart';
+import '../audio/sound_service.dart';
 import '../controllers/game_controller.dart';
 import '../localization.dart';
 import '../widgets/board_background.dart';
@@ -31,6 +32,7 @@ class GameScreen extends StatefulWidget {
     this.hotseat = false,
     this.controller,
     this.snapshot,
+    this.sounds,
     this.onFinished,
     this.onPersist,
     this.onReconnect,
@@ -53,6 +55,9 @@ class GameScreen extends StatefulWidget {
   /// Pre-built controller, used by the LAN lobby. The screen takes ownership
   /// and disposes it.
   final GameController? controller;
+
+  /// Sound effects for a locally owned match; borrowed from the app.
+  final SoundService? sounds;
 
   /// When set, the match is restored instead of started.
   final Map<String, dynamic>? snapshot;
@@ -89,13 +94,18 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     controller =
         widget.controller ??
         (snapshot != null
-            ? GameController.resume(snapshot, hotseat: widget.hotseat)
+            ? GameController.resume(
+                snapshot,
+                hotseat: widget.hotseat,
+                sounds: widget.sounds,
+              )
             : GameController(
                 humanDeck: widget.humanDeck!,
                 opponentDeck: widget.opponentDeck!,
                 difficulty: widget.difficulty,
                 opponentName: _opponentName(),
                 hotseat: widget.hotseat,
+                sounds: widget.sounds,
               ));
     controller.addListener(_onChange);
     // An injected controller is already running (a lobby session).
