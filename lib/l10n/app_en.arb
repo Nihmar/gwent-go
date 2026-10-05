@@ -58,13 +58,12 @@
 
   "deckEditor": "Deck editor",
   "deck": "Deck",
+  "collection": "Collection",
   "deckStats": "Deck stats",
   "leader": "Leader",
   "changeLeader": "Change leader",
   "factionAbility": "Faction ability",
   "saveDeck": "Save deck",
-  "importDeck": "Import deck",
-  "exportDeck": "Export deck",
   "searchCollection": "Search collection",
   "filterAll": "All",
   "filterUnits": "Units",
@@ -72,8 +71,6 @@
   "filterWeather": "Weather",
   "filterHeroes": "Heroes",
   "filterOwned": "Owned",
-  "byRow": "By row",
-  "byStrength": "By strength",
   "totalCards": "Total cards",
   "unitCards": "Unit cards",
   "specialCards": "Special cards",
@@ -126,6 +123,12 @@
     "placeholders": {
       "current": { "type": "int" },
       "total": { "type": "int" }
+    }
+  },
+  "roundShort": "R{round}",
+  "@roundShort": {
+    "placeholders": {
+      "round": { "type": "int" }
     }
   },
   "yourTurn": "Your turn",

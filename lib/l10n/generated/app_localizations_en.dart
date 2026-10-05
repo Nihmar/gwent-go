@@ -170,6 +170,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deck => 'Deck';
 
   @override
+  String get collection => 'Collection';
+
+  @override
   String get deckStats => 'Deck stats';
 
   @override
@@ -183,12 +186,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saveDeck => 'Save deck';
-
-  @override
-  String get importDeck => 'Import deck';
-
-  @override
-  String get exportDeck => 'Export deck';
 
   @override
   String get searchCollection => 'Search collection';
@@ -210,12 +207,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get filterOwned => 'Owned';
-
-  @override
-  String get byRow => 'By row';
-
-  @override
-  String get byStrength => 'By strength';
 
   @override
   String get totalCards => 'Total cards';
@@ -288,6 +279,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String roundOf(int current, int total) {
     return 'Round $current of $total';
+  }
+
+  @override
+  String roundShort(int round) {
+    return 'R$round';
   }
 
   @override

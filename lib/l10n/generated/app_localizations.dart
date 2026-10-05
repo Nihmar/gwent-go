@@ -406,6 +406,12 @@ abstract class AppLocalizations {
   /// **'Deck'**
   String get deck;
 
+  /// No description provided for @collection.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection'**
+  String get collection;
+
   /// No description provided for @deckStats.
   ///
   /// In en, this message translates to:
@@ -435,18 +441,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save deck'**
   String get saveDeck;
-
-  /// No description provided for @importDeck.
-  ///
-  /// In en, this message translates to:
-  /// **'Import deck'**
-  String get importDeck;
-
-  /// No description provided for @exportDeck.
-  ///
-  /// In en, this message translates to:
-  /// **'Export deck'**
-  String get exportDeck;
 
   /// No description provided for @searchCollection.
   ///
@@ -489,18 +483,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Owned'**
   String get filterOwned;
-
-  /// No description provided for @byRow.
-  ///
-  /// In en, this message translates to:
-  /// **'By row'**
-  String get byRow;
-
-  /// No description provided for @byStrength.
-  ///
-  /// In en, this message translates to:
-  /// **'By strength'**
-  String get byStrength;
 
   /// No description provided for @totalCards.
   ///
@@ -621,6 +603,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Round {current} of {total}'**
   String roundOf(int current, int total);
+
+  /// No description provided for @roundShort.
+  ///
+  /// In en, this message translates to:
+  /// **'R{round}'**
+  String roundShort(int round);
 
   /// No description provided for @yourTurn.
   ///
