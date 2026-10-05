@@ -1545,6 +1545,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Waiting for them to reconnect…'**
   String get waitingForOpponent;
+
+  /// No description provided for @reconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnect'**
+  String get reconnect;
+
+  /// No description provided for @reconnectFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reach the host. Try again.'**
+  String get reconnectFailed;
+
+  /// No description provided for @opponentGoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Opponent lost'**
+  String get opponentGoneTitle;
+
+  /// No description provided for @opponentGoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The other player did not come back, so the match was abandoned.'**
+  String get opponentGoneBody;
 }
 
 class _AppLocalizationsDelegate

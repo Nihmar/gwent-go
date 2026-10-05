@@ -381,5 +381,9 @@
   "aiOpponent": "AI opponent",
   "opponentName": "Opponent",
   "opponentDisconnected": "Opponent disconnected",
-  "waitingForOpponent": "Waiting for them to reconnect…"
+  "waitingForOpponent": "Waiting for them to reconnect…",
+  "reconnect": "Reconnect",
+  "reconnectFailed": "Could not reach the host. Try again.",
+  "opponentGoneTitle": "Opponent lost",
+  "opponentGoneBody": "The other player did not come back, so the match was abandoned."
 }

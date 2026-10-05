@@ -818,4 +818,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get waitingForOpponent => 'Waiting for them to reconnect…';
+
+  @override
+  String get reconnect => 'Reconnect';
+
+  @override
+  String get reconnectFailed => 'Could not reach the host. Try again.';
+
+  @override
+  String get opponentGoneTitle => 'Opponent lost';
+
+  @override
+  String get opponentGoneBody =>
+      'The other player did not come back, so the match was abandoned.';
 }
