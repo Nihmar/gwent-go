@@ -25,6 +25,56 @@ class DiscoveredHost {
   String toString() => 'DiscoveredHost($name, $address:$matchPort)';
 }
 
+/// Directed broadcast address of [address] on a /[prefixLength] subnet, such as
+/// `192.168.1.255`; null when the address is not a usable IPv4 subnet.
+String? directedBroadcast(InternetAddress address, int prefixLength) {
+  final raw = address.rawAddress;
+  if (raw.length != 4 || prefixLength <= 0 || prefixLength >= 32) return null;
+  final ip = raw[0] << 24 | raw[1] << 16 | raw[2] << 8 | raw[3];
+  final mask = (0xFFFFFFFF << (32 - prefixLength)) & 0xFFFFFFFF;
+  final target = (ip & mask) | (~mask & 0xFFFFFFFF);
+  return '${target >> 24 & 0xFF}.${target >> 16 & 0xFF}'
+      '.${target >> 8 & 0xFF}.${target & 0xFF}';
+}
+
+/// Virtual interfaces whose subnet would only add an address a guest cannot
+/// reach: containers, VMs, VPN tunnels and the like.
+const Set<String> _virtualInterfacePrefixes = {
+  'docker', 'veth', 'br-', 'virbr', 'vmnet', 'vboxnet', 'tun', 'tap', 'wg',
+  'zt', 'tailscale', 'utun',
+};
+
+/// Whether [name] belongs to a virtual interface rather than a real network.
+bool isVirtualInterface(String name) {
+  final lower = name.toLowerCase();
+  return _virtualInterfacePrefixes.any(lower.startsWith);
+}
+
+/// Subnet broadcasts of every IPv4 interface on this device.
+///
+/// Over Wi-Fi the limited broadcast `255.255.255.255` is dropped by some access
+/// points while the directed one gets through (and vice versa), so the announcer
+/// sends to both. Best-effort: a failure just leaves the limited broadcast.
+Future<List<String>> localBroadcastTargets() async {
+  final targets = <String>[];
+  try {
+    final interfaces = await NetworkInterface.list(
+      type: InternetAddressType.IPv4,
+      includeLoopback: false,
+    );
+    for (final interface in interfaces) {
+      if (isVirtualInterface(interface.name)) continue;
+      for (final address in interface.addresses) {
+        final target = directedBroadcast(address, address.prefixLength);
+        if (target != null && !targets.contains(target)) targets.add(target);
+      }
+    }
+  } on SocketException {
+    // Nothing to add.
+  }
+  return targets;
+}
+
 /// Announces a hosted match to the local network until [stop] is called.
 ///
 /// The payload is a small JSON datagram; a peer running [LanBrowser] turns it
@@ -37,6 +87,7 @@ class LanAnnouncer {
     this.target = '255.255.255.255',
     this.port = defaultPort,
     this.interval = const Duration(seconds: 2),
+    this.targets = localBroadcastTargets,
     String? id,
   }) : id = id ?? DateTime.now().microsecondsSinceEpoch.toRadixString(36);
 
@@ -47,8 +98,14 @@ class LanAnnouncer {
   final String name;
   final int matchPort;
   final String target;
+
+  /// Extra destinations resolved when [start] runs, normally the subnet
+  /// broadcasts of the device's own interfaces.
+  final Future<List<String>> Function() targets;
   final int port;
   final Duration interval;
+
+  List<String> _extraTargets = const [];
 
   RawDatagramSocket? _socket;
   Timer? _timer;
@@ -57,6 +114,7 @@ class LanAnnouncer {
     final socket = await RawDatagramSocket.bind(InternetAddress.anyIPv4, 0);
     socket.broadcastEnabled = true;
     _socket = socket;
+    _extraTargets = await targets();
     _send();
     _timer = Timer.periodic(interval, (_) => _send());
   }
@@ -72,7 +130,9 @@ class LanAnnouncer {
         'port': matchPort,
       }),
     );
-    socket.send(payload, InternetAddress(target), port);
+    for (final destination in {target, ..._extraTargets}) {
+      socket.send(payload, InternetAddress(destination), port);
+    }
   }
 
   Future<void> stop() async {
@@ -132,8 +192,9 @@ class LanBrowser {
     final matchPort = decoded['port'];
     if (matchPort is! int) return;
 
-    final key = '$id|$address|$matchPort';
-    if (!_seen.add(key)) return;
+    // A host that announces on several interfaces is one host: keep the first
+    // address seen for it instead of listing it once per datagram.
+    if (!_seen.add(id)) return;
     _hosts.add(
       DiscoveredHost(
         id: id,
