@@ -81,8 +81,23 @@
   padding-bottom: 8px;
 }
 
-.tile { position: relative; display: flex; justify-content: center; }
+.tile { position: relative; display: flex; flex-direction: column; align-items: center; }
 .tile .copies { position: absolute; left: -2px; top: -7px; z-index: 3; }
+
+/* compact ability label under the card so the collection is scannable */
+.tile-abil {
+  display: block;
+  width: 100%;
+  min-height: 15px;
+  margin-top: 4px;
+  text-align: center;
+  font-size: 10px;
+  line-height: 13px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--gw-gold);
+}
 
 .tile .add {
   position: absolute;
@@ -232,3 +247,42 @@
 
 /* disabled primary action (e.g. Start game on an invalid deck) */
 .btn[disabled] { opacity: 0.42; cursor: not-allowed; box-shadow: none; filter: none; }
+
+/* --- card detail sheet (long-press) --------------------------------------- */
+
+.sheet-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: rgba(0, 0, 0, 0.62);
+}
+
+.sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 8px 16px 20px;
+  background: var(--md-surface-container-high);
+  border-radius: var(--shape-xl) var(--shape-xl) 0 0;
+  box-shadow: 0 -14px 34px rgba(0, 0, 0, 0.55);
+}
+
+.sheet-handle {
+  width: 32px;
+  height: 4px;
+  flex: none;
+  margin: 0 auto;
+  border-radius: 2px;
+  background: var(--md-outline-variant);
+}
+
+.sheet-head { display: flex; align-items: flex-start; gap: 14px; }
+.sheet-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.sheet-ability p { margin: 8px 0 0; color: var(--md-on-surface); line-height: 18px; }
+.sheet-copy { display: flex; align-items: center; gap: 10px; }
+.sheet-copy b { color: var(--md-on-surface); }

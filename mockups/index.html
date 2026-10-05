@@ -109,6 +109,10 @@
       <h3>Phone deck editor</h3>
       <p>A persistent summary bar keeps cards, units, specials, strength and validation visible while adding or removing cards, so the rules never hide behind a tab.</p>
     </div>
+    <div class="surface note">
+      <h3>Abilities at a glance</h3>
+      <p>Each collection tile carries a short ability label and long-press opens a sheet with the full effect text and the copy actions.</p>
+    </div>
   </div>
 
   <!-- ==================== ANDROID ==================== -->
@@ -150,7 +154,7 @@
   <!-- ==================== ANDROID DECK EDITOR ==================== -->
   <section class="section" id="android-decks">
     <h2>Android — collection &amp; deck</h2>
-    <p class="lead">The deck editor rebuilt around touch: tap-to-add collection grid with copy-limit states, and a deck list with quantity steppers. A persistent bottom bar shows the live deck summary and why “Start game” is disabled.</p>
+    <p class="lead">The deck editor rebuilt around touch: tap-to-add collection grid with copy-limit states and ability labels, and a deck list with quantity steppers. A persistent bottom bar shows the live deck summary and why “Start game” is disabled. Long-press a card for its full ability.</p>
 
     <div class="row">
       <div class="showcase">
@@ -178,6 +182,20 @@
           <div class="c-title">Deck</div>
           <div class="c-sub">Leader slot, rows with steppers, live validation · 412 × 915</div>
           <a href="screens/android-deck.html" target="_blank">Open full size ↗</a>
+        </div>
+      </div>
+
+      <div class="showcase">
+        <div class="phone">
+          <div class="camera"></div>
+          <div class="screen">
+            <div class="screen-holder"><iframe src="screens/android-card-sheet.html" title="Android card sheet"></iframe></div>
+          </div>
+        </div>
+        <div class="caption">
+          <div class="c-title">Card detail</div>
+          <div class="c-sub">Long-press: full ability text and copy actions · 412 × 915</div>
+          <a href="screens/android-card-sheet.html" target="_blank">Open full size ↗</a>
         </div>
       </div>
     </div>
@@ -272,7 +290,7 @@
               <li>The match screen shows a live position: Biting Frost freezes both close-combat rows, Commander's Horn doubles the opponent's siege row, and the hand is mid-round 2.</li>
               <li>Card artwork, shields, gems and ability icons are referenced from <code>gwent-classic-enhanced/img</code> — if that folder is missing, images will be blank.</li>
               <li>Phone interaction concept: tap a hand card to lift it, then tap a highlighted row to place it; long-press opens the full card sheet. Desktop uses click + preview panel.</li>
-              <li>Deck editor concept: tap a card in the collection to add a copy, long-press for details; switch to the Deck tab to remove copies with steppers. The bottom summary bar stays visible in both tabs.</li>
+              <li>Deck editor concept: tap a card in the collection to add a copy, long-press for the full ability, switch to the Deck tab to remove copies with steppers. The bottom summary bar stays visible in both tabs.</li>
               <li>Strings are English and centralised, ready for ARB-based localization; difficulty and deck rules are surfaced in the UI.</li>
             </ul>
           </div>
