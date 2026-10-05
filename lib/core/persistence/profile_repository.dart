@@ -11,31 +11,26 @@ class AppSettings {
   const AppSettings({
     required this.difficulty,
     required this.faction,
-    required this.deckId,
     required this.soundEnabled,
   });
 
   final Difficulty difficulty;
   final CardFaction faction;
-  final String deckId;
   final bool soundEnabled;
 
   static const defaults = AppSettings(
     difficulty: Difficulty.normal,
     faction: CardFaction.realms,
-    deckId: '',
     soundEnabled: true,
   );
 
   AppSettings copyWith({
     Difficulty? difficulty,
     CardFaction? faction,
-    String? deckId,
     bool? soundEnabled,
   }) => AppSettings(
     difficulty: difficulty ?? this.difficulty,
     faction: faction ?? this.faction,
-    deckId: deckId ?? this.deckId,
     soundEnabled: soundEnabled ?? this.soundEnabled,
   );
 }
@@ -80,7 +75,6 @@ class ProfileRepository {
 
   static const _keyDifficulty = 'settings.difficulty';
   static const _keyFaction = 'settings.faction';
-  static const _keyDeckId = 'settings.deckId';
   static const _keySound = 'settings.sound';
   static const _keyMatches = 'stats.matches';
   static const _keyWins = 'stats.wins';
@@ -99,7 +93,6 @@ class ProfileRepository {
     return AppSettings(
       difficulty: difficulty,
       faction: faction,
-      deckId: await _store.getString(_keyDeckId) ?? '',
       soundEnabled: await _store.getBool(_keySound) ?? true,
     );
   }
@@ -107,7 +100,6 @@ class ProfileRepository {
   Future<void> saveSettings(AppSettings settings) async {
     await _store.setString(_keyDifficulty, settings.difficulty.name);
     await _store.setString(_keyFaction, settings.faction.name);
-    await _store.setString(_keyDeckId, settings.deckId);
     await _store.setBool(_keySound, settings.soundEnabled);
   }
 

@@ -1078,12 +1078,6 @@ abstract class AppLocalizations {
   /// **'Sets the strength of all Siege Combat cards to 1 for both players.'**
   String get abilityRain;
 
-  /// No description provided for @abilityStorm.
-  ///
-  /// In en, this message translates to:
-  /// **'Reduces the Strength of all Ranged and Siege units to 1.'**
-  String get abilityStorm;
-
   /// No description provided for @abilityClear.
   ///
   /// In en, this message translates to:

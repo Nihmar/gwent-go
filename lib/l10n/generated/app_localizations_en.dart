@@ -553,10 +553,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Sets the strength of all Siege Combat cards to 1 for both players.';
 
   @override
-  String get abilityStorm =>
-      'Reduces the Strength of all Ranged and Siege units to 1.';
-
-  @override
   String get abilityClear =>
       'Removes all Weather Cards (Biting Frost, Impenetrable Fog and Torrential Rain) effects.';
 

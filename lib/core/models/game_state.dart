@@ -9,9 +9,6 @@ enum GamePhase {
   /// A round is in progress.
   playing,
 
-  /// The round has ended and the next one is about to start.
-  roundEnd,
-
   /// The match is over.
   gameOver,
 }
@@ -91,15 +88,4 @@ class GameState {
   List<RowState> rowsFor(int owner) => [
     for (final row in CardRow.combatRows) rowState(owner, row),
   ];
-
-  /// All rows on the battlefield, both sides, in scoring order.
-  Iterable<RowState> get allRows => rows;
-
-  bool hasWeather(String type) => activeWeather.contains(type);
-
-  /// True when [row] is currently affected by weather for its owner.
-  bool isRowWeatherAffected(int owner, CardRow row) {
-    final state = rowState(owner, row);
-    return state.weather;
-  }
 }
