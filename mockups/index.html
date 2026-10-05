@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Gwent Go — UI mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/m3.css">
+<style>
+  body { display: block; min-height: 100vh; overflow: auto; background: #0b0908; }
+  .page { max-width: 1520px; margin: 0 auto; padding: 40px 28px 64px; }
+
+  .masthead { display: flex; align-items: flex-end; gap: 18px; flex-wrap: wrap; padding-bottom: 22px; border-bottom: 1px solid color-mix(in srgb, var(--md-outline-variant) 45%, transparent); }
+  .masthead .mark { font-family: var(--font-display); font-size: 40px; line-height: 1; letter-spacing: 0.12em; color: var(--gw-gold-bright); }
+  .masthead .tag { font-size: 14px; color: var(--md-on-surface-variant); max-width: 760px; line-height: 21px; }
+  .masthead .spacer { flex: 1; }
+  .nav-links { display: flex; gap: 8px; }
+
+  .notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; margin: 26px 0 8px; }
+  .note { padding: 14px 16px; }
+  .note h3 { margin: 0 0 6px; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gw-gold); }
+  .note p { margin: 0; font-size: 12.5px; line-height: 18px; color: var(--md-on-surface-variant); }
+
+  .section { margin-top: 46px; }
+  .section > h2 { margin: 0 0 4px; font-size: 20px; font-weight: 600; letter-spacing: 0.02em; }
+  .section > .lead { margin: 0 0 22px; font-size: 13px; color: var(--md-on-surface-variant); }
+  .row { display: flex; flex-wrap: wrap; gap: 34px; align-items: flex-start; justify-content: center; }
+  .row.two-up { display: grid; grid-template-columns: repeat(2, auto); justify-content: center; }
+
+  .showcase { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .caption { text-align: center; }
+  .caption .c-title { font-size: 13.5px; font-weight: 600; }
+  .caption .c-sub { font-size: 11.5px; color: var(--md-on-surface-variant); }
+  .caption a { color: var(--md-primary); text-decoration: none; font-size: 11.5px; }
+  .caption a:hover { text-decoration: underline; }
+
+  /* ---------- phone frame ---------- */
+  .phone { position: relative; padding: 11px; border-radius: 42px;
+    background: linear-gradient(160deg, #33333a, #101013 55%);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.07); }
+  .phone::before { /* power button */
+    content: ""; position: absolute; right: -3px; top: 168px; width: 3px; height: 62px; border-radius: 0 3px 3px 0;
+    background: #3a3a40; }
+  .phone::after { /* volume rocker */
+    content: ""; position: absolute; left: -3px; top: 132px; width: 3px; height: 96px; border-radius: 3px 0 0 3px;
+    background: #3a3a40; }
+  .phone .screen { position: relative; border-radius: 31px; overflow: hidden; background: #000; box-shadow: 0 0 0 2px #050506; }
+  .phone .camera { position: absolute; top: 22px; left: 50%; transform: translateX(-50%);
+    width: 9px; height: 9px; border-radius: 50%; background: #05050a; box-shadow: inset 0 0 0 2px #16161c, 0 0 0 1px #2a2a33; z-index: 5; }
+
+  /* ---------- window frame ---------- */
+  .window { border-radius: 12px; overflow: hidden; background: #1b1b1f;
+    box-shadow: 0 26px 60px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.06); }
+  .titlebar { height: 36px; display: flex; align-items: center; gap: 9px; padding: 0 6px 0 14px;
+    background: linear-gradient(180deg, #2a2a2f, #232327); border-bottom: 1px solid rgba(0, 0, 0, 0.5); }
+  .titlebar .win-icon { width: 15px; height: 15px; border-radius: 4px;
+    background: radial-gradient(circle at 35% 30%, var(--gw-gold-bright), var(--gw-gold-deep)); flex: none; }
+  .titlebar .win-title { font-size: 12.5px; color: var(--md-on-surface); opacity: 0.9; }
+  .titlebar .spacer { flex: 1; }
+  .titlebar .win-btn { width: 34px; height: 26px; display: grid; place-items: center; border-radius: 5px; color: var(--md-on-surface-variant); }
+  .titlebar .win-btn:hover { background: rgba(255, 255, 255, 0.08); }
+  .titlebar .win-btn.close:hover { background: #c0392b; color: #fff; }
+  .titlebar svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+
+  /* ---------- scaling of the embedded screens ---------- */
+  .screen-holder { position: relative; overflow: hidden; width: calc(var(--w) * var(--s)); height: calc(var(--h) * var(--s)); }
+  .screen-holder iframe { position: absolute; top: 0; left: 0; width: var(--w); height: var(--h); border: 0;
+    transform: scale(var(--s)); transform-origin: top left; }
+  .phone .screen-holder { --w: 412px; --h: 915px; --s: 0.6; }
+  .window .screen-holder { --w: 1280px; --h: 800px; --s: 0.53; }
+  .nav-links a { text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="masthead">
+    <div>
+      <div class="mark">GWENT GO</div>
+      <div class="tag" style="margin-top:8px">UI mockup — Material 3 concept for Android, Linux and Windows. Every frame below is a live HTML/CSS screen rendered at real device viewport sizes, using the card artwork and HUD sprites from the reference repository.</div>
+    </div>
+    <div class="spacer"></div>
+    <div class="nav-links">
+      <a class="chip pill" href="#android">Android</a>
+      <a class="chip pill" href="#desktop">Desktop</a>
+    </div>
+  </header>
+
+  <div class="notes">
+    <div class="surface note">
+      <h3>Material 3 chrome</h3>
+      <p>App bars, navigation rail, segmented buttons, chips, FABs and dialogs follow Material 3 on a gold-on-charcoal dark scheme.</p>
+    </div>
+    <div class="surface note">
+      <h3>Widget-built board</h3>
+      <p>The battlefield is composed from containers, rows, badges and cards — no reference board image — so it can stay responsive and themable.</p>
+    </div>
+    <div class="surface note">
+      <h3>Reference artwork</h3>
+      <p>Card art, shields, gems and ability icons are loaded from <code>gwent-classic-enhanced/img</code>; frames, banners and power badges are drawn in CSS.</p>
+    </div>
+    <div class="surface note">
+      <h3>Three difficulties</h3>
+      <p>Easy / Normal / Hard appear in the home screen, the deck editor and as a chip on the opponent panel during a match.</p>
+    </div>
+  </div>
+
+  <!-- ==================== ANDROID ==================== -->
+  <section class="section" id="android">
+    <h2>Android — phone</h2>
+    <p class="lead">Portrait-first: standard Material 3 home screen, immersive fullscreen match view (system bars hidden while the hand is in play).</p>
+
+    <div class="row">
+      <div class="showcase">
+        <div class="phone">
+          <div class="camera"></div>
+          <div class="screen">
+            <div class="screen-holder"><iframe src="screens/android-menu.html" title="Android home"></iframe></div>
+          </div>
+        </div>
+        <div class="caption">
+          <div class="c-title">Home</div>
+          <div class="c-sub">Hero, difficulty, faction · 412 × 915</div>
+          <a href="screens/android-menu.html" target="_blank">Open full size ↗</a>
+        </div>
+      </div>
+
+      <div class="showcase">
+        <div class="phone">
+          <div class="camera"></div>
+          <div class="screen">
+            <div class="screen-holder"><iframe src="screens/android-board.html" title="Android match"></iframe></div>
+          </div>
+        </div>
+        <div class="caption">
+          <div class="c-title">Match</div>
+          <div class="c-sub">Six rows, weather band, scrollable hand · 412 × 915</div>
+          <a href="screens/android-board.html" target="_blank">Open full size ↗</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== DESKTOP ==================== -->
+  <section class="section" id="desktop">
+    <h2>Desktop — Linux / Windows</h2>
+    <p class="lead">Navigation rail at home, a wide battlefield with player rails and a card-preview panel in match, and a three-column deck editor.</p>
+
+    <div class="row two-up">
+      <div class="showcase">
+        <div class="window">
+          <div class="titlebar">
+            <span class="win-icon"></span>
+            <span class="win-title">Gwent — Home</span>
+            <span class="spacer"></span>
+            <span class="win-btn"><svg viewBox="0 0 12 12"><path d="M2 6h8"/></svg></span>
+            <span class="win-btn"><svg viewBox="0 0 12 12"><rect x="2.5" y="2.5" width="7" height="7"/></svg></span>
+            <span class="win-btn close"><svg viewBox="0 0 12 12"><path d="M3 3l6 6M9 3l-6 6"/></svg></span>
+          </div>
+          <div class="screen">
+            <div class="screen-holder"><iframe src="screens/desktop-menu.html" title="Desktop home"></iframe></div>
+          </div>
+        </div>
+        <div class="caption">
+          <div class="c-title">Home</div>
+          <div class="c-sub">Navigation rail, hero banner, difficulty and factions · 1280 × 800</div>
+          <a href="screens/desktop-menu.html" target="_blank">Open full size ↗</a>
+        </div>
+      </div>
+
+      <div class="showcase">
+        <div class="window">
+          <div class="titlebar">
+            <span class="win-icon"></span>
+            <span class="win-title">Gwent — Match</span>
+            <span class="spacer"></span>
+            <span class="win-btn"><svg viewBox="0 0 12 12"><path d="M2 6h8"/></svg></span>
+            <span class="win-btn"><svg viewBox="0 0 12 12"><rect x="2.5" y="2.5" width="7" height="7"/></svg></span>
+            <span class="win-btn close"><svg viewBox="0 0 12 12"><path d="M3 3l6 6M9 3l-6 6"/></svg></span>
+          </div>
+          <div class="screen">
+            <div class="screen-holder"><iframe src="screens/desktop-board.html" title="Desktop match"></iframe></div>
+          </div>
+        </div>
+        <div class="caption">
+          <div class="c-title">Match — Round 2, Biting Frost active</div>
+          <div class="c-sub">Click a hand card to update the preview panel · 1280 × 800</div>
+          <a href="screens/desktop-board.html" target="_blank">Open full size ↗</a>
+        </div>
+      </div>
+
+      <div class="showcase">
+        <div class="window">
+          <div class="titlebar">
+            <span class="win-icon"></span>
+            <span class="win-title">Gwent — Deck editor</span>
+            <span class="spacer"></span>
+            <span class="win-btn"><svg viewBox="0 0 12 12"><path d="M2 6h8"/></svg></span>
+            <span class="win-btn"><svg viewBox="0 0 12 12"><rect x="2.5" y="2.5" width="7" height="7"/></svg></span>
+            <span class="win-btn close"><svg viewBox="0 0 12 12"><path d="M3 3l6 6M9 3l-6 6"/></svg></span>
+          </div>
+          <div class="screen">
+            <div class="screen-holder"><iframe src="screens/desktop-decks.html" title="Desktop deck editor"></iframe></div>
+          </div>
+        </div>
+        <div class="caption">
+          <div class="c-title">Deck editor</div>
+          <div class="c-sub">Collection bank, deck by row, stats and leader · 1280 × 800</div>
+          <a href="screens/desktop-decks.html" target="_blank">Open full size ↗</a>
+        </div>
+      </div>
+
+      <div class="showcase">
+        <div class="window">
+          <div class="titlebar">
+            <span class="win-icon"></span>
+            <span class="win-title">Notes</span>
+            <span class="spacer"></span>
+            <span class="win-btn"><svg viewBox="0 0 12 12"><path d="M2 6h8"/></svg></span>
+            <span class="win-btn"><svg viewBox="0 0 12 12"><rect x="2.5" y="2.5" width="7" height="7"/></svg></span>
+            <span class="win-btn close"><svg viewBox="0 0 12 12"><path d="M3 3l6 6M9 3l-6 6"/></svg></span>
+          </div>
+          <div class="screen" style="padding:22px 24px;background:#14110d;min-height:368px">
+            <div class="hstack" style="gap:10px;margin-bottom:12px">
+              <svg class="ic" viewBox="0 0 24 24" style="color:var(--gw-gold-bright)"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+              <span class="t-title-m">How to read these mockups</span>
+            </div>
+            <ul class="t-body-s muted" style="margin:0;padding-left:18px;line-height:20px;display:flex;flex-direction:column;gap:8px;max-width:640px">
+              <li>Screens are static concepts at real viewport sizes: 412 × 915 (Android) and 1280 × 800 (desktop). Nothing here is the Flutter app yet.</li>
+              <li>The match screen shows a live position: Biting Frost freezes both close-combat rows, Commander's Horn doubles the opponent's siege row, and the hand is mid-round 2.</li>
+              <li>Card artwork, shields, gems and ability icons are referenced from <code>gwent-classic-enhanced/img</code> — if that folder is missing, images will be blank.</li>
+              <li>Phone interaction concept: tap a hand card to lift it, then tap a highlighted row to place it; long-press opens the full card sheet. Desktop uses click + preview panel.</li>
+              <li>Strings are English and centralised, ready for ARB-based localization; difficulty and deck rules are surfaced in the UI.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="caption">
+          <div class="c-title">Design notes</div>
+          <div class="c-sub">Scope, interactions and asset dependencies</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+</body>
+</html>
