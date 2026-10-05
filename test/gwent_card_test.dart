@@ -51,6 +51,31 @@ void main() {
     expect(assetImage('assets/icons/power_normal.png'), findsNothing);
   });
 
+  testWidgets('special cards keep their emblem in the top-left slot', (
+    tester,
+  ) async {
+    const width = 104.0;
+    await tester.pumpWidget(
+      GwentApp(
+        home: Scaffold(
+          body: GwentCard(
+            definition: CardRepository.byId('frost'),
+            width: width,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final card = tester.getRect(find.byType(GwentCard));
+    final badge = tester.getRect(find.byKey(GwentCard.powerBadgeKey));
+
+    // The artwork centre stays clear, like on units and heroes.
+    expect(badge.center.dx, lessThan(card.center.dx));
+    expect(badge.center.dy, lessThan(card.center.dy));
+    expect(badge.width, closeTo(width * 0.44, 0.5));
+  });
+
   testWidgets('the unit sprite is cropped to the badge area', (tester) async {
     const width = 104.0;
     await tester.pumpWidget(
