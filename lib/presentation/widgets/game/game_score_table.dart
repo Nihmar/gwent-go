@@ -21,11 +21,11 @@ class GameScoreTable extends StatelessWidget {
         TableRow(
           children: [
             const SizedBox.shrink(),
-            for (final label in ['R1', 'R2', 'R3'])
+            for (var round = 1; round <= 3; round++)
               Padding(
                 padding: const EdgeInsets.all(4),
                 child: Text(
-                  label,
+                  strings.roundShort(round),
                   textAlign: TextAlign.right,
                   style: const TextStyle(
                     color: GwentColors.onSurfaceVariant,

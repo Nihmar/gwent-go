@@ -215,14 +215,15 @@ class _DeckEditorScreenState extends State<DeckEditorScreen> {
   }
 
   Widget _narrowBody(BuildContext context) {
+    final strings = context.strings;
     return DefaultTabController(
       length: 2,
       child: Column(
         children: [
-          const TabBar(
+          TabBar(
             tabs: [
-              Tab(text: 'Collection'),
-              Tab(text: 'Deck'),
+              Tab(text: strings.collection),
+              Tab(text: strings.deck),
             ],
           ),
           Expanded(
