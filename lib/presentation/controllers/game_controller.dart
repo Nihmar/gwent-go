@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../core/session/host_session.dart';
@@ -13,6 +15,7 @@ import '../../core/rules/game_engine.dart';
 import '../../core/rules/game_event.dart';
 import '../../core/session/client_session.dart';
 import '../../core/rules/game_random.dart';
+import '../audio/sound_service.dart';
 import '../theme/gwent_colors.dart';
 
 /// A choice the UI must collect before a card can be played.
@@ -52,7 +55,9 @@ class GameController extends ChangeNotifier {
     int localSeat = 0,
     bool hotseat = false,
     int? seed,
+    SoundService? sounds,
   }) : this._(
+         sounds: sounds,
          EngineBackend(
            GameEngine(
              firstDeck: humanDeck,
@@ -116,6 +121,7 @@ class GameController extends ChangeNotifier {
     this.hotseat = false,
     bool driveOpponent = true,
     String? opponentName,
+    this._sounds,
   }) : _localSeat = localSeat,
        difficulty = _backend.state.players[localSeat].difficulty {
     _ai = createAi(difficulty);
@@ -156,6 +162,9 @@ class GameController extends ChangeNotifier {
   }
 
   final MatchBackend _backend;
+
+  /// Sound effects for local matches; absent when nothing is injected.
+  final SoundService? _sounds;
 
   /// The authoritative engine, when this client owns the match.
   GameEngine? get engine =>
@@ -485,7 +494,9 @@ class GameController extends ChangeNotifier {
   }
 
   void _drainEvents() {
-    for (final event in _backend.takeEvents()) {
+    final events = _backend.takeEvents();
+    if (events.isNotEmpty) unawaited(_sounds?.handle(events) ?? Future<void>.value());
+    for (final event in events) {
       if (event is AbilityTriggered && event.cards.isNotEmpty) {
         final color = GwentColors.abilityEffect(event.ability);
         for (final card in event.cards) {
@@ -498,6 +509,7 @@ class GameController extends ChangeNotifier {
 
   @override
   void dispose() {
+    unawaited(_sounds?.dispose() ?? Future<void>.value());
     _disposed = true;
     _backend.onChanged = null;
     _driver.dispose();
