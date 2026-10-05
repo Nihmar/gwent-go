@@ -5,6 +5,8 @@ import 'package:gwent_go/core/data/card_repository.dart';
 import 'package:gwent_go/core/models/player.dart';
 import 'package:gwent_go/presentation/screens/game_screen.dart';
 import 'package:gwent_go/presentation/screens/home_screen.dart';
+import 'package:gwent_go/presentation/widgets/game/game_hand.dart';
+import 'package:gwent_go/presentation/widgets/gwent_card.dart';
 
 void setSurface(WidgetTester tester, double width, double height) {
   tester.view.devicePixelRatio = 1;
@@ -89,6 +91,46 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('CARD PREVIEW'), findsOneWidget);
+    });
+
+    testWidgets('phone flow lets the player select and play a card', (
+      tester,
+    ) async {
+      setSurface(tester, 412, 915);
+      await tester.pumpWidget(
+        GwentApp(
+          home: GameScreen(
+            humanDeck: decks[0],
+            opponentDeck: decks[1],
+            difficulty: Difficulty.easy,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Keep hand'));
+      await tester.pumpAndSettle();
+      // Let a possible AI opening turn resolve; then it is the human's turn.
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pumpAndSettle();
+
+      final handCard = find
+          .descendant(
+            of: find.byType(GameHand),
+            matching: find.byType(GwentCard),
+          )
+          .first;
+      await tester.tap(handCard);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Play card'), findsOneWidget);
+      // The phone strip must also expose the leader control.
+      expect(find.text('Ready'), findsWidgets);
+
+      // Cancelling dismisses the sheet so another card can be selected.
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(find.text('Play card'), findsNothing);
     });
   });
 }
