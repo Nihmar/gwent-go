@@ -218,64 +218,64 @@ class _HomeScreenState extends State<HomeScreen> {
   // Phone / narrow layout
   // ---------------------------------------------------------------------------
 
+  Widget _phoneTopBar(BuildContext context) {
+    final strings = context.strings;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 4, 0),
+      child: Row(
+        children: [
+          Text(
+            strings.appTitle,
+            style: const TextStyle(
+              color: GwentColors.goldBright,
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 6,
+            ),
+          ),
+          const Spacer(),
+          IconButton(
+            tooltip: strings.sound,
+            onPressed: _settings.toggleSound,
+            icon: Icon(
+              _settings.settings.soundEnabled
+                  ? Icons.volume_up_outlined
+                  : Icons.volume_off_outlined,
+            ),
+          ),
+          IconButton(
+            tooltip: strings.settings,
+            onPressed: _openSettings,
+            icon: const Icon(Icons.settings_outlined),
+          ),
+          IconButton(
+            tooltip: strings.about,
+            onPressed: _showAbout,
+            icon: const Icon(Icons.info_outline),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildPhone(BuildContext context) {
     final strings = context.strings;
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 8, 0),
-          child: Row(
-            children: [
-              Text(
-                strings.appTitle,
-                style: const TextStyle(
-                  color: GwentColors.goldBright,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 6,
-                ),
-              ),
-              const Spacer(),
-              IconButton(
-                tooltip: strings.sound,
-                onPressed: _settings.toggleSound,
-                icon: Icon(
-                  _settings.settings.soundEnabled
-                      ? Icons.volume_up_outlined
-                      : Icons.volume_off_outlined,
-                ),
-              ),
-              IconButton(
-                tooltip: strings.settings,
-                onPressed: _openSettings,
-                icon: const Icon(Icons.settings_outlined),
-              ),
-            ],
-          ),
-        ),
+        _phoneTopBar(context),
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            padding: const EdgeInsets.fromLTRB(16, 6, 16, 14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 HeroBanner(
                   faction: _faction,
                   eyebrow: strings.appTagline,
-                  height: 260,
+                  height: 176,
                   compact: true,
                 ),
-                const SizedBox(height: 14),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: [
-                    HomeChip(strings.threeDifficultyLevels),
-                    HomeChip(strings.offline),
-                    HomeChip(strings.classicRules),
-                  ],
-                ),
-                const SizedBox(height: 18),
+                const SizedBox(height: 16),
                 HomeSectionLabel(strings.opponentDifficulty),
                 const SizedBox(height: 8),
                 DifficultySelector(
@@ -290,19 +290,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     fontSize: 12.5,
                   ),
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: 16),
                 HomeSectionLabel(strings.faction),
                 const SizedBox(height: 8),
                 FactionSelector(
                   value: _faction,
                   onChanged: _settings.setFaction,
                 ),
+                const SizedBox(height: 12),
+                HomeDeckTile(deck: _deck, faction: _faction, onTap: _editDeck),
               ],
             ),
           ),
         ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -312,14 +314,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Icons.play_circle_outline,
                   label: strings.continueMatch,
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
               ],
               FilledButton.icon(
                 onPressed: _startMatch,
                 style: FilledButton.styleFrom(
                   backgroundColor: GwentColors.gold,
                   foregroundColor: GwentColors.onPrimary,
-                  minimumSize: const Size.fromHeight(52),
+                  minimumSize: const Size.fromHeight(50),
                   textStyle: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -328,35 +330,29 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: const Icon(Icons.play_arrow_rounded),
                 label: Text(strings.play),
               ),
-              const SizedBox(height: 10),
-              TonalActionButton(
-                onPressed: () => _startMatch(hotseat: true),
-                icon: Icons.people_alt_outlined,
-                label: strings.localMatch,
-              ),
-              const SizedBox(height: 10),
-              TonalActionButton(
-                onPressed: _openLobby,
-                icon: Icons.wifi_tethering,
-                label: strings.lanMatch,
-              ),
-              const SizedBox(height: 10),
-              TonalActionButton(
-                onPressed: _editDeck,
-                icon: Icons.grid_view_rounded,
-                label: strings.deckCollection,
-              ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  TextButton(
-                    onPressed: _openSettings,
-                    child: Text(strings.settings),
+                  Expanded(
+                    child: TonalActionButton(
+                      onPressed: () => _startMatch(hotseat: true),
+                      icon: Icons.people_alt_outlined,
+                      label: strings.localMatch,
+                      height: 44,
+                    ),
                   ),
-                  TextButton(onPressed: _showAbout, child: Text(strings.about)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TonalActionButton(
+                      onPressed: _openLobby,
+                      icon: Icons.wifi_tethering,
+                      label: strings.lanMatch,
+                      height: 44,
+                    ),
+                  ),
                 ],
               ),
+              const SizedBox(height: 6),
               Text(
                 '${strings.version} · ${strings.english}',
                 textAlign: TextAlign.center,

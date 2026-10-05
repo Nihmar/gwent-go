@@ -109,7 +109,7 @@ class HeroBanner extends StatelessWidget {
                     strings.appTitle,
                     style: TextStyle(
                       fontFamily: 'serif',
-                      fontSize: compact ? 40 : 62,
+                      fontSize: compact ? 36 : 62,
                       height: 1,
                       letterSpacing: compact ? 4 : 6,
                       color: GwentColors.goldBright,
@@ -122,18 +122,22 @@ class HeroBanner extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: compact ? 360 : 520),
-                    child: Text(
-                      strings.appAbout,
-                      style: const TextStyle(
-                        color: GwentColors.onSurface,
-                        fontSize: 13.5,
-                        height: 1.4,
+                  // The compact banner is a visual header, not the place for
+                  // the about text; it lives in the About dialog.
+                  if (!compact) ...[
+                    const SizedBox(height: 10),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 520),
+                      child: Text(
+                        strings.appAbout,
+                        style: const TextStyle(
+                          color: GwentColors.onSurface,
+                          fontSize: 13.5,
+                          height: 1.4,
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                   if (!compact && onContinue != null) ...[
                     const SizedBox(height: 14),
                     FilledButton.tonalIcon(
@@ -202,6 +206,85 @@ class HomeSurface extends StatelessWidget {
         ),
       ),
       child: child,
+    );
+  }
+}
+
+/// Compact tile showing the deck a new match would use.
+///
+/// Tapping it opens the deck editor, so the home screen does not need a
+/// full-width "Deck collection" button competing with the primary action.
+class HomeDeckTile extends StatelessWidget {
+  const HomeDeckTile({
+    super.key,
+    required this.deck,
+    required this.faction,
+    required this.onTap,
+  });
+
+  final DeckDefinition deck;
+  final CardFaction faction;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = context.strings;
+    return Material(
+      color: GwentColors.surfaceLow,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(12, 8, 10, 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: GwentColors.outlineVariant.withValues(alpha: 0.5),
+            ),
+          ),
+          child: Row(
+            children: [
+              Image.asset(
+                factionInfo(faction).shieldAsset,
+                width: 22,
+                height: 26,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      strings.deckCollection,
+                      style: const TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      '${deck.name} · '
+                      '${CardRepository.deckStrength(deck)} ${strings.strength}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: GwentColors.onSurfaceVariant,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 6),
+              const Icon(
+                Icons.edit_outlined,
+                size: 18,
+                color: GwentColors.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -286,10 +369,7 @@ class NewMatchPanel extends StatelessWidget {
                 onPressed: onStartLocal,
                 child: Text(strings.localMatch),
               ),
-              TextButton(
-                onPressed: onStartLan,
-                child: Text(strings.lanMatch),
-              ),
+              TextButton(onPressed: onStartLan, child: Text(strings.lanMatch)),
             ],
           ),
         ],
