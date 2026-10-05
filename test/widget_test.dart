@@ -64,7 +64,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Deck editor'), findsOneWidget);
-      expect(find.text('Save deck'), findsOneWidget);
+      expect(find.text('Start game'), findsOneWidget);
     });
 
     testWidgets('offers to continue a saved match', (tester) async {
@@ -87,6 +87,37 @@ void main() {
 
       expect(find.text('Continue match'), findsOneWidget);
       controller.dispose();
+    });
+
+    testWidgets('blocks starting an invalid deck', (tester) async {
+      setSurface(tester, 412, 915);
+      final store = InMemoryKeyValueStore({
+        'collection.owned': '{"blue_stripes":0}',
+      });
+      final controller = SettingsController(ProfileRepository(store));
+
+      await tester.pumpWidget(GwentApp(home: HomeScreen(settings: controller)));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Play').first);
+      await tester.pumpAndSettle();
+      expect(find.text('Deck not playable'), findsOneWidget);
+      controller.dispose();
+    });
+
+    testWidgets('can start a match from the deck editor', (tester) async {
+      setSurface(tester, 412, 915);
+      await tester.pumpWidget(const GwentApp(home: HomeScreen()));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Deck collection'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Start game'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Keep hand'), findsOneWidget);
+      // Flush the debounced match autosave timer.
+      await tester.pump(const Duration(seconds: 1));
     });
   });
 

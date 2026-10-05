@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../core/data/faction_catalog.dart';
 import '../core/models/card.dart';
 import '../core/models/player.dart';
+import '../core/rules/deck_validator.dart';
 import '../l10n/generated/app_localizations.dart';
 
 /// Localized names for domain enums and card abilities.
@@ -43,6 +44,19 @@ extension GwentLocalizations on AppLocalizations {
     if (difficulty == Difficulty.hard) return difficultyHardDescription;
     return difficultyNormalDescription;
   }
+
+  /// Human readable description of a card ability.
+  String deckIssueMessage(DeckIssue issue) => switch (issue) {
+    DeckIssue.tooFewUnits => deckIssueTooFewUnits(DeckValidator.minUnits),
+    DeckIssue.tooManySpecial => deckIssueTooManySpecial(
+      DeckValidator.maxSpecial,
+    ),
+    DeckIssue.tooManyCards => deckIssueTooManyCards(DeckValidator.maxTotal),
+    DeckIssue.leaderFactionMismatch => deckIssueLeaderFaction,
+    DeckIssue.cardNotAllowed => deckIssueCardNotAllowed,
+    DeckIssue.tooManyCopies => deckIssueTooManyCopies,
+    DeckIssue.unknownCard => deckIssueUnknownCard,
+  };
 
   /// Human readable description of a card ability.
   String abilityDescription(String ability) => switch (ability) {

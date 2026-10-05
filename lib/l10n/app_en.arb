@@ -81,6 +81,30 @@
   "totalStrength": "Total strength",
   "deckValid": "Deck is valid — ready to play",
   "deckInvalid": "Deck is not valid yet",
+  "deckIssueTooFewUnits": "Needs at least {min} unit cards",
+  "@deckIssueTooFewUnits": {
+    "placeholders": {
+      "min": { "type": "int" }
+    }
+  },
+  "deckIssueTooManySpecial": "At most {max} special cards",
+  "@deckIssueTooManySpecial": {
+    "placeholders": {
+      "max": { "type": "int" }
+    }
+  },
+  "deckIssueTooManyCards": "At most {max} cards in total",
+  "@deckIssueTooManyCards": {
+    "placeholders": {
+      "max": { "type": "int" }
+    }
+  },
+  "deckIssueLeaderFaction": "The leader does not match the faction",
+  "deckIssueCardNotAllowed": "Some cards are not allowed in this faction",
+  "deckIssueTooManyCopies": "Some cards exceed the owned copies",
+  "deckIssueUnknownCard": "The deck contains an unknown card",
+  "invalidDeckTitle": "Deck not playable",
+  "openDeckEditor": "Open deck editor",
   "cardsOwned": "{owned} cards owned · {distinct} distinct",
   "@cardsOwned": {
     "placeholders": {

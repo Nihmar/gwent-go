@@ -2,26 +2,40 @@ import 'package:flutter/material.dart';
 
 import '../../core/data/card_repository.dart';
 import '../../core/models/card.dart';
+import '../../core/models/collection.dart';
 import '../../core/models/player.dart';
+import '../../core/rules/deck_validator.dart';
 import '../localization.dart';
 import '../theme/gwent_colors.dart';
 import '../widgets/board_background.dart';
 import '../widgets/deck/deck_editor_parts.dart';
 
+/// Result returned by the deck editor.
+class DeckEditorResult {
+  const DeckEditorResult(this.deck, {this.startGame = false});
+
+  final DeckDefinition deck;
+
+  /// When true the caller should immediately start a match with this deck.
+  final bool startGame;
+}
+
 /// Collection browser and deck builder.
 ///
-/// Editing is expressed as a mutable card-count map; the screen returns a new
-/// [DeckDefinition] when saved. The heavy panes live in
-/// `widgets/deck/deck_editor_parts.dart` to keep this file focused.
+/// Editing is expressed as a mutable card-count map; the screen returns a
+/// [DeckEditorResult] when saved or when a match is started from here. The
+/// heavy panes live in `widgets/deck/deck_editor_parts.dart`.
 class DeckEditorScreen extends StatefulWidget {
   const DeckEditorScreen({
     super.key,
     required this.deck,
     required this.difficulty,
+    this.collection = Collection.full,
   });
 
   final DeckDefinition deck;
   final Difficulty difficulty;
+  final Collection collection;
 
   @override
   State<DeckEditorScreen> createState() => _DeckEditorScreenState();
@@ -36,7 +50,7 @@ class _DeckEditorScreenState extends State<DeckEditorScreen> {
 
   CardFaction get _faction => widget.deck.faction;
 
-  List<CardDefinition> get _collection {
+  List<CardDefinition> get _bank {
     final query = _search.toLowerCase();
     return CardRepository.collectionFor(_faction).where((card) {
       if (_filter != null) {
@@ -59,9 +73,15 @@ class _DeckEditorScreenState extends State<DeckEditorScreen> {
     cardCounts: Map.of(_counts),
   );
 
+  DeckValidationResult get _validation =>
+      DeckValidator.validate(_build(), collection: widget.collection);
+
   void _add(CardDefinition card) {
     final current = _counts[card.id] ?? 0;
-    if (current >= card.maxCopies) return;
+    final cap = card.maxCopies < widget.collection.ownedCount(card)
+        ? card.maxCopies
+        : widget.collection.ownedCount(card);
+    if (current >= cap) return;
     setState(() => _counts[card.id] = current + 1);
   }
 
@@ -95,6 +115,10 @@ class _DeckEditorScreenState extends State<DeckEditorScreen> {
     if (chosen != null) setState(() => _leader = chosen);
   }
 
+  void _save({bool startGame = false}) {
+    Navigator.of(context).pop(DeckEditorResult(_build(), startGame: startGame));
+  }
+
   @override
   Widget build(BuildContext context) {
     final wide = MediaQuery.sizeOf(context).width >= 1000;
@@ -115,6 +139,7 @@ class _DeckEditorScreenState extends State<DeckEditorScreen> {
   Widget _header(BuildContext context) {
     final strings = context.strings;
     final wideHeader = MediaQuery.sizeOf(context).width >= 700;
+    final valid = _validation.isValid;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
@@ -144,9 +169,22 @@ class _DeckEditorScreenState extends State<DeckEditorScreen> {
               child: Text(strings.changeLeader),
             ),
           const SizedBox(width: 8),
+          if (wideHeader)
+            FilledButton.tonal(onPressed: _save, child: Text(strings.saveDeck))
+          else
+            IconButton(
+              tooltip: strings.saveDeck,
+              onPressed: _save,
+              icon: const Icon(Icons.save_outlined),
+            ),
+          const SizedBox(width: 8),
           FilledButton(
-            onPressed: () => Navigator.of(context).pop(_build()),
-            child: Text(strings.saveDeck),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              minimumSize: const Size(0, 40),
+            ),
+            onPressed: valid ? () => _save(startGame: true) : null,
+            child: Text(strings.startGame),
           ),
         ],
       ),
@@ -199,34 +237,30 @@ class _DeckEditorScreenState extends State<DeckEditorScreen> {
     );
   }
 
-  Widget _collectionPane(BuildContext context) {
-    return DeckCollectionPane(
-      collection: _collection,
-      counts: _counts,
-      search: _search,
-      filter: _filter,
-      onlyOwned: _onlyOwned,
-      onSearchChanged: (value) => setState(() => _search = value),
-      onFilterChanged: (row) => setState(() => _filter = row),
-      onOnlyOwnedChanged: (value) => setState(() => _onlyOwned = value),
-      onAdd: _add,
-    );
-  }
+  Widget _collectionPane(BuildContext context) => DeckCollectionPane(
+    cards: _bank,
+    collection: widget.collection,
+    counts: _counts,
+    search: _search,
+    filter: _filter,
+    onlyOwned: _onlyOwned,
+    onSearchChanged: (value) => setState(() => _search = value),
+    onFilterChanged: (row) => setState(() => _filter = row),
+    onOnlyOwnedChanged: (value) => setState(() => _onlyOwned = value),
+    onAdd: _add,
+  );
 
-  Widget _deckPane(BuildContext context, bool showChangeLeader) {
-    return DeckListPane(
-      counts: _counts,
-      onRemove: _remove,
-      onChangeLeader: _changeLeader,
-      showChangeLeader: showChangeLeader,
-    );
-  }
+  Widget _deckPane(BuildContext context, bool showChangeLeader) => DeckListPane(
+    counts: _counts,
+    onRemove: _remove,
+    onChangeLeader: _changeLeader,
+    showChangeLeader: showChangeLeader,
+  );
 
-  Widget _sidePane() {
-    return DeckSidePane(
-      deck: _build(),
-      leader: _leader,
-      onChangeLeader: _changeLeader,
-    );
-  }
+  Widget _sidePane() => DeckSidePane(
+    deck: _build(),
+    leader: _leader,
+    validation: _validation,
+    onChangeLeader: _changeLeader,
+  );
 }

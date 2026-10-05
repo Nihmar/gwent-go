@@ -544,6 +544,60 @@ abstract class AppLocalizations {
   /// **'Deck is not valid yet'**
   String get deckInvalid;
 
+  /// No description provided for @deckIssueTooFewUnits.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs at least {min} unit cards'**
+  String deckIssueTooFewUnits(int min);
+
+  /// No description provided for @deckIssueTooManySpecial.
+  ///
+  /// In en, this message translates to:
+  /// **'At most {max} special cards'**
+  String deckIssueTooManySpecial(int max);
+
+  /// No description provided for @deckIssueTooManyCards.
+  ///
+  /// In en, this message translates to:
+  /// **'At most {max} cards in total'**
+  String deckIssueTooManyCards(int max);
+
+  /// No description provided for @deckIssueLeaderFaction.
+  ///
+  /// In en, this message translates to:
+  /// **'The leader does not match the faction'**
+  String get deckIssueLeaderFaction;
+
+  /// No description provided for @deckIssueCardNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Some cards are not allowed in this faction'**
+  String get deckIssueCardNotAllowed;
+
+  /// No description provided for @deckIssueTooManyCopies.
+  ///
+  /// In en, this message translates to:
+  /// **'Some cards exceed the owned copies'**
+  String get deckIssueTooManyCopies;
+
+  /// No description provided for @deckIssueUnknownCard.
+  ///
+  /// In en, this message translates to:
+  /// **'The deck contains an unknown card'**
+  String get deckIssueUnknownCard;
+
+  /// No description provided for @invalidDeckTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deck not playable'**
+  String get invalidDeckTitle;
+
+  /// No description provided for @openDeckEditor.
+  ///
+  /// In en, this message translates to:
+  /// **'Open deck editor'**
+  String get openDeckEditor;
+
   /// No description provided for @cardsOwned.
   ///
   /// In en, this message translates to:

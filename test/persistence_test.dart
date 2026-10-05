@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gwent_go/core/data/card_repository.dart';
 import 'package:gwent_go/core/models/card.dart';
+import 'package:gwent_go/core/models/collection.dart';
 import 'package:gwent_go/core/models/player.dart';
 import 'package:gwent_go/core/persistence/key_value_store.dart';
 import 'package:gwent_go/core/persistence/profile_repository.dart';
@@ -71,6 +72,15 @@ void main() {
       expect(isValidMatchSnapshot(snapshot!), isTrue);
       final restored = GameEngine.fromJson(snapshot);
       expect(restored.state.roundNumber, engine.state.roundNumber);
+    });
+
+    test('collection defaults to full and round-trips restrictions', () async {
+      final repository = ProfileRepository(InMemoryKeyValueStore());
+      expect((await repository.loadCollection()).isFull, isTrue);
+
+      await repository.saveCollection(Collection.fromJson({'blue_stripes': 2}));
+      final loaded = await repository.loadCollection();
+      expect(loaded.ownedCount(CardRepository.byId('blue_stripes')), 2);
     });
   });
 

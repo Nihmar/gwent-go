@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../../core/data/card_repository.dart';
 import '../../core/data/faction_catalog.dart';
 import '../../core/models/card.dart';
+import '../../core/models/collection.dart';
 import '../../core/models/player.dart';
 import '../../core/persistence/profile_repository.dart';
 import '../../core/rules/game_engine.dart';
@@ -20,6 +21,7 @@ class SettingsController extends ChangeNotifier {
   AppSettings settings = AppSettings.defaults;
   MatchStats stats = MatchStats.empty;
   Map<String, dynamic>? savedMatch;
+  Collection collection = Collection.full;
   bool loaded = false;
 
   final Map<CardFaction, DeckDefinition> _customDecks = {};
@@ -32,6 +34,7 @@ class SettingsController extends ChangeNotifier {
   Future<void> load() async {
     settings = await repository.loadSettings();
     stats = await repository.loadStats();
+    collection = await repository.loadCollection();
     final storedMatch = await repository.loadMatch();
     final validMatch = storedMatch != null && isValidMatchSnapshot(storedMatch);
     savedMatch = validMatch ? storedMatch : null;
