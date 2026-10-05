@@ -438,6 +438,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get leaderUsed => 'Used';
 
   @override
+  String get leaderPassive => 'Passive';
+
+  @override
   String get cardPreview => 'Card preview';
 
   @override

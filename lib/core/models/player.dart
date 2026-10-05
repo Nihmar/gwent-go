@@ -100,9 +100,15 @@ class PlayerState {
   int roundsLost = 0;
 
   int get roundsWon => 2 - roundsLost;
-  bool get leaderAvailable =>
-      !leaderUsed && leader.abilities.any(Ability.isActiveLeaderAbility);
+  bool get leaderAvailable => !leaderUsed && hasActiveLeader;
   bool get isOutOfGems => roundsLost >= 2;
+
+  /// True when the leader has an ability the player can activate.
+  ///
+  /// Passive leaders (King Bran, the White Flame, ...) run automatically and
+  /// are never "used", so the UI must not present them as such.
+  bool get hasActiveLeader =>
+      leader.abilities.any(Ability.isActiveLeaderAbility);
 
   /// True when the player still has a legal action other than passing.
   bool canPlay() => hand.isNotEmpty || leaderAvailable;
