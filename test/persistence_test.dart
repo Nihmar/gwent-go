@@ -80,6 +80,19 @@ void main() {
       final loaded = await repository.loadCollection();
       expect(loaded.ownedCount(CardRepository.byId('blue_stripes')), 2);
     });
+
+    test('stored values of the wrong JSON type fall back safely', () async {
+      final store = InMemoryKeyValueStore({
+        'deck.realms': '[1,2,3]',
+        'match.current': '"nope"',
+        'collection.owned': '42',
+      });
+      final repository = ProfileRepository(store);
+
+      expect(await repository.loadDeck(CardFaction.realms), isNull);
+      expect(await repository.loadMatch(), isNull);
+      expect((await repository.loadCollection()).isFull, isTrue);
+    });
   });
 
   group('SettingsController', () {
@@ -126,6 +139,18 @@ void main() {
       await controller.load();
       expect(controller.hasSavedMatch, isFalse);
       expect(await store.getString('match.current'), isNull);
+      controller.dispose();
+    });
+
+    test('load survives stored values of the wrong JSON type', () async {
+      final store = InMemoryKeyValueStore({
+        'deck.realms': '[]',
+        'match.current': '[]',
+        'collection.owned': '[]',
+      });
+      final controller = SettingsController(ProfileRepository(store));
+      await controller.load();
+      expect(controller.loaded, isTrue);
       controller.dispose();
     });
   });
