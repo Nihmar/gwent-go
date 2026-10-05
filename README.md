@@ -59,6 +59,40 @@ flutter run -d linux    # or android / windows
 flutter build linux     # release builds for the target platform
 ```
 
+### Android release signing
+
+Release APKs and bundles are signed with a dedicated keystore when
+`android/key.properties` exists; both it and the keystore are git-ignored.
+Without them Gradle falls back to the debug key so contributors can still run
+`flutter build apk --release`.
+
+`android/key.properties`:
+
+```properties
+storePassword=<password>
+keyPassword=<password>
+keyAlias=gwentgo
+storeFile=gwent-go-release.jks
+```
+
+`storeFile` is relative to `android/app/`. Generate a keystore with:
+
+```bash
+keytool -genkeypair -v \
+  -keystore android/app/gwent-go-release.jks \
+  -storetype PKCS12 -keyalg RSA -keysize 2048 -validity 10000 \
+  -alias gwentgo \
+  -storepass <password> -keypass <password>
+```
+
+Keep the keystore and its passwords backed up somewhere safe: losing them means
+the published app can no longer be updated. `flutter build appbundle` is the
+recommended format for Play Store submissions.
+
+The Android and Linux application ids are `dev.nihmar.gwentgo`. The iOS, macOS
+and Windows runners still carry the generated `com.example` placeholders and
+should be updated if those platforms are ever enabled.
+
 ## Assets
 
 Card artwork and icon sprites are bundled under `assets/`. They originate from

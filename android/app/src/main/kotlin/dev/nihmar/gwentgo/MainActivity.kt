@@ -1,4 +1,4 @@
-package com.example.gwent_go
+package dev.nihmar.gwentgo
 
 import io.flutter.embedding.android.FlutterActivity
 
