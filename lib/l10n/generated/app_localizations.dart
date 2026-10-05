@@ -892,6 +892,12 @@ abstract class AppLocalizations {
   /// **'Used'**
   String get leaderUsed;
 
+  /// No description provided for @leaderPassive.
+  ///
+  /// In en, this message translates to:
+  /// **'Passive'**
+  String get leaderPassive;
+
   /// No description provided for @cardPreview.
   ///
   /// In en, this message translates to:

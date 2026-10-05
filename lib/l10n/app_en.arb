@@ -215,6 +215,7 @@
   "weather": "Weather",
   "leaderReady": "Ready",
   "leaderUsed": "Used",
+  "leaderPassive": "Passive",
   "cardPreview": "Card preview",
   "matchScore": "Match score",
   "you": "You",

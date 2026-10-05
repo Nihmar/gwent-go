@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/data/faction_catalog.dart';
+import '../../../core/models/player.dart';
 import '../../../core/rules/scoring.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/game_controller.dart';
 import '../../localization.dart';
 import '../../theme/gwent_colors.dart';
 import '../board_widgets.dart';
 import 'card_effects.dart';
 import '../gwent_card.dart';
+
+/// Label for a leader control: a passive leader is never "used", and an
+/// active one is only "ready" while it has not been consumed.
+String _leaderLabel(AppLocalizations strings, PlayerState player) {
+  if (!player.hasActiveLeader) return strings.leaderPassive;
+  return player.leaderUsed ? strings.leaderUsed : strings.leaderReady;
+}
 
 /// Compact player summary used by the phone layout.
 class GamePlayerStrip extends StatelessWidget {
@@ -99,11 +108,11 @@ class _LeaderChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final strings = context.strings;
     final player = controller.human;
-    final available = player.leaderAvailable && controller.isLocalTurn;
+    final canActivate = player.leaderAvailable && controller.isLocalTurn;
     return Tooltip(
       message: strings.cardDescription(player.leader),
       child: GestureDetector(
-        onTap: available ? controller.activateLeader : null,
+        onTap: canActivate ? controller.activateLeader : null,
         behavior: HitTestBehavior.opaque,
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -115,9 +124,9 @@ class _LeaderChip extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             Text(
-              available ? strings.leaderReady : strings.leaderUsed,
+              _leaderLabel(strings, player),
               style: TextStyle(
-                color: available
+                color: player.leaderAvailable
                     ? GwentColors.goldBright
                     : GwentColors.onSurfaceVariant,
                 fontSize: 9,
@@ -277,18 +286,18 @@ class _LeaderButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final strings = context.strings;
     final player = controller.human;
-    final available = player.leaderAvailable && controller.isLocalTurn;
+    final canActivate = player.leaderAvailable && controller.isLocalTurn;
     return Column(
       children: [
         GwentCard(
           definition: player.leader,
           width: 52,
           dim: !player.leaderAvailable,
-          onTap: available ? controller.activateLeader : null,
+          onTap: canActivate ? controller.activateLeader : null,
         ),
         const SizedBox(height: 3),
         Text(
-          player.leaderAvailable ? strings.leaderReady : strings.leaderUsed,
+          _leaderLabel(strings, player),
           style: TextStyle(
             color: player.leaderAvailable
                 ? GwentColors.goldBright

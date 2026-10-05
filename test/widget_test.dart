@@ -195,6 +195,31 @@ void main() {
       expect(find.text('Play card'), findsNothing);
     });
 
+    testWidgets('a passive leader is not labelled as used', (tester) async {
+      setSurface(tester, 412, 915);
+      final controller = GameController(
+        humanDeck: DeckDefinition(
+          id: 'test_passive',
+          name: 'Test passive',
+          faction: CardFaction.monsters,
+          leader: CardRepository.byId('eredin_the_treacherous'),
+          cardCounts: const {'gryffin': 12, 'nekker': 2},
+        ),
+        opponentDeck: CardRepository.defaultDecks()[0],
+        difficulty: Difficulty.normal,
+        seed: 3,
+      );
+      controller.start();
+      controller.confirmMulligan();
+
+      await tester.pumpWidget(GwentApp(home: GameScreen(controller: controller)));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Passive'), findsWidgets);
+      expect(find.text('Used'), findsNothing);
+      expect(find.text('Ready'), findsNothing);
+    });
+
     testWidgets('leader multi-select asks for confirmation', (tester) async {
       setSurface(tester, 412, 915);
       final controller = GameController(
