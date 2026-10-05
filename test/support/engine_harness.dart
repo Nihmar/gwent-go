@@ -5,7 +5,9 @@ import 'package:gwent_go/core/models/player.dart';
 import 'package:gwent_go/core/rules/game_engine.dart';
 import 'package:gwent_go/core/rules/game_random.dart';
 
-int _uid = 0;
+// Kept high so cards injected by tests never collide with the engine's own
+// uid sequence (which starts at 0).
+int _uid = 1 << 20;
 
 /// Builds a card instance directly, bypassing the deck builder.
 CardInstance makeCard(String id, {int owner = 0}) => CardInstance(

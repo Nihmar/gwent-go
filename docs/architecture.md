@@ -69,6 +69,25 @@ at a width breakpoint.
 The board is composed entirely from widgets (`Row`, `Container`, `Stack`,
 `Image`); only card artwork and icon sprites are raster assets.
 
+## Persistence
+
+The core depends on a tiny `KeyValueStore` interface only. The Flutter layer
+provides `SharedPreferencesStore`; tests use `InMemoryKeyValueStore`.
+`ProfileRepository` builds on it to store settings, per-faction decks,
+aggregate statistics and the paused match.
+
+A match is serialized by `GameEngine.toJson` / `GameEngine.fromJson`: card
+instances are stored once in a flat registry (id plus per-instance flags) and
+every zone references them by `uid`. Only card ids are persisted, so a catalog
+change cannot desynchronise a snapshot; unknown ids make the snapshot invalid
+and it is discarded on load. The RNG seed is stored and the deck order is
+explicit, so a resumed match keeps drawing the same cards.
+
+`GameScreen` persists the snapshot through `onPersist` (debounced after each
+change, and immediately when the app is backgrounded or the match is paused).
+`HomeScreen` shows **Continue match** while a snapshot exists; finishing a match
+records the statistics and clears the snapshot.
+
 ## Localization
 
 All user-facing strings come from `lib/l10n/app_en.arb` through Flutter's
@@ -115,10 +134,10 @@ mind and should be revisited when it is:
 - **King Bran** is described as "units only lose half their Strength in bad
   weather"; the reference implementation does not apply it, so this project
   implements the ceiled half as the intended behaviour.
-- **Persistence:** decks, settings and match statistics are not persisted yet.
-  Statistics shown on the home screen are derived from the selected deck rather
-  than stored history.
-- **Sound and music** are not implemented.
+- **Sound and music** are not implemented; the setting is persisted but has no
+  effect yet.
+- **Deck ownership** is not modelled: every collectible card is available up to
+  its maximum number of copies.
 - **Display font:** the mockup uses *Cinzel*; the app currently uses the
   platform serif fallback to avoid shipping a font dependency. Bundling Cinzel
   is a small follow-up.

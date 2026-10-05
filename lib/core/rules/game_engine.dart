@@ -8,6 +8,7 @@ import 'scoring.dart';
 
 part 'game_engine_abilities.dart';
 part 'game_engine_leaders.dart';
+part 'game_engine_snapshot.dart';
 part 'game_engine_zones.dart';
 
 /// The authoritative, platform-independent Gwent rules engine.
@@ -54,6 +55,36 @@ class GameEngine {
     _buildDeck(opponent);
     _abilities = _AbilityResolver(this);
   }
+
+  /// Rebuilds an engine around a restored [GameState].
+  GameEngine._restore(this._random, this.opponentName, GameState restored) {
+    state = restored;
+    _abilities = _AbilityResolver(this);
+  }
+
+  /// Restores a paused match previously produced by [toJson].
+  ///
+  /// Throws [FormatException] when the snapshot is unusable; callers should
+  /// discard it in that case.
+  factory GameEngine.fromJson(Map<String, dynamic> json, {GameRandom? random}) {
+    final decoded = decodeMatch(json);
+    final engine = GameEngine._restore(
+      random ?? GameRandom(json['randomSeed'] as int?),
+      json['opponentName'] as String? ?? 'Opponent',
+      decoded.state,
+    );
+    engine._uid = decoded.maxUid + 1;
+    engine.humanRedraws = json['humanRedraws'] as int? ?? 0;
+    return engine;
+  }
+
+  /// Serializes the current match so it can be paused and resumed later.
+  Map<String, dynamic> toJson() => encodeMatch(
+    state,
+    opponentName: opponentName,
+    humanRedraws: humanRedraws,
+    randomSeed: _random.seed,
+  );
 
   final GameRandom _random;
   final String opponentName;

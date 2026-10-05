@@ -46,7 +46,13 @@
   "startGame": "Start game",
   "matches": "Matches",
   "won": "Won",
+  "losses": "Lost",
+  "draws": "Drawn",
   "winRate": "Win rate",
+  "noMatchesYet": "No matches played yet",
+  "resetStats": "Reset statistics",
+  "language": "Language",
+  "pause": "Pause",
   "cards": "cards",
   "strength": "strength",
 

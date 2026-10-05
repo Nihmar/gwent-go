@@ -8,10 +8,16 @@ import '../../theme/gwent_colors.dart';
 
 /// Top bar of the match screen: opponent summary and round counter.
 class GameHeader extends StatelessWidget {
-  const GameHeader({super.key, required this.controller, this.compact = false});
+  const GameHeader({
+    super.key,
+    required this.controller,
+    this.compact = false,
+    this.onPause,
+  });
 
   final GameController controller;
   final bool compact;
+  final VoidCallback? onPause;
 
   @override
   Widget build(BuildContext context) {
@@ -79,6 +85,12 @@ class GameHeader extends StatelessWidget {
             ),
           const SizedBox(width: 8),
           _RoundChip(state: controller.state),
+          if (onPause != null)
+            IconButton(
+              tooltip: strings.pause,
+              icon: const Icon(Icons.pause_circle_outline),
+              onPressed: onPause,
+            ),
         ],
       ),
     );

@@ -4,6 +4,7 @@ import '../../../core/data/card_repository.dart';
 import '../../../core/data/faction_catalog.dart';
 import '../../../core/models/card.dart';
 import '../../../core/models/player.dart';
+import '../../../core/persistence/profile_repository.dart';
 import '../../localization.dart';
 import '../../theme/gwent_colors.dart';
 import '../selectors.dart';
@@ -44,12 +45,16 @@ class HeroBanner extends StatelessWidget {
     required this.eyebrow,
     this.height = 300,
     this.compact = false,
+    this.onContinue,
   });
 
   final CardFaction faction;
   final String eyebrow;
   final double height;
   final bool compact;
+
+  /// When set, a "Continue match" action is shown in the banner.
+  final VoidCallback? onContinue;
 
   @override
   Widget build(BuildContext context) {
@@ -129,6 +134,14 @@ class HeroBanner extends StatelessWidget {
                       ),
                     ),
                   ),
+                  if (!compact && onContinue != null) ...[
+                    const SizedBox(height: 14),
+                    FilledButton.tonalIcon(
+                      onPressed: onContinue,
+                      icon: const Icon(Icons.play_circle_outline),
+                      label: Text(strings.continueMatch),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -276,11 +289,13 @@ class DecksPanel extends StatelessWidget {
     required this.deck,
     required this.onManage,
     required this.onSelect,
+    required this.stats,
   });
 
   final DeckDefinition deck;
   final VoidCallback onManage;
   final ValueChanged<DeckDefinition> onSelect;
+  final MatchStats stats;
 
   @override
   Widget build(BuildContext context) {
@@ -316,14 +331,11 @@ class DecksPanel extends StatelessWidget {
           const Divider(height: 20),
           Row(
             children: [
-              _Stat(label: strings.totalCards, value: '${deck.totalCards}'),
+              _Stat(label: strings.matches, value: '${stats.matches}'),
+              _Stat(label: strings.won, value: '${stats.wins}'),
               _Stat(
-                label: strings.totalStrength,
-                value: '${CardRepository.deckStrength(deck)}',
-              ),
-              _Stat(
-                label: strings.heroCards,
-                value: '${CardRepository.deckHeroCount(deck)}',
+                label: strings.winRate,
+                value: '${(stats.winRate * 100).round()}%',
               ),
             ],
           ),
