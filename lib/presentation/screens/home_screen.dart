@@ -7,6 +7,7 @@ import '../../core/models/player.dart';
 import '../../core/persistence/key_value_store.dart';
 import '../../core/persistence/profile_repository.dart';
 import '../../core/rules/deck_validator.dart';
+import '../audio/sound_service.dart';
 import '../controllers/settings_controller.dart';
 import '../localization.dart';
 import '../theme/gwent_colors.dart';
@@ -23,10 +24,14 @@ import 'stats_screen.dart';
 /// match or edit the deck. Layout adapts between a phone column and a desktop
 /// row.
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, this.settings});
+  const HomeScreen({super.key, this.settings, this.sounds});
 
   /// Injected in production; tests get an in-memory controller by default.
   final SettingsController? settings;
+
+  /// Sound effects for locally started matches; absent in tests and when the
+  /// app did not supply a backend.
+  final SoundService? sounds;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -99,6 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
           opponentDeck: opponentDeck,
           difficulty: _difficulty,
           hotseat: hotseat,
+          sounds: widget.sounds,
           onFinished: _onMatchFinished,
           onPersist: (snapshot) => _settings.saveMatch(snapshot),
         ),
@@ -147,6 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
       MaterialPageRoute(
         builder: (_) => GameScreen(
           snapshot: snapshot,
+          sounds: widget.sounds,
           onFinished: _onMatchFinished,
           onPersist: (value) => _settings.saveMatch(value),
         ),

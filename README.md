@@ -29,6 +29,9 @@ The game is playable end to end against the computer:
   home screen;
 - two humans on one device (hotseat) and host-authoritative LAN play over TCP,
   with UDP discovery, a manual address fallback and reconnection after a drop;
+- match sound effects through an asset-backed `SoundPlayer`, honouring the
+  persisted sound toggle (the cue files are not recorded yet; see
+  `assets/audio/README.md`);
 - English UI built on Flutter's localization stack (easy to translate).
 
 ## Project layout

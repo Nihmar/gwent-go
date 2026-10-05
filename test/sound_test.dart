@@ -1,9 +1,17 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gwent_go/core/data/card_repository.dart';
 import 'package:gwent_go/core/models/card.dart';
+import 'package:gwent_go/core/models/player.dart';
 import 'package:gwent_go/core/rules/game_event.dart';
+import 'package:gwent_go/presentation/audio/asset_sound_player.dart';
+import 'package:gwent_go/presentation/audio/sound_cue_assets.dart';
 import 'package:gwent_go/presentation/audio/sound_cues.dart';
 import 'package:gwent_go/presentation/audio/sound_player.dart';
 import 'package:gwent_go/presentation/audio/sound_service.dart';
+import 'package:gwent_go/presentation/controllers/game_controller.dart';
+
+import 'support/engine_harness.dart';
 
 /// Records what would have been played.
 class _RecordingPlayer implements SoundPlayer {
@@ -15,6 +23,14 @@ class _RecordingPlayer implements SoundPlayer {
 
   @override
   Future<void> dispose() async => disposed = true;
+}
+
+/// An asset bundle in which nothing can be found, like a build that ships
+/// before the sound effects are recorded.
+class _EmptyBundle extends CachingAssetBundle {
+  @override
+  Future<ByteData> load(String key) async =>
+      throw Exception('missing asset $key');
 }
 
 final _card = CardInstance(
@@ -78,6 +94,30 @@ void main() {
     });
   });
 
+  group('assets', () {
+    test('every cue maps to a unique bundled audio file', () {
+      for (final cue in SoundCue.values) {
+        final asset = assetForCue(cue);
+        expect(asset, isNotNull, reason: 'no asset for ${cue.name}');
+        expect(asset, startsWith('assets/audio/'), reason: cue.name);
+        expect(asset, endsWith('.mp3'), reason: cue.name);
+      }
+      expect(
+        soundCueAssets.values.toSet(),
+        hasLength(SoundCue.values.length),
+        reason: 'asset paths must be unique',
+      );
+    });
+
+    test('a player without assets stays silent instead of failing', () async {
+      final player = AssetSoundPlayer(bundle: _EmptyBundle());
+      for (final cue in SoundCue.values) {
+        await player.play(cue);
+      }
+      await player.dispose();
+    });
+  });
+
   group('service', () {
     test('plays the cues of the events it is given', () async {
       final player = _RecordingPlayer();
@@ -119,6 +159,33 @@ void main() {
       const sounds = SilentSoundPlayer();
       await sounds.play(SoundCue.matchEnded);
       await sounds.dispose();
+    });
+
+    test('the controller forwards match events to the sound service', () {
+      final decks = CardRepository.defaultDecks();
+      final player = _RecordingPlayer();
+      final sounds = SoundService(player: player);
+      final controller = GameController(
+        humanDeck: decks[0],
+        opponentDeck: decks[1],
+        difficulty: Difficulty.normal,
+        seed: 3,
+        sounds: sounds,
+      );
+      controller.start();
+      controller.confirmMulligan();
+      controller.state.currentPlayer = 0;
+      controller.state.players[0].passed = false;
+      controller.human.hand
+        ..clear()
+        ..add(makeCard('gryffin', owner: 0));
+      final card = controller.human.hand.single;
+      controller.selectCard(card);
+      controller.playSelected();
+
+      expect(player.played, contains(SoundCue.cardPlayed));
+      controller.dispose();
+      sounds.dispose();
     });
   });
 }
