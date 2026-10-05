@@ -404,7 +404,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clearWeatherNotPlayed => 'Clear Weather not played';
 
   @override
-  String get closeRowAtOne => 'Close rows at 1';
+  String weatherRowAtOne(String row) {
+    return '$row at 1';
+  }
 
   @override
   String pointsAbbrev(int value) {

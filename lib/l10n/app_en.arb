@@ -183,7 +183,12 @@
   "playAgain": "Play again",
   "notPlayed": "—",
   "clearWeatherNotPlayed": "Clear Weather not played",
-  "closeRowAtOne": "Close rows at 1",
+  "weatherRowAtOne": "{row} at 1",
+  "@weatherRowAtOne": {
+    "placeholders": {
+      "row": { "type": "String" }
+    }
+  },
   "pointsAbbrev": "{value} str",
   "@pointsAbbrev": {
     "placeholders": {
