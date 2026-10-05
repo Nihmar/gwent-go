@@ -72,7 +72,7 @@ class MulliganOverlay extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                '${strings.cardsInHand}: ${controller.human.hand.length}',
+                '${strings.cardsInHand}: ${controller.human.handSize}',
                 style: const TextStyle(color: GwentColors.onSurfaceVariant),
               ),
               const SizedBox(height: 20),

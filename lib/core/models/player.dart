@@ -73,6 +73,19 @@ class PlayerState {
   final List<CardInstance> hand = [];
   final List<CardInstance> graveyard = [];
 
+  /// Size of a hidden hand, when the state came from a projection. Null when
+  /// [hand] holds the real cards.
+  int? hiddenHandCount;
+
+  /// Size of a hidden deck order, when the state came from a projection.
+  int? hiddenDeckCount;
+
+  /// Cards in hand, hidden or not.
+  int get handSize => hiddenHandCount ?? hand.length;
+
+  /// Cards left in the deck, hidden or not.
+  int get deckSize => hiddenDeckCount ?? deck.length;
+
   bool leaderUsed = false;
   bool passed = false;
   bool isWinning = false;
