@@ -35,6 +35,7 @@ GameEngine harness({
   String humanLeader = 'foltest_gold',
   String opponentLeader = 'eredin_silver',
   int seed = 7,
+  GameRandom? random,
 }) {
   final engine = GameEngine(
     firstDeck: testDeck(
@@ -53,7 +54,7 @@ GameEngine harness({
       cards: const {'gryffin': 1, 'nekker': 3, 'gargoyle': 1},
     ),
     difficulty: Difficulty.normal,
-    random: GameRandom(seed),
+    random: random ?? GameRandom(seed),
   );
   engine.startMatch();
   engine.finishMulligan(0);

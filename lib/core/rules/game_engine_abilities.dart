@@ -202,9 +202,13 @@ class _AbilityResolver {
   void _resolveMedic(PlayerState player, CardInstance? requested) {
     final candidates = player.graveyard.where((c) => c.isUnit).toList();
     if (candidates.isEmpty) return;
-    final revive = requested != null && candidates.contains(requested)
-        ? requested
-        : _autoMedicPick(candidates);
+    // Emhyr "Invader of the North" makes every revive random, ignoring any
+    // requested card (reference: game.randomRespawn).
+    final revive = state.randomRespawn
+        ? random.pick(candidates)
+        : (requested != null && candidates.contains(requested)
+              ? requested
+              : _autoMedicPick(candidates));
     player.graveyard.remove(revive);
     revive.owner = player.index;
     final row = rowForCard(revive, player.index);
