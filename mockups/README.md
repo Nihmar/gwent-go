@@ -45,8 +45,9 @@ fixed sprite-sheet math (content sits at 15,14–125,125 in a 215 × 215 canvas)
   shows cards / units / specials / strength and the validation message while the
   player adds cards in the collection grid or edits copies in the deck list.
   Adding is a tap in the grid, removing is a stepper in the deck, so a mis-tap
-  cannot silently delete a card. The copy state lives in a single top-right
-  marker so the card's own strength badge (top-left) stays readable.
+  cannot silently delete a card. In the grid the card face is pure artwork:
+  name, type, copies and ability sit underneath, with a top-right marker showing
+  whether another copy can be added.
 - **Abilities are visible while browsing**: every collection tile carries a short
   ability label (`Hero`, `Tight Bond`, `Medic`, ...) and long-press opens a card
   sheet with the full localized effect text plus the add/remove actions.
