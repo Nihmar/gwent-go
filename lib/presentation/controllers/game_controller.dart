@@ -67,7 +67,6 @@ class GameController extends ChangeNotifier {
   final Difficulty difficulty;
   late final AiPlayer _ai;
 
-  final List<GameEvent> log = [];
   final List<CardInstance> redrawPicks = [];
 
   CardInstance? selectedCard;
@@ -362,7 +361,6 @@ class GameController extends ChangeNotifier {
 
   void _drainEvents() {
     for (final event in engine.takeEvents()) {
-      log.add(event);
       if (event is AbilityTriggered && event.cards.isNotEmpty) {
         final color = GwentColors.abilityEffect(event.ability);
         for (final card in event.cards) {
@@ -370,9 +368,6 @@ class GameController extends ChangeNotifier {
           _flashColors[card.uid] = color;
         }
       }
-    }
-    while (log.length > 40) {
-      log.removeAt(0);
     }
   }
 

@@ -27,7 +27,6 @@ abstract final class CardAssets {
     Ability.frost => 'frost',
     Ability.fog => 'fog',
     Ability.rain => 'rain',
-    Ability.storm => 'storm',
     Ability.clear => 'clear',
     Ability.decoy => 'decoy',
     Ability.scorch => 'scorch',

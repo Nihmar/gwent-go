@@ -61,7 +61,7 @@ class SettingsController extends ChangeNotifier {
 
   Future<void> saveDeck(DeckDefinition deck) async {
     _customDecks[deck.faction] = deck;
-    settings = settings.copyWith(faction: deck.faction, deckId: deck.id);
+    settings = settings.copyWith(faction: deck.faction);
     notifyListeners();
     await repository.saveDeck(deck);
     await repository.saveSettings(settings);

@@ -62,7 +62,6 @@ abstract final class Ability {
   static const frost = 'frost';
   static const fog = 'fog';
   static const rain = 'rain';
-  static const storm = 'storm';
   static const clear = 'clear';
 
   /// Weather abilities mapped to the combat rows they affect.
@@ -70,7 +69,6 @@ abstract final class Ability {
     frost: [CardRow.close],
     fog: [CardRow.ranged],
     rain: [CardRow.siege],
-    storm: [CardRow.ranged, CardRow.siege],
   };
 
   static bool isWeather(String id) => weatherRows.containsKey(id);
@@ -95,16 +93,6 @@ abstract final class Ability {
     'crach_an_craite',
   };
 
-  /// Leader abilities that only apply at the start of the game (or passively)
-  /// and therefore cannot be activated.
-  static const Set<String> passiveLeaderAbilities = {
-    'emhyr_whiteflame',
-    'emhyr_invader',
-    'eredin_treacherous',
-    'francesca_daisy',
-    'king_bran',
-  };
-
   static bool isActiveLeaderAbility(String id) =>
       activeLeaderAbilities.contains(id);
 }
@@ -120,7 +108,6 @@ class CardDefinition {
     required this.artFilename,
     this.abilities = const [],
     this.maxCopies = 1,
-    this.descriptionKey,
   });
 
   /// Stable, language-independent identifier (unique across the catalog).
@@ -141,9 +128,6 @@ class CardDefinition {
 
   /// Maximum number of copies allowed in an owned collection.
   final int maxCopies;
-
-  /// Optional explicit localization key for the card description.
-  final String? descriptionKey;
 
   bool get isHero => abilities.contains(Ability.hero);
 
@@ -167,28 +151,8 @@ class CardDefinition {
 
   bool hasAbility(String ability) => abilities.contains(ability);
 
-  /// First active ability, used to pick the artwork badge.
-  String? get primaryAbility =>
-      abilities.where((a) => a != Ability.hero).firstOrNull;
-
-  CardDefinition copyWith({int? maxCopies}) => CardDefinition(
-    id: id,
-    name: name,
-    faction: faction,
-    row: row,
-    baseStrength: baseStrength,
-    artFilename: artFilename,
-    abilities: abilities,
-    maxCopies: maxCopies ?? this.maxCopies,
-    descriptionKey: descriptionKey,
-  );
-
   @override
   String toString() => 'CardDefinition($id, $name)';
-}
-
-extension _FirstOrNull<T> on Iterable<T> {
-  T? get firstOrNull => isEmpty ? null : first;
 }
 
 /// A concrete card owned by a player during a match.

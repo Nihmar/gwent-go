@@ -79,7 +79,6 @@ extension GwentLocalizations on AppLocalizations {
     Ability.frost => abilityFrost,
     Ability.fog => abilityFog,
     Ability.rain => abilityRain,
-    Ability.storm => abilityStorm,
     Ability.clear => abilityClear,
     'foltest_king' => leaderFoltestKing,
     'foltest_lord' => leaderFoltestLord,

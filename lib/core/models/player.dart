@@ -7,20 +7,6 @@ enum Difficulty {
   normal,
   hard;
 
-  /// Localization key for the human-readable label.
-  String get labelKey => switch (this) {
-    Difficulty.easy => 'easy',
-    Difficulty.normal => 'normal',
-    Difficulty.hard => 'hard',
-  };
-
-  /// Localization key for the short description shown on the home screen.
-  String get descriptionKey => switch (this) {
-    Difficulty.easy => 'difficultyEasyDescription',
-    Difficulty.normal => 'difficultyNormalDescription',
-    Difficulty.hard => 'difficultyHardDescription',
-  };
-
   static Difficulty fromName(String name) => Difficulty.values.firstWhere(
     (d) => d.name == name,
     orElse: () => Difficulty.normal,
@@ -125,10 +111,4 @@ class RowState {
   bool halfWeather = false;
 
   bool get hasSpecial => special != null;
-
-  void clear() {
-    cards.clear();
-    special = null;
-    weather = false;
-  }
 }

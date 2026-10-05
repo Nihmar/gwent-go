@@ -20,7 +20,6 @@ void main() {
         const AppSettings(
           difficulty: Difficulty.hard,
           faction: CardFaction.skellige,
-          deckId: 'custom',
           soundEnabled: false,
         ),
       );
@@ -28,7 +27,6 @@ void main() {
       final loaded = await repository.loadSettings();
       expect(loaded.difficulty, Difficulty.hard);
       expect(loaded.faction, CardFaction.skellige);
-      expect(loaded.deckId, 'custom');
       expect(loaded.soundEnabled, isFalse);
     });
 
@@ -91,7 +89,6 @@ void main() {
         const AppSettings(
           difficulty: Difficulty.easy,
           faction: CardFaction.monsters,
-          deckId: 'x',
           soundEnabled: true,
         ),
       );

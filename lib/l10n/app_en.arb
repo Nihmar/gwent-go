@@ -249,7 +249,6 @@
   "abilityFrost": "Sets the strength of all Close Combat cards to 1 for both players.",
   "abilityFog": "Sets the strength of all Ranged Combat cards to 1 for both players.",
   "abilityRain": "Sets the strength of all Siege Combat cards to 1 for both players.",
-  "abilityStorm": "Reduces the Strength of all Ranged and Siege units to 1.",
   "abilityClear": "Removes all Weather Cards (Biting Frost, Impenetrable Fog and Torrential Rain) effects.",
 
   "leaderFoltestKing": "Pick an Impenetrable Fog card from your deck and play it instantly.",
