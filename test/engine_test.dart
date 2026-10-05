@@ -322,4 +322,38 @@ void main() {
       expect(engine.human.graveyard, isEmpty);
     });
   });
+
+  group('White Flame leader', () {
+    test('cancels passive leader effects for both players', () {
+      final engine = harness(
+        humanFaction: CardFaction.skellige,
+        humanLeader: 'king_bran',
+        opponentFaction: CardFaction.nilfgaard,
+        opponentLeader: 'emhyr_bronze',
+      );
+      expect(engine.human.leaderUsed, isTrue);
+      expect(engine.opponent.leaderUsed, isTrue);
+      // King Bran's weather protection must not apply while White Flame is in
+      // play, matching the reference's disableLeader behaviour.
+      expect(engine.state.rowState(0, CardRow.close).halfWeather, isFalse);
+    });
+
+    test('cancels double spy power from the Treacherous leader', () {
+      final engine = harness(
+        humanFaction: CardFaction.nilfgaard,
+        humanLeader: 'emhyr_bronze',
+        opponentFaction: CardFaction.monsters,
+        opponentLeader: 'eredin_the_treacherous',
+      );
+      expect(engine.state.doubleSpyPower, isFalse);
+    });
+
+    test('passive leader effects still apply without White Flame', () {
+      final engine = harness(
+        humanFaction: CardFaction.skellige,
+        humanLeader: 'king_bran',
+      );
+      expect(engine.state.rowState(0, CardRow.close).halfWeather, isTrue);
+    });
+  });
 }
