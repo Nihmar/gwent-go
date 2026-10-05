@@ -33,7 +33,7 @@ class GameHand extends StatelessWidget {
             showName: false,
             selected: identical(controller.selectedCard, card),
             dim:
-                !controller.engine.canPlayCard(human.index, card) &&
+                !controller.canPlayCard(card) &&
                 controller.isLocalTurn,
             onTap: () => controller.selectCard(card),
             onLongPress: () => showCardDetail(

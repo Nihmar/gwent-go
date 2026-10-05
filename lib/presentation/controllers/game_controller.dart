@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'match_backend.dart';
 import 'turn_driver.dart';
 
 import '../../core/ai/ai.dart';
@@ -9,6 +10,7 @@ import '../../core/models/game_state.dart';
 import '../../core/models/player.dart';
 import '../../core/rules/game_engine.dart';
 import '../../core/rules/game_event.dart';
+import '../../core/session/client_session.dart';
 import '../../core/rules/game_random.dart';
 import '../theme/gwent_colors.dart';
 
@@ -50,16 +52,25 @@ class GameController extends ChangeNotifier {
     bool hotseat = false,
     int? seed,
   }) : this._(
-         GameEngine(
-           firstDeck: humanDeck,
-           secondDeck: opponentDeck,
-           difficulty: difficulty,
-           random: seed == null ? null : GameRandom(seed),
+         EngineBackend(
+           GameEngine(
+             firstDeck: humanDeck,
+             secondDeck: opponentDeck,
+             difficulty: difficulty,
+             random: seed == null ? null : GameRandom(seed),
+           ),
          ),
          localSeat: localSeat,
          opponentName: opponentName,
          hotseat: hotseat,
        );
+
+  /// Creates a controller for a guest: it renders the projections the host
+  /// sends and forwards commands through [session].
+  factory GameController.remote({
+    required ClientSession session,
+    required int localSeat,
+  }) => GameController._(SessionBackend(session, localSeat: localSeat), localSeat: localSeat);
 
   /// Resumes a match from a snapshot produced by [snapshot] using the given
   /// snapshot (which already carries the player names).
@@ -69,7 +80,7 @@ class GameController extends ChangeNotifier {
     bool hotseat = false,
   }) {
     final controller = GameController._(
-      GameEngine.fromJson(snapshot),
+      EngineBackend(GameEngine.fromJson(snapshot)),
       localSeat: localSeat,
       hotseat: hotseat,
     );
@@ -79,31 +90,37 @@ class GameController extends ChangeNotifier {
   }
 
   GameController._(
-    this.engine, {
+    this._backend, {
     required int localSeat,
-    required this.hotseat,
+    this.hotseat = false,
     String? opponentName,
   }) : _localSeat = localSeat,
-       difficulty = engine.state.players[localSeat].difficulty {
+       difficulty = _backend.state.players[localSeat].difficulty {
     _ai = createAi(difficulty);
+    final engine = _backend is EngineBackend ? _backend.engine : null;
+    _backend.onChanged = () {
+      if (!_disposed) notifyListeners();
+    };
     // The engine is seat agnostic; the presentation marks which seats humans
     // control. In hotseat play both of them are.
     if (hotseat) {
-      for (final player in engine.state.players) {
+      for (final player in _backend.state.players) {
         player.isHuman = true;
       }
-    } else {
-      engine.state.players[localSeat].isHuman = true;
+    } else if (engine != null) {
+      _backend.state.players[localSeat].isHuman = true;
       if (opponentName != null) {
-        engine.state.players[engine.state.opponentOf(localSeat)].name =
+        _backend.state.players[_backend.state.opponentOf(localSeat)].name =
             opponentName;
       }
     }
-    _driver = hotseat
+    // Only a client that owns the engine has seats to drive; a guest waits for
+    // the host's projections.
+    _driver = engine == null || hotseat
         ? const IdleTurnDriver()
         : LocalAiDriver(
             engine: engine,
-            seat: engine.state.opponentOf(localSeat),
+            seat: _backend.state.opponentOf(localSeat),
             ai: _ai,
             onApplied: () {
               _drainEvents();
@@ -116,7 +133,11 @@ class GameController extends ChangeNotifier {
           );
   }
 
-  final GameEngine engine;
+  final MatchBackend _backend;
+
+  /// The authoritative engine, when this client owns the match.
+  GameEngine? get engine =>
+      _backend is EngineBackend ? _backend.engine : null;
 
   /// True when two humans share this device.
   final bool hotseat;
@@ -156,7 +177,7 @@ class GameController extends ChangeNotifier {
   /// True while the player is choosing cards for a leader ability.
   bool get isChoosingForLeader => pendingChoice != null && selectedCard == null;
 
-  GameState get state => engine.state;
+  GameState get state => _backend.state;
   PlayerState get human => state.players[_localSeat];
   PlayerState get opponent => state.players[state.opponentOf(_localSeat)];
   bool get isMulligan =>
@@ -202,7 +223,7 @@ class GameController extends ChangeNotifier {
 
   /// Starts the match and enters the mulligan phase.
   void start() {
-    engine.startMatch();
+    _backend.startMatch();
     _runAiMulligan();
     _drainEvents();
     notifyListeners();
@@ -210,23 +231,28 @@ class GameController extends ChangeNotifier {
 
   /// Redraws the opening hand of every seat this client does not control.
   void _runAiMulligan() {
-    if (hotseat) return;
+    if (hotseat || !_backend.isAuthoritative) return;
     if (state.phase != GamePhase.mulligan) return;
     for (final player in state.players) {
       if (player.isHuman || player.mulliganDone) continue;
       for (var i = 0; i < GameEngine.maxRedraws; i++) {
-        final order = engine.mulliganDiscards(player);
+        final order = _backend.mulliganDiscards(player);
         if (order.isEmpty) break;
         final card = order.first;
         if (card.baseStrength >= 15) break;
-        if (!engine.redraw(player.index, card)) break;
+        if (!_backend.redraw(player.index, card)) break;
       }
-      engine.finishMulligan(player.index);
+      _backend.finishMulligan(player.index);
     }
   }
 
-  /// Serializes the current match so it can be resumed later.
-  Map<String, dynamic> snapshot() => engine.toJson();
+  /// Whether [card] may be played right now (used to dim cards).
+  bool canPlayCard(CardInstance card) =>
+      _backend.canPlayCard(human.index, card);
+
+  /// Serializes the current match so it can be resumed later; null when this
+  /// client does not own the state (a remote guest).
+  Map<String, dynamic>? snapshot() => _backend.snapshot();
 
   // ---------------------------------------------------------------------------
   // Mulligan
@@ -244,10 +270,10 @@ class GameController extends ChangeNotifier {
   void confirmMulligan() {
     if (!isMulligan) return;
     for (final card in redrawPicks) {
-      engine.redraw(human.index, card);
+      _backend.redraw(human.index, card);
     }
     redrawPicks.clear();
-    engine.finishMulligan(human.index);
+    _backend.finishMulligan(human.index);
     _drainEvents();
     _syncHotseat();
     notifyListeners();
@@ -275,7 +301,7 @@ class GameController extends ChangeNotifier {
   void playSelected({CardRow? row, CardInstance? target}) {
     final card = selectedCard;
     if (card == null) return;
-    if (!engine.canPlayCard(human.index, card)) return;
+    if (!_backend.canPlayCard(human.index, card)) return;
 
     if (_needsRow(card) && row == null) {
       pendingChoice = RowChoice(_rowOptions(card));
@@ -297,7 +323,7 @@ class GameController extends ChangeNotifier {
       }
     }
 
-    final played = engine.playCard(
+    final played = _backend.playCard(
       human.index,
       card,
       targetRow: row,
@@ -309,7 +335,7 @@ class GameController extends ChangeNotifier {
 
   void pass() {
     if (!isLocalTurn) return;
-    engine.pass(human.index);
+    _backend.pass(human.index);
     _afterHumanAction();
   }
 
@@ -345,7 +371,7 @@ class GameController extends ChangeNotifier {
       default:
         break;
     }
-    engine.activateLeader(human.index);
+    _backend.activateLeader(human.index);
     _afterHumanAction();
   }
 
@@ -367,7 +393,7 @@ class GameController extends ChangeNotifier {
         _startDestroyerDraw();
         return;
       case TargetKind.deck:
-        engine.activateLeader(
+        _backend.activateLeader(
           human.index,
           discard: _destroyerDiscard,
           deckPick: targets.first,
@@ -376,14 +402,14 @@ class GameController extends ChangeNotifier {
         return;
       case TargetKind.graveyard:
       case TargetKind.battlefield:
-        engine.activateLeader(human.index, target: targets.first);
+        _backend.activateLeader(human.index, target: targets.first);
         _afterHumanAction();
         return;
     }
   }
 
   void _finishDestroyer() {
-    engine.activateLeader(human.index, discard: _destroyerDiscard);
+    _backend.activateLeader(human.index, discard: _destroyerDiscard);
     _afterHumanAction();
   }
 
@@ -434,7 +460,7 @@ class GameController extends ChangeNotifier {
   }
 
   void _drainEvents() {
-    for (final event in engine.takeEvents()) {
+    for (final event in _backend.takeEvents()) {
       if (event is AbilityTriggered && event.cards.isNotEmpty) {
         final color = GwentColors.abilityEffect(event.ability);
         for (final card in event.cards) {
@@ -448,7 +474,9 @@ class GameController extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    _backend.onChanged = null;
     _driver.dispose();
+    _backend.dispose();
     super.dispose();
   }
 }
