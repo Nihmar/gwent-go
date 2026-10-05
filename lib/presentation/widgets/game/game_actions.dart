@@ -24,7 +24,7 @@ class GameActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = context.strings;
-    final humanTurn = controller.engine.isHumanTurn && !controller.isMulligan;
+    final humanTurn = controller.isLocalTurn && !controller.isMulligan;
     final turnChip = TurnChip(
       label: humanTurn ? strings.yourTurn : strings.opponentTurn,
       active: humanTurn,

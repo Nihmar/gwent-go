@@ -52,7 +52,7 @@ void main() {
       setDeck(engine, 0, ['ciri', 'triss', 'villen']);
       engine.playCard(
         0,
-        engine.human.hand.firstWhere((c) => c.id == 'stennis'),
+        engine.state.players[0].hand.firstWhere((c) => c.id == 'stennis'),
       );
 
       setTurn(engine, 0);
@@ -61,7 +61,7 @@ void main() {
           .cards
           .add(makeCard('gryffin', owner: 0));
       final frost = makeCard('frost', owner: 0);
-      engine.human.hand.add(frost);
+      engine.state.players[0].hand.add(frost);
       engine.playCard(0, frost);
 
       final encoded = jsonEncode(engine.toJson());
@@ -97,7 +97,7 @@ void main() {
       setHand(engine, 0, ['gryffin', 'fiend']);
       final restored = GameEngine.fromJson(engine.toJson());
       setTurn(restored, 0);
-      final card = restored.human.hand.first;
+      final card = restored.state.players[0].hand.first;
       expect(restored.playCard(0, card), isTrue);
       expect(
         restored.state.rowState(0, CardRow.close).cards.map((c) => c.id),

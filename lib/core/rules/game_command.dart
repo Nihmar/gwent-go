@@ -70,12 +70,24 @@ class RedrawCommand extends GameCommand {
   final int cardUid;
 }
 
-/// Ends the opening mulligan and starts the first round.
+/// Ends the opening mulligan for one seat.
 class FinishMulliganCommand extends GameCommand {
   const FinishMulliganCommand(this.player);
 
   @override
   final int player;
+}
+
+/// Lets a lone Scoia'tael seat decide who takes the first turn.
+class ChooseFirstPlayerCommand extends GameCommand {
+  const ChooseFirstPlayerCommand({
+    required this.player,
+    required this.firstPlayer,
+  });
+
+  @override
+  final int player;
+  final int firstPlayer;
 }
 
 /// Why a [GameCommand] was rejected.
@@ -109,6 +121,15 @@ enum CommandRejection {
 
   /// The seat has no redraws left.
   noRedrawsLeft,
+
+  /// A step that was already completed, e.g. a finished mulligan.
+  alreadyDone,
+
+  /// The seat has no such decision to make.
+  choiceNotAllowed,
+
+  /// The chosen seat does not exist.
+  invalidChoice,
 }
 
 /// Outcome of [GameEngine.apply].

@@ -70,6 +70,9 @@ extension GwentLocalizations on AppLocalizations {
     CommandRejection.noTarget => commandNoTarget,
     CommandRejection.leaderUnavailable => commandLeaderUnavailable,
     CommandRejection.noRedrawsLeft => commandNoRedrawsLeft,
+    CommandRejection.alreadyDone => commandAlreadyDone,
+    CommandRejection.choiceNotAllowed => commandChoiceNotAllowed,
+    CommandRejection.invalidChoice => commandInvalidChoice,
   };
 
   /// Human readable description of a card ability.

@@ -22,43 +22,39 @@ part 'game_engine_zones.dart';
 /// [_AbilityResolver] companion part file to keep both files cohesive.
 class GameEngine {
   GameEngine({
-    required DeckDefinition humanDeck,
-    required DeckDefinition opponentDeck,
+    required DeckDefinition firstDeck,
+    required DeckDefinition secondDeck,
     required Difficulty difficulty,
     GameRandom? random,
-    this.opponentName = 'Opponent',
   }) : _random = random ?? GameRandom() {
-    final human = PlayerState(
-      index: 0,
-      name: 'You',
-      faction: humanDeck.faction,
-      leader: humanDeck.leader,
-      isHuman: true,
-      difficulty: difficulty,
-      deckDefinition: humanDeck,
-    );
-    final opponent = PlayerState(
-      index: 1,
-      name: opponentName,
-      faction: opponentDeck.faction,
-      leader: opponentDeck.leader,
-      isHuman: false,
-      difficulty: difficulty,
-      deckDefinition: opponentDeck,
-    );
+    final players = [
+      for (var i = 0; i < 2; i++)
+        PlayerState(
+          index: i,
+          name: 'Player ${i + 1}',
+          faction: (i == 0 ? firstDeck : secondDeck).faction,
+          leader: (i == 0 ? firstDeck : secondDeck).leader,
+          // Which seats are driven by the AI is a session concern; the
+          // presentation marks the local seat after construction.
+          isHuman: false,
+          difficulty: difficulty,
+          deckDefinition: i == 0 ? firstDeck : secondDeck,
+        ),
+    ];
     state = GameState(
-      players: [human, opponent],
+      players: players,
       roundNumber: 0,
       currentPlayer: 0,
       firstPlayer: 0,
     );
-    _buildDeck(human);
-    _buildDeck(opponent);
+    for (final player in players) {
+      _buildDeck(player);
+    }
     _abilities = _AbilityResolver(this);
   }
 
   /// Rebuilds an engine around a restored [GameState].
-  GameEngine._restore(this._random, this.opponentName, GameState restored) {
+  GameEngine._restore(this._random, GameState restored) {
     state = restored;
     _abilities = _AbilityResolver(this);
   }
@@ -71,24 +67,21 @@ class GameEngine {
     final decoded = decodeMatch(json);
     final engine = GameEngine._restore(
       random ?? GameRandom(json['randomSeed'] as int?),
-      json['opponentName'] as String? ?? 'Opponent',
       decoded.state,
     );
     engine._uid = decoded.maxUid + 1;
-    engine.humanRedraws = json['humanRedraws'] as int? ?? 0;
+    engine._firstPlayerChoice = json['firstPlayerChoice'] as int?;
     return engine;
   }
 
   /// Serializes the current match so it can be paused and resumed later.
   Map<String, dynamic> toJson() => encodeMatch(
     state,
-    opponentName: opponentName,
-    humanRedraws: humanRedraws,
     randomSeed: _random.seed,
+    firstPlayerChoice: _firstPlayerChoice,
   );
 
   final GameRandom _random;
-  final String opponentName;
 
   late final GameState state;
   late final _AbilityResolver _abilities;
@@ -96,9 +89,13 @@ class GameEngine {
   final List<GameEvent> _events = [];
   int _uid = 0;
 
-  int humanRedraws = 0;
+  /// Redraws each seat may use during the opening mulligan.
   static const int maxRedraws = 2;
   static const int openingHandSize = 10;
+
+  /// Seat that still has to choose who starts, when a single Scoia'tael seat
+  /// is in the match.
+  int? _firstPlayerChoice;
 
   List<GameEvent> takeEvents() {
     final out = List<GameEvent>.unmodifiable(_events);
@@ -107,14 +104,13 @@ class GameEngine {
   }
 
   GameRandom get random => _random;
-  PlayerState get human => state.players[0];
-  PlayerState get opponent => state.players[1];
 
-  bool get isHumanTurn =>
-      state.phase == GamePhase.playing && state.currentPlayer == human.index;
+  /// Seat that still has to choose who starts, or null.
+  int? get firstPlayerChoice => _firstPlayerChoice;
 
-  bool get isOpponentTurn =>
-      state.phase == GamePhase.playing && state.currentPlayer == opponent.index;
+  /// Discard order for a seat's mulligan, most disposable card first.
+  List<CardInstance> mulliganDiscards(PlayerState player) =>
+      _abilities.discardOrder(player);
 
   int nextUid() => _uid++;
 
@@ -142,42 +138,44 @@ class GameEngine {
 
   /// Draws opening hands, applies start-of-game abilities and enters mulligan.
   void startMatch() {
-    _abilities.draw(human, openingHandSize);
-    _abilities.draw(opponent, openingHandSize);
+    for (final player in state.players) {
+      _abilities.draw(player, openingHandSize);
+    }
     final leadersDisabled = _applyGameStart();
     _randomizeFirstPlayer();
     // White Flame disables every leader, including the passive ones, matching
     // the reference implementation's disableLeader branch.
     if (!leadersDisabled) _applyLeaderStartAbilities();
-    _mulliganOpponent();
     state.phase = GamePhase.mulligan;
     Scoring.refresh(state);
     _emit(const MatchStarted());
   }
 
   void _randomizeFirstPlayer() {
-    final humanScoiatael = human.faction == CardFaction.scoiatael;
-    final opponentScoiatael = opponent.faction == CardFaction.scoiatael;
-    if (humanScoiatael && !opponentScoiatael) {
-      // The human Scoia'tael player chooses; the UI defaults to going first.
-      state.firstPlayer = human.index;
-    } else if (opponentScoiatael && !humanScoiatael) {
-      state.firstPlayer = _random.chance(0.5) ? opponent.index : human.index;
+    final scoia = state.players
+        .where((player) => player.faction == CardFaction.scoiatael)
+        .toList();
+    if (scoia.length == 1) {
+      // The lone Scoia'tael seat decides. It defaults to going first until it
+      // sends a ChooseFirstPlayerCommand.
+      _firstPlayerChoice = scoia.single.index;
+      state.firstPlayer = scoia.single.index;
     } else {
-      state.firstPlayer = _random.chance(0.5) ? human.index : opponent.index;
+      state.firstPlayer = _random.chance(0.5) ? 0 : 1;
     }
   }
 
   /// Applies start-of-game leader rules. Returns true when a White Flame leader
   /// disabled both leaders, so no other leader effect may run.
   bool _applyGameStart() {
-    if (human.leader.hasAbility('emhyr_whiteflame') ||
-        opponent.leader.hasAbility('emhyr_whiteflame')) {
-      human.leaderUsed = true;
-      opponent.leaderUsed = true;
-      return true;
+    final disabled = state.players.any(
+      (player) => player.leader.hasAbility('emhyr_whiteflame'),
+    );
+    if (!disabled) return false;
+    for (final player in state.players) {
+      player.leaderUsed = true;
     }
-    return false;
+    return true;
   }
 
   /// Passive / start-of-game leader abilities.
@@ -202,20 +200,6 @@ class GameEngine {
         }
       }
     }
-  }
-
-  void _mulliganOpponent() {
-    _opponentRedraw();
-    _opponentRedraw();
-  }
-
-  void _opponentRedraw() {
-    if (opponent.deck.isEmpty) return;
-    final order = _abilities.discardOrder(opponent);
-    if (order.isEmpty) return;
-    final card = order.first;
-    if (card.baseStrength >= 15) return;
-    _swapWithDeck(opponent, card);
   }
 
   void _swapWithDeck(PlayerState player, CardInstance card) {
@@ -243,7 +227,7 @@ class GameEngine {
     for (final player in state.players) {
       if (!player.canPlay()) player.passed = true;
     }
-    if (human.passed && opponent.passed) {
+    if (state.players.every((player) => player.passed)) {
       _endRound();
       return;
     }
@@ -303,7 +287,7 @@ class GameEngine {
       player.passed = true;
       _emit(PlayerPassed(player.index));
     }
-    if (human.passed && opponent.passed) {
+    if (state.players.every((player) => player.passed)) {
       _endRound();
       return;
     }
@@ -311,21 +295,21 @@ class GameEngine {
   }
 
   void _endRound() {
-    final humanTotal = Scoring.playerTotal(state, human.index);
-    final opponentTotal = Scoring.playerTotal(state, opponent.index);
-    var diff = humanTotal - opponentTotal;
+    final scores = [
+      for (final player in state.players)
+        Scoring.playerTotal(state, player.index),
+    ];
+    var diff = scores[0] - scores[1];
     if (diff == 0) {
-      final humanNilf = human.faction == CardFaction.nilfgaard;
-      final opponentNilf = opponent.faction == CardFaction.nilfgaard;
-      if (humanNilf != opponentNilf) diff = humanNilf ? 1 : -1;
+      final firstNilf = state.players[0].faction == CardFaction.nilfgaard;
+      final secondNilf = state.players[1].faction == CardFaction.nilfgaard;
+      if (firstNilf != secondNilf) diff = firstNilf ? 1 : -1;
     }
-    final int? winner = diff > 0
-        ? human.index
-        : (diff < 0 ? opponent.index : null);
+    final int? winner = diff > 0 ? 0 : (diff < 0 ? 1 : null);
     state.roundHistory.add(
       RoundResult(
         round: state.roundNumber,
-        scores: [humanTotal, opponentTotal],
+        scores: scores,
         winner: winner,
       ),
     );
@@ -342,10 +326,10 @@ class GameEngine {
       RoundEnded(
         round: state.roundNumber,
         winner: winner,
-        scores: [humanTotal, opponentTotal],
+        scores: scores,
       ),
     );
-    if (human.isOutOfGems || opponent.isOutOfGems) {
+    if (state.players.any((player) => player.isOutOfGems)) {
       _endGame();
     } else {
       _startRound();
@@ -387,13 +371,10 @@ class GameEngine {
 
   void _endGame() {
     state.phase = GamePhase.gameOver;
-    if (human.isOutOfGems && opponent.isOutOfGems) {
-      state.matchWinner = null;
-    } else if (human.isOutOfGems) {
-      state.matchWinner = opponent.index;
-    } else {
-      state.matchWinner = human.index;
-    }
+    final remaining = state.players
+        .where((player) => !player.isOutOfGems)
+        .toList();
+    state.matchWinner = remaining.length == 1 ? remaining.single.index : null;
     _emit(MatchEnded(state.matchWinner));
   }
 
@@ -412,6 +393,7 @@ class GameEngine {
     PassCommand() => _applyPass(command),
     RedrawCommand() => _applyRedraw(command),
     FinishMulliganCommand() => _applyFinishMulligan(command),
+    ChooseFirstPlayerCommand() => _applyChooseFirstPlayer(command),
   };
 
   /// Finds a card anywhere on the table by its instance id.
@@ -542,22 +524,22 @@ class GameEngine {
     if (state.phase != GamePhase.mulligan) {
       return const CommandRejected(CommandRejection.wrongPhase);
     }
-    // Only the local seat redraws until the per-seat mulligan lands (#37).
-    if (command.player != human.index) {
-      return const CommandRejected(CommandRejection.notYourTurn);
+    final player = state.players[command.player];
+    if (player.mulliganDone) {
+      return const CommandRejected(CommandRejection.alreadyDone);
     }
-    if (humanRedraws >= maxRedraws) {
+    if (player.redraws >= maxRedraws) {
       return const CommandRejected(CommandRejection.noRedrawsLeft);
     }
     final card = cardByUid(command.cardUid);
     if (card == null) {
       return const CommandRejected(CommandRejection.unknownCard);
     }
-    if (human.deck.isEmpty || !human.hand.contains(card)) {
+    if (player.deck.isEmpty || !player.hand.contains(card)) {
       return const CommandRejected(CommandRejection.cardNotInHand);
     }
-    humanRedraws++;
-    _swapWithDeck(human, card);
+    player.redraws++;
+    _swapWithDeck(player, card);
     return const CommandAccepted();
   }
 
@@ -565,11 +547,32 @@ class GameEngine {
     if (state.phase != GamePhase.mulligan) {
       return const CommandRejected(CommandRejection.wrongPhase);
     }
-    if (command.player != human.index) {
-      return const CommandRejected(CommandRejection.notYourTurn);
+    final player = state.players[command.player];
+    if (player.mulliganDone) {
+      return const CommandRejected(CommandRejection.alreadyDone);
     }
-    state.phase = GamePhase.playing;
-    _startRound();
+    player.mulliganDone = true;
+    // The round starts once every seat has confirmed its opening hand.
+    if (state.allMulligansDone) {
+      state.phase = GamePhase.playing;
+      _startRound();
+    }
+    return const CommandAccepted();
+  }
+
+  CommandResult _applyChooseFirstPlayer(ChooseFirstPlayerCommand command) {
+    if (state.phase != GamePhase.mulligan) {
+      return const CommandRejected(CommandRejection.wrongPhase);
+    }
+    if (_firstPlayerChoice != command.player) {
+      return const CommandRejected(CommandRejection.choiceNotAllowed);
+    }
+    if (command.firstPlayer < 0 ||
+        command.firstPlayer >= state.players.length) {
+      return const CommandRejected(CommandRejection.invalidChoice);
+    }
+    state.firstPlayer = command.firstPlayer;
+    _firstPlayerChoice = null;
     return const CommandAccepted();
   }
 
@@ -627,5 +630,10 @@ class GameEngine {
   bool redraw(int playerIndex, CardInstance card) =>
       apply(RedrawCommand(player: playerIndex, cardUid: card.uid)).accepted;
 
-  void finishMulligan() => apply(FinishMulliganCommand(human.index));
+  bool finishMulligan(int playerIndex) =>
+      apply(FinishMulliganCommand(playerIndex)).accepted;
+
+  bool chooseFirstPlayer(int playerIndex, int firstPlayer) => apply(
+    ChooseFirstPlayerCommand(player: playerIndex, firstPlayer: firstPlayer),
+  ).accepted;
 }

@@ -64,7 +64,8 @@ class PlayerState {
   String name;
   final CardFaction faction;
   CardDefinition leader;
-  final bool isHuman;
+  /// Whether a human controls this seat; set by the presentation/session.
+  bool isHuman;
   final Difficulty difficulty;
   final DeckDefinition deckDefinition;
 
@@ -75,6 +76,12 @@ class PlayerState {
   bool leaderUsed = false;
   bool passed = false;
   bool isWinning = false;
+
+  /// Redraws used during the opening mulligan.
+  int redraws = 0;
+
+  /// Set once the seat has confirmed its opening hand.
+  bool mulliganDone = false;
 
   /// A player starts with two "gems"; each lost round removes one.
   int roundsLost = 0;

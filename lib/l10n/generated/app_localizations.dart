@@ -550,6 +550,24 @@ abstract class AppLocalizations {
   /// **'You have no redraws left.'**
   String get commandNoRedrawsLeft;
 
+  /// No description provided for @commandAlreadyDone.
+  ///
+  /// In en, this message translates to:
+  /// **'You have already confirmed that step.'**
+  String get commandAlreadyDone;
+
+  /// No description provided for @commandChoiceNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'That decision is not yours to make.'**
+  String get commandChoiceNotAllowed;
+
+  /// No description provided for @commandInvalidChoice.
+  ///
+  /// In en, this message translates to:
+  /// **'That choice is not valid.'**
+  String get commandInvalidChoice;
+
   /// No description provided for @searchCollection.
   ///
   /// In en, this message translates to:

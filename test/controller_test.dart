@@ -173,7 +173,7 @@ void main() {
     test('ability effects register a flash for affected cards', () {
       final controller = buildController();
       controller.start();
-      controller.engine.finishMulligan();
+      controller.engine.finishMulligan(0);
       controller.state.currentPlayer = 0;
 
       final strong = makeCard('fiend', owner: controller.opponent.index);

@@ -37,7 +37,7 @@ GameEngine harness({
   int seed = 7,
 }) {
   final engine = GameEngine(
-    humanDeck: testDeck(
+    firstDeck: testDeck(
       faction: humanFaction,
       leaderId: humanLeader,
       cards: const {
@@ -47,7 +47,7 @@ GameEngine harness({
         'yennefer': 1,
       },
     ),
-    opponentDeck: testDeck(
+    secondDeck: testDeck(
       faction: opponentFaction,
       leaderId: opponentLeader,
       cards: const {'gryffin': 1, 'nekker': 3, 'gargoyle': 1},
@@ -56,7 +56,8 @@ GameEngine harness({
     random: GameRandom(seed),
   );
   engine.startMatch();
-  engine.finishMulligan();
+  engine.finishMulligan(0);
+  engine.finishMulligan(1);
   return engine;
 }
 

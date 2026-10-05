@@ -246,6 +246,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commandNoRedrawsLeft => 'You have no redraws left.';
 
   @override
+  String get commandAlreadyDone => 'You have already confirmed that step.';
+
+  @override
+  String get commandChoiceNotAllowed => 'That decision is not yours to make.';
+
+  @override
+  String get commandInvalidChoice => 'That choice is not valid.';
+
+  @override
   String get searchCollection => 'Search collection';
 
   @override

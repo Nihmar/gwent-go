@@ -78,22 +78,25 @@ Already helpful:
 
 Blocking issues, each addressed by a phase below:
 
-1. **Privileged local human.** `GameState.human`, `GameEngine.human`/`opponent`
-   and `isHumanTurn`/`isOpponentTurn` assume exactly one human seat (index 0).
-   A network match has two local perspectives, and a hotseat match has two
-   humans on one engine.
-2. **Opponent mulligan is automatic.** `startMatch()` calls `_mulliganOpponent()`,
-   and `redraw()` rejects any `playerIndex != human.index`. Every seat must
-   submit its own mulligan.
-3. **Scoia'tael first-player choice defaults to the local human.**
-   `_randomizeFirstPlayer()` cannot ask a remote peer.
-4. **Opponent identity is baked into the engine.** `opponentName` is a constructor
-   argument and part of the snapshot; names belong to a lobby/session.
-5. **`dart:math` RNG.** Seeded `Random` is convenient but not a cross-platform
-   contract; a small in-core PRNG removes the doubt and helps replay tests.
-6. **No command objects.** `playCard` takes a live `CardInstance` reference and
-   returns a `bool`. The wire needs serializable commands (`cardUid`,
-   `targetUid`, `row`) and a rejection reason.
+1. **Privileged local human.** ~~`GameState.human`, `GameEngine.human`/`opponent`
+   and `isHumanTurn`/`isOpponentTurn` assume exactly one human seat (index 0).~~
+   Done: the core is seat agnostic; `GameController.localSeat` marks the local
+   seat in the presentation layer.
+2. **Opponent mulligan is automatic.** ~~`startMatch()` calls
+   `_mulliganOpponent()`, and `redraw()` rejects any `playerIndex != human.index`.~~
+   Done: `redraw`/`finishMulligan` are per seat with a redraw budget on
+   `PlayerState`; the round starts once every seat has confirmed. The AI seats'
+   redraws are driven by the controller.
+3. **Scoia'tael first-player choice defaults to the local human.** Done: a lone
+   Scoia'tael seat decides through `ChooseFirstPlayerCommand`; the engine
+   exposes the pending choice.
+4. **Opponent identity is baked into the engine.** Done: `opponentName` is gone
+   from the engine and the snapshot; names live on `PlayerState` and are set by
+   the presentation/lobby.
+5. **`dart:math` RNG.** Done: `GameRandom` is an in-core xorshift128 seeded
+   through SplitMix32, always recording its seed.
+6. **No command objects.** Done: `GameCommand`/`CommandResult` carry uids and
+   rejection reasons, and `GameEngine.apply` is the single mutation path.
 7. **No fog of war.** `GameState` and `encodeMatch` include both hands and the
    full deck order. A guest must receive a redacted projection.
 8. **Events hold object references.** `GameEvent`s are not serializable. Rather

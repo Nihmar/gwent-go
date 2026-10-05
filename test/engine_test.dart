@@ -15,8 +15,8 @@ void main() {
     test('startMatch deals ten cards and enters the mulligan phase', () {
       final decks = CardRepository.defaultDecks();
       final engine = GameEngine(
-        humanDeck: decks[0],
-        opponentDeck: decks[1],
+        firstDeck: decks[0],
+        secondDeck: decks[1],
         difficulty: Difficulty.normal,
         random: GameRandom(11),
       );
@@ -24,20 +24,22 @@ void main() {
       engine.startMatch();
 
       expect(engine.state.phase, GamePhase.mulligan);
-      expect(engine.human.hand, hasLength(10));
-      expect(engine.opponent.hand, hasLength(10));
+      expect(engine.state.players[0].hand, hasLength(10));
+      expect(engine.state.players[1].hand, hasLength(10));
     });
 
     test('finishMulligan starts round one with the first player acting', () {
       final engine = harness();
-      engine.finishMulligan();
+      engine.finishMulligan(0);
+      engine.finishMulligan(1);
       expect(engine.state.roundNumber, 1);
       expect(engine.state.currentPlayer, engine.state.firstPlayer);
     });
 
     test('passing both players ends the round and records a result', () {
       final engine = harness();
-      engine.finishMulligan();
+      engine.finishMulligan(0);
+      engine.finishMulligan(1);
       while (engine.state.roundNumber == 1 &&
           engine.state.phase == GamePhase.playing) {
         engine.pass(engine.state.currentPlayer);
@@ -47,7 +49,8 @@ void main() {
 
     test('winning two rounds ends the match', () {
       final engine = harness();
-      engine.finishMulligan();
+      engine.finishMulligan(0);
+      engine.finishMulligan(1);
       // Force a human win in round one.
       engine.state
           .rowState(0, CardRow.close)
@@ -55,7 +58,7 @@ void main() {
           .add(makeCard('geralt', owner: 0));
       engine.pass(engine.state.currentPlayer);
       engine.pass(engine.state.currentPlayer);
-      expect(engine.opponent.roundsLost, 1);
+      expect(engine.state.players[1].roundsLost, 1);
       expect(engine.state.roundNumber, 2);
 
       // Force a human win in round two.
@@ -71,11 +74,12 @@ void main() {
 
     test('Nilfgaard wins a round that ends in a draw', () {
       final engine = harness(humanFaction: CardFaction.nilfgaard);
-      engine.finishMulligan();
+      engine.finishMulligan(0);
+      engine.finishMulligan(1);
       engine.pass(engine.state.currentPlayer);
       engine.pass(engine.state.currentPlayer);
       expect(engine.state.roundHistory.single.winner, 0);
-      expect(engine.opponent.roundsLost, 1);
+      expect(engine.state.players[1].roundsLost, 1);
     });
   });
 
@@ -85,21 +89,21 @@ void main() {
       setTurn(engine, 0);
       setHand(engine, 0, ['stennis']);
       setDeck(engine, 0, ['geralt', 'ciri', 'triss']);
-      final spy = engine.human.hand.first;
+      final spy = engine.state.players[0].hand.first;
       expect(engine.playCard(0, spy), isTrue);
       expect(
         engine.state.rowState(1, CardRow.close).cards.map((c) => c.id),
         contains('stennis'),
       );
-      expect(engine.human.hand.length, 2);
+      expect(engine.state.players[0].hand.length, 2);
     });
 
     test('Medic revives a unit from the graveyard', () {
       final engine = harness();
       setTurn(engine, 0);
       setHand(engine, 0, ['yennefer']);
-      engine.human.graveyard.add(makeCard('gryffin', owner: 0));
-      final medic = engine.human.hand.first;
+      engine.state.players[0].graveyard.add(makeCard('gryffin', owner: 0));
+      final medic = engine.state.players[0].hand.first;
       expect(engine.playCard(0, medic), isTrue);
       expect(
         engine.state.rowState(0, CardRow.close).cards.map((c) => c.id),
@@ -112,7 +116,7 @@ void main() {
       setTurn(engine, 0);
       setHand(engine, 0, ['nekker']);
       setDeck(engine, 0, ['nekker_1', 'nekker_2']);
-      final card = engine.human.hand.first;
+      final card = engine.state.players[0].hand.first;
       expect(engine.playCard(0, card), isTrue);
       final nekkers = engine.state
           .rowState(0, CardRow.close)
@@ -129,7 +133,7 @@ void main() {
         makeCard('fiend', owner: 1),
       ]);
       setHand(engine, 0, ['scorch']);
-      final scorch = engine.human.hand.first;
+      final scorch = engine.state.players[0].hand.first;
       expect(engine.playCard(0, scorch), isTrue);
       final opponentClose = engine.state
           .rowState(1, CardRow.close)
@@ -137,7 +141,7 @@ void main() {
           .map((c) => c.id);
       expect(opponentClose, isNot(contains('fiend')));
       expect(opponentClose, contains('gryffin'));
-      expect(engine.human.graveyard.map((c) => c.id), contains('scorch'));
+      expect(engine.state.players[0].graveyard.map((c) => c.id), contains('scorch'));
     });
 
     test('Villentretenmerth scorches the strongest enemy close units', () {
@@ -148,7 +152,7 @@ void main() {
         makeCard('gryffin', owner: 1),
       ]);
       setHand(engine, 0, ['villen']);
-      final card = engine.human.hand.first;
+      final card = engine.state.players[0].hand.first;
       expect(engine.playCard(0, card), isTrue);
       expect(engine.state.rowState(1, CardRow.close).cards, isEmpty);
     });
@@ -161,7 +165,7 @@ void main() {
           .cards
           .add(makeCard('berserker', owner: 0));
       setHand(engine, 0, ['mardroeme']);
-      final card = engine.human.hand.first;
+      final card = engine.state.players[0].hand.first;
       expect(engine.playCard(0, card, targetRow: CardRow.close), isTrue);
       expect(
         engine.state.rowState(0, CardRow.close).cards.map((c) => c.id),
@@ -175,9 +179,9 @@ void main() {
       final target = makeCard('gryffin', owner: 0);
       engine.state.rowState(0, CardRow.close).cards.add(target);
       setHand(engine, 0, ['decoy']);
-      final decoy = engine.human.hand.first;
+      final decoy = engine.state.players[0].hand.first;
       expect(engine.playCard(0, decoy, target: target), isTrue);
-      expect(engine.human.hand.map((c) => c.id), contains('gryffin'));
+      expect(engine.state.players[0].hand.map((c) => c.id), contains('gryffin'));
       expect(
         engine.state.rowState(0, CardRow.close).cards.map((c) => c.id),
         contains('decoy'),
@@ -196,7 +200,7 @@ void main() {
           .cards
           .add(makeCard('fiend', owner: 1));
       setHand(engine, 0, ['frost']);
-      final frost = engine.human.hand.first;
+      final frost = engine.state.players[0].hand.first;
       expect(engine.playCard(0, frost), isTrue);
       expect(engine.state.activeWeather, contains(Ability.frost));
       Scoring.refresh(engine.state);
@@ -218,7 +222,7 @@ void main() {
           .cards
           .add(makeCard('cow', owner: 0));
       setHand(engine, 0, ['scorch']);
-      final scorch = engine.human.hand.first;
+      final scorch = engine.state.players[0].hand.first;
       expect(engine.playCard(0, scorch), isTrue);
       expect(
         engine.state.rowState(0, CardRow.close).cards.map((c) => c.id),
@@ -230,11 +234,11 @@ void main() {
       final engine = harness();
       setTurn(engine, 0);
       setHand(engine, 0, ['frost']);
-      engine.playCard(0, engine.human.hand.first);
+      engine.playCard(0, engine.state.players[0].hand.first);
       setTurn(engine, 0);
       setHand(engine, 0, ['frost']);
-      engine.playCard(0, engine.human.hand.first);
-      expect(engine.human.graveyard.map((c) => c.id), contains('frost'));
+      engine.playCard(0, engine.state.players[0].hand.first);
+      expect(engine.state.players[0].graveyard.map((c) => c.id), contains('frost'));
       expect(engine.state.weatherCards.length, 1);
     });
 
@@ -243,7 +247,7 @@ void main() {
       // A real frost card is already active.
       setTurn(engine, 0);
       setHand(engine, 0, ['frost']);
-      engine.playCard(0, engine.human.hand.first);
+      engine.playCard(0, engine.state.players[0].hand.first);
 
       // A differently named card with the same effect must be discarded.
       final renamed = CardInstance(
@@ -260,7 +264,7 @@ void main() {
         owner: 0,
       );
       setTurn(engine, 0);
-      engine.human.hand
+      engine.state.players[0].hand
         ..clear()
         ..add(renamed);
 
@@ -270,7 +274,7 @@ void main() {
         isNot(contains('test_deep_freeze')),
       );
       expect(
-        engine.human.graveyard.map((c) => c.id),
+        engine.state.players[0].graveyard.map((c) => c.id),
         contains('test_deep_freeze'),
       );
     });
@@ -283,7 +287,7 @@ void main() {
       setHand(engine, 0, ['stennis']);
       setDeck(engine, 0, ['geralt']);
       engine.takeEvents();
-      final spy = engine.human.hand.first;
+      final spy = engine.state.players[0].hand.first;
 
       expect(engine.playCard(0, spy), isTrue);
       final draws = engine.takeEvents().whereType<CardsDrawn>().toList();
@@ -297,7 +301,7 @@ void main() {
       setHand(engine, 0, ['stennis']);
       setDeck(engine, 0, []);
       engine.takeEvents();
-      final spy = engine.human.hand.first;
+      final spy = engine.state.players[0].hand.first;
 
       expect(engine.playCard(0, spy), isTrue);
       expect(engine.takeEvents().whereType<CardsDrawn>(), isEmpty);
@@ -318,16 +322,16 @@ void main() {
         Scoring.rowTotal(engine.state, engine.state.rowState(0, CardRow.siege)),
         12,
       );
-      expect(engine.human.leaderUsed, isTrue);
+      expect(engine.state.players[0].leaderUsed, isTrue);
     });
 
     test('Crach an Craite shuffles both graveyards into the decks', () {
       final engine = harness(humanLeader: 'crach_an_craite');
       setTurn(engine, 0);
-      engine.human.graveyard.add(makeCard('gryffin', owner: 0));
+      engine.state.players[0].graveyard.add(makeCard('gryffin', owner: 0));
       expect(engine.activateLeader(0), isTrue);
-      expect(engine.human.graveyard, isEmpty);
-      expect(engine.human.deck.map((c) => c.id), contains('gryffin'));
+      expect(engine.state.players[0].graveyard, isEmpty);
+      expect(engine.state.players[0].deck.map((c) => c.id), contains('gryffin'));
     });
   });
 
@@ -341,10 +345,10 @@ void main() {
       final discardA = makeCard('nekker', owner: 0);
       final discardB = makeCard('nekker_1', owner: 0);
       final pick = makeCard('gryffin', owner: 0);
-      engine.human.hand
+      engine.state.players[0].hand
         ..clear()
         ..addAll([discardA, discardB]);
-      engine.human.deck
+      engine.state.players[0].deck
         ..clear()
         ..addAll([pick, makeCard('fiend', owner: 0)]);
 
@@ -353,11 +357,11 @@ void main() {
         isTrue,
       );
       expect(
-        engine.human.graveyard.map((c) => c.id),
+        engine.state.players[0].graveyard.map((c) => c.id),
         containsAll(['nekker', 'nekker_1']),
       );
-      expect(engine.human.hand.map((c) => c.id), contains('gryffin'));
-      expect(engine.human.deck.map((c) => c.id), isNot(contains('gryffin')));
+      expect(engine.state.players[0].hand.map((c) => c.id), contains('gryffin'));
+      expect(engine.state.players[0].deck.map((c) => c.id), isNot(contains('gryffin')));
     });
 
     test('Emhyr the Relentless draws the chosen opponent card', () {
@@ -367,14 +371,14 @@ void main() {
       );
       setTurn(engine, 0);
       final target = makeCard('gryffin', owner: 1);
-      engine.opponent.graveyard
+      engine.state.players[1].graveyard
         ..clear()
         ..addAll([target, makeCard('fiend', owner: 1)]);
 
       expect(engine.activateLeader(0, target: target), isTrue);
-      expect(engine.human.hand.map((c) => c.id), contains('gryffin'));
+      expect(engine.state.players[0].hand.map((c) => c.id), contains('gryffin'));
       expect(
-        engine.opponent.graveyard.map((c) => c.id),
+        engine.state.players[1].graveyard.map((c) => c.id),
         isNot(contains('gryffin')),
       );
     });
@@ -386,13 +390,13 @@ void main() {
       );
       setTurn(engine, 0);
       final target = makeCard('fiend', owner: 0);
-      engine.human.graveyard
+      engine.state.players[0].graveyard
         ..clear()
         ..add(target);
 
       expect(engine.activateLeader(0, target: target), isTrue);
-      expect(engine.human.hand.map((c) => c.id), contains('fiend'));
-      expect(engine.human.graveyard, isEmpty);
+      expect(engine.state.players[0].hand.map((c) => c.id), contains('fiend'));
+      expect(engine.state.players[0].graveyard, isEmpty);
     });
   });
 
@@ -404,8 +408,8 @@ void main() {
         opponentFaction: CardFaction.nilfgaard,
         opponentLeader: 'emhyr_bronze',
       );
-      expect(engine.human.leaderUsed, isTrue);
-      expect(engine.opponent.leaderUsed, isTrue);
+      expect(engine.state.players[0].leaderUsed, isTrue);
+      expect(engine.state.players[1].leaderUsed, isTrue);
       // King Bran's weather protection must not apply while White Flame is in
       // play, matching the reference's disableLeader behaviour.
       expect(engine.state.rowState(0, CardRow.close).halfWeather, isFalse);
@@ -433,11 +437,11 @@ void main() {
   group('Skellige faction', () {
     test('round three revives two random units, not the strongest', () {
       final engine = GameEngine(
-        humanDeck: testDeck(
+        firstDeck: testDeck(
           faction: CardFaction.skellige,
           leaderId: 'crach_an_craite',
         ),
-        opponentDeck: testDeck(
+        secondDeck: testDeck(
           faction: CardFaction.monsters,
           leaderId: 'eredin_silver',
         ),
@@ -447,9 +451,10 @@ void main() {
         random: _NoShuffleRandom(),
       );
       engine.startMatch();
-      engine.finishMulligan();
+      engine.finishMulligan(0);
+      engine.finishMulligan(1);
 
-      engine.human.graveyard
+      engine.state.players[0].graveyard
         ..clear()
         ..addAll([
           makeCard('nekker', owner: 0),
@@ -468,7 +473,7 @@ void main() {
         for (final row in engine.state.rowsFor(0)) ...row.cards.map((c) => c.id),
       ];
       expect(revived, containsAll(['nekker', 'gargoyle']));
-      expect(engine.human.graveyard.map((c) => c.id), contains('fiend'));
+      expect(engine.state.players[0].graveyard.map((c) => c.id), contains('fiend'));
     });
   });
 }
