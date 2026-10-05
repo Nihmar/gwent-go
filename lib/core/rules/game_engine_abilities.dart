@@ -374,7 +374,7 @@ class _AbilityResolver {
       uid: engine.nextUid(),
       definition: CardRepository.byId('horn'),
       owner: player.index,
-    );
+    )..temporary = true;
   }
 
   void _drawFromOpponentGrave(PlayerState player) {

@@ -216,6 +216,10 @@ class CardInstance {
   /// Set when the card is removed from the battlefield and triggers an ability.
   bool removedTriggered = false;
 
+  /// Cards created by an ability (a leader's temporary Horn) are discarded
+  /// instead of going to the graveyard.
+  bool temporary = false;
+
   String get id => definition.id;
   String get name => definition.name;
   CardFaction get faction => definition.faction;

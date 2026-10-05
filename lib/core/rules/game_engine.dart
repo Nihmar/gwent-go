@@ -343,7 +343,9 @@ class GameEngine {
       final special = row.special;
       if (special != null) {
         row.special = null;
-        state.players[special.owner].graveyard.add(special);
+        if (!special.temporary) {
+          state.players[special.owner].graveyard.add(special);
+        }
       }
       row.weather = false;
     }
