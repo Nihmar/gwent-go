@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Gwent Go — Android deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/theme.css">
+<link rel="stylesheet" href="../css/m3.css">
+<link rel="stylesheet" href="../css/gwent-card.css">
+<link rel="stylesheet" href="../css/gwent-board.css">
+<link rel="stylesheet" href="../css/deck-editor.css">
+</head>
+<body class="screen">
+<div class="canvas" style="width:412px;height:915px">
+  <div class="board-bg"></div>
+  <div class="shell">
+
+    <div class="status-bar">
+      <span>14:32</span>
+      <div class="sys-icons">
+        <svg viewBox="0 0 24 24"><path d="M3 18h3v-5H3zM8.5 18h3V9h-3zM14 18h3V5h-3zM19.5 18h3V12h-3z"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M12 18.5 9.6 16a3.6 3.6 0 0 1 4.8 0zM12 12.2a7.6 7.6 0 0 0-5.4 2.2l-1.9-1.9a10.3 10.3 0 0 1 14.6 0l-1.9 1.9a7.6 7.6 0 0 0-5.4-2.2zM12 5.6c-3.6 0-6.9 1.3-9.4 3.5L.7 7.2A15.7 15.7 0 0 1 12 3.2c4.3 0 8.3 1.5 11.3 4l-1.9 1.9A13.2 13.2 0 0 0 12 5.6z"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M4 8h13.5c1.1 0 2 .9 2 2v4c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2v-4c0-1.1.9-2 2-2zm18 2.5v3a1.8 1.8 0 0 0 0-3z"/></svg>
+      </div>
+    </div>
+
+    <div class="de-bar">
+      <button class="icon-btn" title="Back">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      </button>
+      <i class="faction-badge" style="background-image:url('../../gwent-classic-enhanced/img/icons/deck_shield_realms.png')"></i>
+      <div class="de-heading">
+        <span class="de-title truncate">Deck editor</span>
+        <span class="de-sub truncate">Foltest Siege · Northern Realms</span>
+      </div>
+      <button class="icon-btn" title="More">
+        <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+      </button>
+    </div>
+
+    <div class="de-modes">
+      <div class="segmented">
+        <button>Collection</button>
+        <button class="selected">Deck (27)</button>
+      </div>
+    </div>
+
+    <div class="de-body scroll-y" style="gap:10px;padding-bottom:10px">
+
+      <div class="surface de-leader">
+        <div class="gcard hero noname" style="--cw:56px;--art:url('../../gwent-classic-enhanced/img/sm/realms_foltest_copper.jpg')">
+          <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+        </div>
+        <div class="info">
+          <span class="t-label-s muted">Leader</span>
+          <span class="t-title-s truncate">Foltest — The Siegemaster</span>
+          <span class="t-body-s muted">Doubles the strength of all your Siege units.</span>
+        </div>
+        <button class="btn tonal sm">Change</button>
+      </div>
+
+      <div class="surface de-group">
+        <div class="de-group-head">
+          <i class="row-icon" style="background-image:url('../../gwent-classic-enhanced/img/icons/card_row_close.png')"></i>
+          <span class="t-title-s">Close Combat</span>
+          <span class="spacer"></span>
+          <span class="t-body-s muted">7 cards · 41 str</span>
+        </div>
+        <div class="de-item">
+          <div class="thumb gcard hero noname" style="--cw:42px;--art:url('../../gwent-classic-enhanced/img/sm/neutral_geralt.jpg')">
+            <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+          </div>
+          <div class="info">
+            <span class="t-title-s truncate">Geralt of Rivia</span>
+            <span class="t-body-s muted truncate">Hero · 15 strength</span>
+          </div>
+          <div class="de-stepper">
+            <button title="Remove one"><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+            <span class="n">1</span>
+            <button title="Add one" disabled><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+          </div>
+        </div>
+        <div class="de-item">
+          <div class="thumb gcard hero noname" style="--cw:42px;--art:url('../../gwent-classic-enhanced/img/sm/realms_vernon.jpg')">
+            <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+          </div>
+          <div class="info">
+            <span class="t-title-s truncate">Vernon Roche</span>
+            <span class="t-body-s muted truncate">Hero · 10 strength</span>
+          </div>
+          <div class="de-stepper">
+            <button title="Remove one"><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+            <span class="n">1</span>
+            <button title="Add one" disabled><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+          </div>
+        </div>
+        <div class="de-item">
+          <div class="thumb gcard noname" style="--cw:42px;--art:url('../../gwent-classic-enhanced/img/sm/realms_blue_stripes.jpg')">
+            <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+          </div>
+          <div class="info">
+            <span class="t-title-s truncate">Blue Stripes Commando</span>
+            <span class="t-body-s muted truncate">Tight Bond · 4 strength</span>
+          </div>
+          <div class="de-stepper">
+            <button title="Remove one"><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+            <span class="n">3</span>
+            <button title="Add one" disabled><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+          </div>
+        </div>
+        <div class="de-item">
+          <div class="thumb gcard noname" style="--cw:42px;--art:url('../../gwent-classic-enhanced/img/sm/realms_yarpen.jpg')">
+            <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+          </div>
+          <div class="info">
+            <span class="t-title-s truncate">Yarpen Zigrin</span>
+            <span class="t-body-s muted truncate">2 strength</span>
+          </div>
+          <div class="de-stepper">
+            <button title="Remove one"><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+            <span class="n">1</span>
+            <button title="Add one" disabled><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+          </div>
+        </div>
+        <div class="de-item">
+          <div class="thumb gcard noname" style="--cw:42px;--art:url('../../gwent-classic-enhanced/img/sm/neutral_dandelion.jpg')">
+            <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+          </div>
+          <div class="info">
+            <span class="t-title-s truncate">Dandelion</span>
+            <span class="t-body-s muted truncate">Commander's Horn · 2 strength</span>
+          </div>
+          <div class="de-stepper">
+            <button title="Remove one"><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+            <span class="n">1</span>
+            <button title="Add one" disabled><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="surface de-group">
+        <div class="de-group-head">
+          <i class="row-icon" style="background-image:url('../../gwent-classic-enhanced/img/icons/card_row_ranged.png')"></i>
+          <span class="t-title-s">Ranged Combat</span>
+          <span class="spacer"></span>
+          <span class="t-body-s muted">5 cards · 31 str</span>
+        </div>
+        <div class="de-item">
+          <div class="thumb gcard hero noname" style="--cw:42px;--art:url('../../gwent-classic-enhanced/img/sm/realms_philippa.jpg')">
+            <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+          </div>
+          <div class="info">
+            <span class="t-title-s truncate">Philippa Eilhart</span>
+            <span class="t-body-s muted truncate">Hero · 10 strength</span>
+          </div>
+          <div class="de-stepper">
+            <button title="Remove one"><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+            <span class="n">1</span>
+            <button title="Add one" disabled><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+          </div>
+        </div>
+        <div class="de-item">
+          <div class="thumb gcard noname" style="--cw:42px;--art:url('../../gwent-classic-enhanced/img/sm/realms_dethmold.jpg')">
+            <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+          </div>
+          <div class="info">
+            <span class="t-title-s truncate">Dethmold</span>
+            <span class="t-body-s muted truncate">6 strength</span>
+          </div>
+          <div class="de-stepper">
+            <button title="Remove one"><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+            <span class="n">1</span>
+            <button title="Add one" disabled><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+          </div>
+        </div>
+        <div class="de-item">
+          <div class="thumb gcard noname" style="--cw:42px;--art:url('../../gwent-classic-enhanced/img/sm/realms_crinfrid.jpg')">
+            <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+          </div>
+          <div class="info">
+            <span class="t-title-s truncate">Crinfrid Reavers Dragon Hunter</span>
+            <span class="t-body-s muted truncate">Tight Bond · 5 strength</span>
+          </div>
+          <div class="de-stepper">
+            <button title="Remove one"><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+            <span class="n">3</span>
+            <button title="Add one" disabled><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="surface de-group">
+        <div class="de-group-head">
+          <i class="row-icon" style="background-image:url('../../gwent-classic-enhanced/img/icons/card_row_siege.png')"></i>
+          <span class="t-title-s">Siege Combat</span>
+          <span class="spacer"></span>
+          <span class="t-body-s muted">8 cards · 36 str</span>
+        </div>
+        <div class="de-item">
+          <div class="thumb gcard noname" style="--cw:42px;--art:url('../../gwent-classic-enhanced/img/sm/realms_catapult_1.jpg')">
+            <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+          </div>
+          <div class="info">
+            <span class="t-title-s truncate">Catapult</span>
+            <span class="t-body-s muted truncate">Tight Bond · 8 strength</span>
+          </div>
+          <div class="de-stepper">
+            <button title="Remove one"><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+            <span class="n">2</span>
+            <button title="Add one" disabled><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+          </div>
+        </div>
+        <div class="de-item">
+          <div class="thumb gcard noname" style="--cw:42px;--art:url('../../gwent-classic-enhanced/img/sm/realms_ballista.jpg')">
+            <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+          </div>
+          <div class="info">
+            <span class="t-title-s truncate">Ballista</span>
+            <span class="t-body-s muted truncate">6 strength</span>
+          </div>
+          <div class="de-stepper">
+            <button title="Remove one"><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+            <span class="n">1</span>
+            <button title="Add one" disabled><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+          </div>
+        </div>
+        <div class="de-item">
+          <div class="thumb gcard noname" style="--cw:42px;--art:url('../../gwent-classic-enhanced/img/sm/realms_trebuchet.jpg')">
+            <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+          </div>
+          <div class="info">
+            <span class="t-title-s truncate">Trebuchet</span>
+            <span class="t-body-s muted truncate">6 strength</span>
+          </div>
+          <div class="de-stepper">
+            <button title="Remove one"><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+            <span class="n">1</span>
+            <button title="Add one" disabled><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+          </div>
+        </div>
+        <div class="de-item">
+          <div class="thumb gcard noname" style="--cw:42px;--art:url('../../gwent-classic-enhanced/img/sm/realms_banner_nurse.jpg')">
+            <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+          </div>
+          <div class="info">
+            <span class="t-title-s truncate">Dun Banner Medic</span>
+            <span class="t-body-s muted truncate">Medic · 5 strength</span>
+          </div>
+          <div class="de-stepper">
+            <button title="Remove one"><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+            <span class="n">1</span>
+            <button title="Add one" disabled><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+          </div>
+        </div>
+        <div class="de-item">
+          <div class="thumb gcard noname" style="--cw:42px;--art:url('../../gwent-classic-enhanced/img/sm/realms_kaedwen_siege.jpg')">
+            <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+          </div>
+          <div class="info">
+            <span class="t-title-s truncate">Kaedweni Siege Expert</span>
+            <span class="t-body-s muted truncate">Morale · 1 strength</span>
+          </div>
+          <div class="de-stepper">
+            <button title="Remove one"><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+            <span class="n">3</span>
+            <button title="Add one" disabled><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="surface de-group">
+        <div class="de-group-head">
+          <span class="t-title-s">Special</span>
+          <span class="spacer"></span>
+          <span class="t-body-s muted">4 cards</span>
+        </div>
+        <div class="de-item">
+          <div class="thumb gcard special noname" style="--cw:42px;--art:url('../../gwent-classic-enhanced/img/sm/special_horn.jpg')">
+            <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+          </div>
+          <div class="info">
+            <span class="t-title-s truncate">Commander's Horn</span>
+            <span class="t-body-s muted truncate">Doubles a row</span>
+          </div>
+          <div class="de-stepper">
+            <button title="Remove one"><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+            <span class="n">1</span>
+            <button title="Add one" disabled><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+          </div>
+        </div>
+        <div class="de-item">
+          <div class="thumb gcard special noname" style="--cw:42px;--art:url('../../gwent-classic-enhanced/img/sm/special_decoy.jpg')">
+            <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+          </div>
+          <div class="info">
+            <span class="t-title-s truncate">Decoy</span>
+            <span class="t-body-s muted truncate">Swap with a unit</span>
+          </div>
+          <div class="de-stepper">
+            <button title="Remove one"><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+            <span class="n">2</span>
+            <button title="Add one"><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+          </div>
+        </div>
+        <div class="de-item">
+          <div class="thumb gcard special noname" style="--cw:42px;--art:url('../../gwent-classic-enhanced/img/sm/special_scorch.jpg')">
+            <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+          </div>
+          <div class="info">
+            <span class="t-title-s truncate">Scorch</span>
+            <span class="t-body-s muted truncate">Destroy the strongest unit</span>
+          </div>
+          <div class="de-stepper">
+            <button title="Remove one"><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+            <span class="n">1</span>
+            <button title="Add one" disabled><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="surface de-group">
+        <div class="de-group-head">
+          <span class="t-title-s">Weather</span>
+          <span class="spacer"></span>
+          <span class="t-body-s muted">3 cards</span>
+        </div>
+        <div class="de-item">
+          <div class="thumb gcard special noname" style="--cw:42px;--art:url('../../gwent-classic-enhanced/img/sm/weather_frost.jpg')">
+            <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+          </div>
+          <div class="info">
+            <span class="t-title-s truncate">Biting Frost</span>
+            <span class="t-body-s muted truncate">Close Combat units at 1</span>
+          </div>
+          <div class="de-stepper">
+            <button title="Remove one"><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+            <span class="n">1</span>
+            <button title="Add one"><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+          </div>
+        </div>
+        <div class="de-item">
+          <div class="thumb gcard special noname" style="--cw:42px;--art:url('../../gwent-classic-enhanced/img/sm/weather_fog.jpg')">
+            <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+          </div>
+          <div class="info">
+            <span class="t-title-s truncate">Impenetrable Fog</span>
+            <span class="t-body-s muted truncate">Ranged Combat units at 1</span>
+          </div>
+          <div class="de-stepper">
+            <button title="Remove one"><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+            <span class="n">1</span>
+            <button title="Add one"><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+          </div>
+        </div>
+        <div class="de-item">
+          <div class="thumb gcard special noname" style="--cw:42px;--art:url('../../gwent-classic-enhanced/img/sm/weather_rain.jpg')">
+            <div class="gcard-clip"><div class="gcard-art"></div><div class="gcard-shade"></div></div>
+          </div>
+          <div class="info">
+            <span class="t-title-s truncate">Torrential Rain</span>
+            <span class="t-body-s muted truncate">Siege Combat units at 1</span>
+          </div>
+          <div class="de-stepper">
+            <button title="Remove one"><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+            <span class="n">1</span>
+            <button title="Add one"><svg class="ic ic-18" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="de-bottom">
+      <div class="de-progress"><i style="width:68%"></i></div>
+      <div class="de-stats">
+        <div class="de-stat"><span class="k">Cards</span><span class="v">27/40</span></div>
+        <div class="de-stat warn"><span class="k">Units</span><span class="v">20/22</span></div>
+        <div class="de-stat ok"><span class="k">Special</span><span class="v">7/10</span></div>
+        <div class="de-stat"><span class="k">Strength</span><span class="v">108</span></div>
+      </div>
+      <div class="de-alert">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M12 4 2.5 20h19z"/><path d="M12 10v4M12 17h.01"/></svg>
+        Add 2 more unit cards to play
+      </div>
+      <div class="de-buttons">
+        <button class="btn tonal">Save deck</button>
+        <button class="btn filled" disabled>Start game</button>
+      </div>
+    </div>
+
+    <div class="gesture-bar"><i></i></div>
+  </div>
+</div>
+</body>
+</html>

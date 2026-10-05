@@ -14,6 +14,8 @@ links to each screen full size.
 | --- | --- | --- |
 | Android — home | 412 × 915 | `screens/android-menu.html` |
 | Android — match | 412 × 915 | `screens/android-board.html` |
+| Android — collection | 412 × 915 | `screens/android-collection.html` |
+| Android — deck | 412 × 915 | `screens/android-deck.html` |
 | Desktop — home | 1280 × 800 | `screens/desktop-menu.html` |
 | Desktop — match | 1280 × 800 | `screens/desktop-board.html` |
 | Desktop — deck editor | 1280 × 800 | `screens/desktop-decks.html` |
@@ -38,6 +40,11 @@ fixed sprite-sheet math (content sits at 15,14–125,125 in a 215 × 215 canvas)
 - **Phone layouts are portrait-first**: the home screen uses the standard M3
   layout; the match view is immersive fullscreen (system bars hidden) with a
   scrollable hand.
+- **The phone deck editor keeps the rules in view**: a persistent bottom bar
+  shows cards / units / specials / strength and the validation message while the
+  player adds cards in the collection grid or edits copies in the deck list.
+  Adding is a tap in the grid, removing is a stepper in the deck, so a mis-tap
+  cannot silently delete a card.
 - **Desktop adds context**: player rails with leader/deck/graveyard state, a
   card preview panel with ability text, a match score table, and a
   three-column deck editor (collection, deck by row, stats/leader/difficulty).

@@ -1,0 +1,234 @@
+/* ==========================================================================
+   Gwent Go - mobile deck editor (collection + deck)
+   Shared by screens/android-collection.html and screens/android-deck.html.
+   ========================================================================== */
+
+/* --- phone chrome (same idiom as the other Android screens) -------------- */
+
+.shell {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.status-bar {
+  height: 28px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--md-on-surface);
+}
+
+.status-bar .sys-icons { display: flex; align-items: center; gap: 5px; margin-left: auto; }
+.status-bar svg { width: 15px; height: 15px; fill: currentColor; stroke: none; }
+
+.gesture-bar { height: 22px; flex: none; display: grid; place-items: center; }
+.gesture-bar i { width: 116px; height: 4px; border-radius: 2px; background: rgba(233, 226, 214, 0.4); }
+
+/* --- top app bar ---------------------------------------------------------- */
+
+.de-bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 8px 6px 4px;
+}
+
+.de-bar .de-heading { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.de-bar .de-title { font-size: 19px; font-weight: 600; letter-spacing: 0.02em; }
+.de-bar .de-sub { font-size: 12px; color: var(--md-on-surface-variant); }
+
+.de-bar .faction-badge {
+  width: 26px;
+  height: 30px;
+  flex: none;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+}
+
+/* --- mode switch ---------------------------------------------------------- */
+
+.de-modes { flex: none; padding: 2px 16px 10px; }
+.de-modes .segmented { width: 100%; height: 44px; }
+.de-modes .segmented > button { flex: 1; padding: 0 8px; font-size: 13.5px; }
+
+/* --- scrolling body ------------------------------------------------------- */
+
+.de-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 16px;
+}
+
+.de-hint { flex: none; padding: 0 2px; font-size: 11px; color: var(--md-on-surface-variant); }
+
+/* --- collection grid ------------------------------------------------------ */
+
+.de-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px 8px;
+  padding-bottom: 8px;
+}
+
+.tile { position: relative; display: flex; justify-content: center; }
+.tile .copies { position: absolute; left: -2px; top: -7px; z-index: 3; }
+
+.tile .add {
+  position: absolute;
+  right: -2px;
+  top: -7px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  z-index: 3;
+  background: var(--gw-gold);
+  color: #2a1e05;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.tile .add .ic { width: 15px; height: 15px; stroke-width: 2.6; }
+
+.tile.in-deck .gcard-clip {
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--gw-gold) 60%, transparent), 0 2px 6px rgba(0, 0, 0, 0.55);
+}
+
+.tile.full .gcard { filter: saturate(0.5) brightness(0.62); }
+.tile.full .gcard-clip {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--gw-gold) 55%, transparent), 0 2px 6px rgba(0, 0, 0, 0.55);
+}
+
+.tile.full .check {
+  position: absolute;
+  right: -2px;
+  top: -7px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  z-index: 3;
+  background: var(--gw-gold);
+  color: #2a1e05;
+}
+
+.tile.full .check .ic { width: 14px; height: 14px; stroke-width: 3; }
+
+/* --- deck list ------------------------------------------------------------ */
+
+.de-leader { display: flex; align-items: center; gap: 12px; padding: 10px; }
+.de-leader .info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+
+.de-group { overflow: hidden; }
+.de-group-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: color-mix(in srgb, var(--md-on-surface) 4%, transparent);
+}
+
+.de-group-head .row-icon {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+}
+
+.de-item { display: flex; align-items: center; gap: 10px; padding: 6px 12px; }
+.de-item + .de-item { border-top: 1px solid color-mix(in srgb, var(--md-outline-variant) 30%, transparent); }
+.de-item .thumb { flex: none; }
+.de-item .info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+.de-stepper { flex: none; display: flex; align-items: center; gap: 2px; }
+.de-stepper button {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--md-on-surface-variant);
+  cursor: pointer;
+}
+.de-stepper button:hover {
+  background: color-mix(in srgb, var(--md-on-surface) 9%, transparent);
+  color: var(--md-on-surface);
+}
+.de-stepper button[disabled] { opacity: 0.3; cursor: not-allowed; }
+.de-stepper button[disabled]:hover { background: none; color: var(--md-on-surface-variant); }
+.de-stepper .n {
+  min-width: 20px;
+  text-align: center;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- persistent bottom summary -------------------------------------------- */
+
+.de-bottom {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 10px 16px 6px;
+  background: var(--md-surface-container-low);
+  border-top: 1px solid color-mix(in srgb, var(--md-outline-variant) 45%, transparent);
+}
+
+.de-progress {
+  height: 4px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--md-outline-variant) 55%, transparent);
+}
+.de-progress i { display: block; height: 100%; background: linear-gradient(90deg, var(--gw-gold), var(--gw-gold-bright)); }
+
+.de-stats { display: flex; gap: 6px; }
+.de-stat {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px 8px;
+  border-radius: var(--shape-sm);
+  background: color-mix(in srgb, var(--md-on-surface) 4%, transparent);
+}
+.de-stat .k { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--md-on-surface-variant); }
+.de-stat .v { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.de-stat.warn .v { color: var(--md-error); }
+.de-stat.ok .v { color: var(--gw-gold-bright); }
+
+.de-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: var(--shape-sm);
+  background: color-mix(in srgb, var(--md-error) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--md-error) 34%, transparent);
+  color: var(--md-error);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+.de-alert .ic { width: 15px; height: 15px; }
+
+.de-buttons { display: flex; gap: 8px; padding-bottom: 4px; }
+.de-buttons .btn { flex: 1; }
+
+/* disabled primary action (e.g. Start game on an invalid deck) */
+.btn[disabled] { opacity: 0.42; cursor: not-allowed; box-shadow: none; filter: none; }
