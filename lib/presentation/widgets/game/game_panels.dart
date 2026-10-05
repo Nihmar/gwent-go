@@ -69,10 +69,10 @@ class GamePlayerStrip extends StatelessWidget {
             _LeaderChip(controller: controller),
           ],
           const Spacer(),
-          _HandCount(count: player.hand.length),
+          _HandCount(count: player.handSize),
           const SizedBox(width: 6),
           Pile(
-            count: player.deck.length,
+            count: player.deckSize,
             backAsset: info.deckBackAsset,
             width: 28,
           ),
@@ -213,13 +213,13 @@ class GamePlayerPanel extends StatelessWidget {
               const SizedBox(width: 8),
               RoundGems(roundsWon: player.roundsWon),
               const Spacer(),
-              _HandCount(count: player.hand.length),
+              _HandCount(count: player.handSize),
             ],
           ),
           const SizedBox(height: 10),
           Row(
             children: [
-              Pile(count: player.deck.length, backAsset: info.deckBackAsset),
+              Pile(count: player.deckSize, backAsset: info.deckBackAsset),
               const SizedBox(width: 10),
               Pile(
                 count: player.graveyard.length,
