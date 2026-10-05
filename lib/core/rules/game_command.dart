@@ -130,6 +130,9 @@ enum CommandRejection {
 
   /// The chosen seat does not exist.
   invalidChoice,
+
+  /// The chosen row cannot hold this card.
+  invalidTargetRow,
 }
 
 /// Outcome of [GameEngine.apply].

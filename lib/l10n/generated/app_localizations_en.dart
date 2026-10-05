@@ -302,6 +302,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commandInvalidChoice => 'That choice is not valid.';
 
   @override
+  String get commandInvalidTargetRow =>
+      'That card cannot be placed on the chosen row.';
+
+  @override
   String get searchCollection => 'Search collection';
 
   @override

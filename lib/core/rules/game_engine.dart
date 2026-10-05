@@ -441,6 +441,16 @@ class GameEngine {
     if (targetUid != null && target == null) {
       return const CommandRejected(CommandRejection.unknownCard);
     }
+    final targetRow = command.targetRow;
+    if (targetRow != null && !targetRow.isCombat) {
+      return const CommandRejected(CommandRejection.invalidTargetRow);
+    }
+    if (card.row == CardRow.agile &&
+        targetRow != null &&
+        targetRow != CardRow.close &&
+        targetRow != CardRow.ranged) {
+      return const CommandRejected(CommandRejection.invalidTargetRow);
+    }
 
     if (card.hasAbility(Ability.decoy)) {
       if (_abilities.decoyTargets(player).isEmpty) {

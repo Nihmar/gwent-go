@@ -112,6 +112,71 @@ void main() {
       );
     });
 
+    test('a non-combat target row is rejected without touching the board', () {
+      for (final seat in [0, 1]) {
+        for (final row in [
+          CardRow.agile,
+          CardRow.weather,
+          CardRow.special,
+          CardRow.leader,
+        ]) {
+          final engine = harness();
+          setTurn(engine, seat);
+          setHand(engine, seat, ['horn']);
+          final card = engine.state.players[seat].hand.single;
+
+          expect(
+            rejectionOf(
+              engine.apply(
+                PlayCardCommand(
+                  player: seat,
+                  cardUid: card.uid,
+                  targetRow: row,
+                ),
+              ),
+            ),
+            CommandRejection.invalidTargetRow,
+            reason: 'seat $seat row ${row.name}',
+          );
+          expect(engine.state.players[seat].hand, contains(card));
+          expect(engine.state.rows.every((r) => r.special == null), isTrue);
+        }
+      }
+    });
+
+    test('an agile card cannot be played on the siege row', () {
+      final engine = harness();
+      setTurn(engine, 0);
+      setHand(engine, 0, ['celaeno_harpy']);
+      final card = engine.state.players[0].hand.single;
+
+      expect(
+        rejectionOf(
+          engine.apply(
+            PlayCardCommand(
+              player: 0,
+              cardUid: card.uid,
+              targetRow: CardRow.siege,
+            ),
+          ),
+        ),
+        CommandRejection.invalidTargetRow,
+      );
+      expect(engine.state.players[0].hand, contains(card));
+    });
+
+    test('querying a non-combat row fails loudly', () {
+      final engine = harness();
+      expect(
+        () => engine.state.rowState(0, CardRow.weather),
+        throwsArgumentError,
+      );
+      expect(
+        () => engine.state.rowState(1, CardRow.weather),
+        throwsArgumentError,
+      );
+    });
+
     test('a decoy without a target is rejected', () {
       final engine = harness();
       setTurn(engine, 0);
