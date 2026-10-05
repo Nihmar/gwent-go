@@ -82,7 +82,8 @@
 }
 
 .tile { position: relative; display: flex; flex-direction: column; align-items: center; }
-.tile .copies { position: absolute; left: -2px; top: -7px; z-index: 3; }
+/* a single status marker in the top-right keeps the strength badge visible */
+.tile .copies { position: absolute; right: -2px; top: -7px; z-index: 3; }
 
 /* compact ability label under the card so the collection is scannable */
 .tile-abil {
@@ -124,22 +125,6 @@
 .tile.full .gcard-clip {
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--gw-gold) 55%, transparent), 0 2px 6px rgba(0, 0, 0, 0.55);
 }
-
-.tile.full .check {
-  position: absolute;
-  right: -2px;
-  top: -7px;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  z-index: 3;
-  background: var(--gw-gold);
-  color: #2a1e05;
-}
-
-.tile.full .check .ic { width: 14px; height: 14px; stroke-width: 3; }
 
 /* --- deck list ------------------------------------------------------------ */
 
