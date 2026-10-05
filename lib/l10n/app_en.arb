@@ -116,6 +116,14 @@
   "tapCardDetails": "Tap a card for details",
   "selectRowHint": "Choose a row",
   "selectTargetHint": "Choose a target",
+  "selectDiscardHint": "Discard {count} cards",
+  "@selectDiscardHint": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "selectDrawHint": "Choose a card to draw",
+  "confirmSelection": "Confirm",
   "mulliganTitle": "Choose up to {count} cards to redraw",
   "@mulliganTitle": {
     "placeholders": {

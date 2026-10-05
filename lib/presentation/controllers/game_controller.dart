@@ -19,12 +19,15 @@ class RowChoice extends PendingChoice {
   final List<CardRow> rows;
 }
 
-enum TargetKind { battlefield, graveyard }
+enum TargetKind { battlefield, graveyard, hand, deck }
 
 class TargetChoice extends PendingChoice {
-  const TargetChoice(this.targets, this.kind);
+  const TargetChoice(this.targets, this.kind, {this.requiredCount = 1});
   final List<CardInstance> targets;
   final TargetKind kind;
+
+  /// How many cards the player must pick before confirming.
+  final int requiredCount;
 }
 
 /// Bridges the rules engine to the widget tree.
@@ -58,6 +61,10 @@ class GameController extends ChangeNotifier {
   PendingChoice? pendingChoice;
   bool isAiThinking = false;
   bool _disposed = false;
+  List<CardInstance> _destroyerDiscard = const [];
+
+  /// True while the player is choosing cards for a leader ability.
+  bool get isChoosingForLeader => pendingChoice != null && selectedCard == null;
 
   GameState get state => engine.state;
   PlayerState get human => engine.human;
@@ -111,6 +118,7 @@ class GameController extends ChangeNotifier {
   void clearSelection() {
     selectedCard = null;
     pendingChoice = null;
+    _destroyerDiscard = const [];
     notifyListeners();
   }
 
@@ -158,13 +166,82 @@ class GameController extends ChangeNotifier {
 
   void activateLeader() {
     if (!engine.isHumanTurn || !human.leaderAvailable) return;
+    switch (human.leader.abilities.first) {
+      case 'eredin_destroyer':
+        pendingChoice = TargetChoice(
+          List.of(human.hand),
+          TargetKind.hand,
+          requiredCount: 2,
+        );
+        notifyListeners();
+        return;
+      case 'emhyr_relentless':
+        final targets = opponent.graveyard.where((c) => c.isUnit).toList();
+        if (targets.isEmpty) break;
+        pendingChoice = TargetChoice(targets, TargetKind.graveyard);
+        notifyListeners();
+        return;
+      case 'eredin_bringer_of_death':
+        final targets = human.graveyard.where((c) => c.isUnit).toList();
+        if (targets.isEmpty) break;
+        pendingChoice = TargetChoice(targets, TargetKind.graveyard);
+        notifyListeners();
+        return;
+      default:
+        break;
+    }
     engine.activateLeader(human.index);
+    _afterHumanAction();
+  }
+
+  /// Resolves a [TargetChoice] collected by the UI.
+  ///
+  /// For card-driven choices (Decoy, Medic) the selection is forwarded to
+  /// [playSelected]; for leader abilities it completes the activation.
+  void chooseTargets(List<CardInstance> targets) {
+    if (targets.isEmpty) return;
+    if (selectedCard != null) {
+      playSelected(target: targets.first);
+      return;
+    }
+    final choice = pendingChoice;
+    if (choice is! TargetChoice) return;
+    switch (choice.kind) {
+      case TargetKind.hand:
+        _destroyerDiscard = targets.take(choice.requiredCount).toList();
+        final deck = List.of(human.deck);
+        if (deck.isEmpty) {
+          _finishDestroyer();
+          return;
+        }
+        pendingChoice = TargetChoice(deck, TargetKind.deck);
+        notifyListeners();
+        return;
+      case TargetKind.deck:
+        engine.activateLeader(
+          human.index,
+          discard: _destroyerDiscard,
+          deckPick: targets.first,
+        );
+        _afterHumanAction();
+        return;
+      case TargetKind.graveyard:
+      case TargetKind.battlefield:
+        engine.activateLeader(human.index, target: targets.first);
+        _afterHumanAction();
+        return;
+    }
+  }
+
+  void _finishDestroyer() {
+    engine.activateLeader(human.index, discard: _destroyerDiscard);
     _afterHumanAction();
   }
 
   void _afterHumanAction() {
     selectedCard = null;
     pendingChoice = null;
+    _destroyerDiscard = const [];
     _drainEvents();
     notifyListeners();
     _maybeRunAi();

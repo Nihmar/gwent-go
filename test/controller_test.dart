@@ -17,6 +17,23 @@ GameController buildController() {
   );
 }
 
+GameController buildLeaderController(String leaderId, CardFaction faction) {
+  final opponent = CardRepository.defaultDecks()[1];
+  final deck = DeckDefinition(
+    id: 'test_leader',
+    name: 'Test leader',
+    faction: faction,
+    leader: CardRepository.byId(leaderId),
+    cardCounts: const {'gryffin': 12, 'nekker': 2},
+  );
+  return GameController(
+    humanDeck: deck,
+    opponentDeck: opponent,
+    difficulty: Difficulty.normal,
+    seed: 3,
+  );
+}
+
 void main() {
   group('GameController', () {
     test('starts in the mulligan phase with a full hand', () {
@@ -73,6 +90,61 @@ void main() {
       controller.selectCard(controller.human.hand.first);
       controller.playSelected();
       expect(controller.pendingChoice, isA<TargetChoice>());
+      controller.dispose();
+    });
+
+    test('Destroyer of Worlds asks for two discards then a draw', () {
+      final controller = buildLeaderController(
+        'eredin_gold',
+        CardFaction.monsters,
+      );
+      controller.start();
+      controller.confirmMulligan();
+      controller.state.currentPlayer = 0;
+
+      controller.activateLeader();
+      final discardChoice = controller.pendingChoice as TargetChoice;
+      expect(discardChoice.kind, TargetKind.hand);
+      expect(discardChoice.requiredCount, 2);
+
+      final discards = controller.human.hand.take(2).toList();
+      controller.chooseTargets(discards);
+      final drawChoice = controller.pendingChoice as TargetChoice;
+      expect(drawChoice.kind, TargetKind.deck);
+
+      final pick = controller.human.deck.first;
+      controller.chooseTargets([pick]);
+
+      expect(controller.human.leaderUsed, isTrue);
+      expect(
+        controller.human.graveyard.map((c) => c.id),
+        containsAll(discards.map((c) => c.id)),
+      );
+      expect(controller.human.hand.map((c) => c.id), contains(pick.id));
+      controller.dispose();
+    });
+
+    test('Emhyr the Relentless asks for an opponent graveyard card', () {
+      final controller = buildLeaderController(
+        'emhyr_gold',
+        CardFaction.nilfgaard,
+      );
+      controller.start();
+      controller.confirmMulligan();
+      controller.state.currentPlayer = 0;
+
+      final target = makeCard('gryffin', owner: controller.opponent.index);
+      controller.opponent.graveyard
+        ..clear()
+        ..add(target);
+
+      controller.activateLeader();
+      final choice = controller.pendingChoice as TargetChoice;
+      expect(choice.kind, TargetKind.graveyard);
+      controller.chooseTargets([target]);
+
+      expect(controller.human.leaderUsed, isTrue);
+      expect(controller.human.hand.map((c) => c.id), contains('gryffin'));
       controller.dispose();
     });
   });

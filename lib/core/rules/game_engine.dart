@@ -436,6 +436,8 @@ class GameEngine {
     int playerIndex, {
     CardRow? targetRow,
     CardInstance? target,
+    List<CardInstance>? discard,
+    CardInstance? deckPick,
   }) {
     if (state.phase != GamePhase.playing) return false;
     if (state.currentPlayer != playerIndex) return false;
@@ -448,6 +450,8 @@ class GameEngine {
       ability,
       targetRow: targetRow,
       target: target,
+      discard: discard,
+      deckPick: deckPick,
     );
     player.leaderUsed = true;
     _emit(LeaderActivated(player: playerIndex, ability: ability));
