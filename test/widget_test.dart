@@ -15,6 +15,7 @@ import 'package:gwent_go/presentation/screens/home_screen.dart';
 import 'package:gwent_go/presentation/widgets/game/game_hand.dart';
 import 'package:gwent_go/presentation/widgets/game/game_overlays.dart';
 import 'package:gwent_go/presentation/widgets/gwent_card.dart';
+import 'package:gwent_go/presentation/widgets/selectors.dart';
 
 void setSurface(WidgetTester tester, double width, double height) {
   tester.view.devicePixelRatio = 1;
@@ -32,6 +33,27 @@ void main() {
       expect(find.text('GWENT'), findsWidgets);
       expect(find.text('Play'), findsWidgets);
       expect(find.text('Normal'), findsOneWidget);
+    });
+
+    testWidgets('phone layout keeps its controls above the actions', (
+      tester,
+    ) async {
+      setSurface(tester, 412, 915);
+      await tester.pumpWidget(const GwentApp(home: HomeScreen()));
+      await tester.pumpAndSettle();
+
+      // The action area must not cover or clip the selectors: the faction row
+      // and the deck tile have to sit entirely above the primary button.
+      final actionsTop = tester.getRect(find.text('Play')).top;
+      expect(find.text('Deck collection'), findsOneWidget);
+      expect(
+        tester.getRect(find.text('Deck collection')).bottom,
+        lessThan(actionsTop),
+      );
+      expect(
+        tester.getRect(find.byType(FactionSelector)).bottom,
+        lessThan(actionsTop),
+      );
     });
 
     testWidgets('desktop layout shows the navigation rail', (tester) async {
