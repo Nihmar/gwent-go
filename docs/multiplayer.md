@@ -1,12 +1,10 @@
 # Multiplayer Plan
 
-Status: **design draft**. No multiplayer code exists yet. This document turns the
-"Future multiplayer considerations" of [architecture.md](architecture.md) into a
-concrete plan: the recommended architecture, the engine work required before any
-networking, a phased implementation order and the risks.
-
-Per `AGENTS.md`, multiplayer is future scope. Nothing here should be implemented
-until the corresponding phases are explicitly scheduled.
+Status: **implemented for LAN**. Hotseat and host-authoritative LAN play over TCP
+(with UDP discovery and reconnection) ship in the app. This document keeps the
+design, the phased plan and the remaining work; phases 1–7 are done and phase 8
+(Wi-Fi Direct and Bluetooth) is investigated in [transports.md](transports.md)
+but not implemented.
 
 ## Goals and non-goals
 
@@ -97,16 +95,16 @@ Blocking issues, each addressed by a phase below:
    through SplitMix32, always recording its seed.
 6. **No command objects.** Done: `GameCommand`/`CommandResult` carry uids and
    rejection reasons, and `GameEngine.apply` is the single mutation path.
-7. **No fog of war.** `GameState` and `encodeMatch` include both hands and the
-   full deck order. A guest must receive a redacted projection.
-8. **Events hold object references.** `GameEvent`s are not serializable. Rather
-   than serializing them, ship projections and let the client re-derive
-   animations from state changes, or serialize a small event DTO later.
-9. **No versioning.** Nothing rejects a peer whose card catalog or protocol
-   differs.
-10. **AI runs from the Flutter controller.** `GameController._maybeRunAi` owns the
-    opponent turn loop with `Future.delayed`; in multiplayer the host session
-    must drive it, and the controller must become transport-agnostic.
+7. **No fog of war.** Done: `encodeProjection`/`decodeProjection` ship a per-seat
+   view in which the opponent's hand and every deck order are reduced to counts.
+8. **Events hold object references.** Resolved by design: events stay in-process
+   and are not serialized. The wire carries projections, and the client
+   re-derives animations from state changes.
+9. **No versioning.** Done: `MatchVersions` covers the protocol, the rules and a
+   content hash of the catalog; the lobby handshake rejects mismatches.
+10. **AI runs from the Flutter controller.** Done: `TurnDriver`/`LocalAiDriver`
+    and the `MatchBackend` abstraction keep the controller transport-agnostic,
+    and the host session owns the authoritative engine.
 
 ## Phases
 
@@ -187,7 +185,7 @@ Goal: validate Phases 1–3 without any networking.
 Exit criteria: a full two-human match on one device, with no privileged seat and
 no hand leakage on the transition screen.
 
-### Phase 5 — Presentation integration
+### Phase 5 — Presentation integration *(done)*
 
 Goal: the UI works with a local or remote driver behind the same interface.
 
@@ -201,7 +199,7 @@ Goal: the UI works with a local or remote driver behind the same interface.
   rematch.
 - All new strings go through the ARB/localization stack.
 
-### Phase 6 — LAN transport and discovery
+### Phase 6 — LAN transport and discovery *(done)*
 
 Goal: two devices on the same network can play.
 
@@ -213,7 +211,7 @@ Goal: two devices on the same network can play.
 - Android: LAN permissions and lifecycle handling; Linux/Windows: no special
   permissions.
 
-### Phase 7 — Reconnection and robustness
+### Phase 7 — Reconnection and robustness *(done)*
 
 - Reconnect handshake: guest proves its seat, host replies with a fresh
   projection plus a `resync` marker.
