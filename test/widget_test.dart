@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gwent_go/app.dart';
 import 'package:gwent_go/core/data/card_repository.dart';
 import 'package:gwent_go/core/models/card.dart';
+import 'package:gwent_go/core/models/game_state.dart';
 import 'package:gwent_go/core/models/player.dart';
 import 'package:gwent_go/core/persistence/key_value_store.dart';
 import 'package:gwent_go/core/persistence/profile_repository.dart';
@@ -341,6 +342,54 @@ void main() {
       await tester.tap(find.text('Close'));
       await tester.pumpAndSettle();
       expect(find.text('Close'), findsNothing);
+    });
+
+    testWidgets('finishing a match leaves the board for the menu', (
+      tester,
+    ) async {
+      setSurface(tester, 412, 915);
+      final controller = GameController(
+        humanDeck: decks[0],
+        opponentDeck: decks[1],
+        difficulty: Difficulty.normal,
+        seed: 3,
+      );
+      controller.start();
+      controller.confirmMulligan();
+
+      await tester.pumpWidget(
+        GwentApp(
+          home: Builder(
+            builder: (context) => Center(
+              child: ElevatedButton(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => GameScreen(controller: controller),
+                  ),
+                ),
+                child: const Text('launcher'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('launcher'));
+      await tester.pumpAndSettle();
+
+      // Force the human to win the match while the board is open.
+      controller.engine!.state
+        ..phase = GamePhase.gameOver
+        ..matchWinner = 0;
+      controller.selectCard(null);
+      await tester.pumpAndSettle();
+
+      expect(find.text('You win the match'), findsOneWidget);
+      await tester.tap(find.text('Main menu'));
+      await tester.pumpAndSettle();
+
+      // Acknowledging the result must not leave a dead board behind.
+      expect(find.text('launcher'), findsOneWidget);
+      expect(find.byType(GameScreen), findsNothing);
     });
   });
 }

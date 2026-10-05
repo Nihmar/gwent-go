@@ -238,6 +238,12 @@ abstract class AppLocalizations {
   /// **'Menu'**
   String get menu;
 
+  /// No description provided for @backToMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Main menu'**
+  String get backToMenu;
+
   /// No description provided for @opponentDifficulty.
   ///
   /// In en, this message translates to:

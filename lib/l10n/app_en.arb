@@ -24,6 +24,7 @@
   "save": "Save",
   "sound": "Sound",
   "menu": "Menu",
+  "backToMenu": "Main menu",
   "opponentDifficulty": "Opponent difficulty",
   "easy": "Easy",
   "normal": "Normal",

@@ -240,11 +240,14 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
         actions: [
           FilledButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(strings.close),
+            child: Text(strings.backToMenu),
           ),
         ],
       ),
     );
+    // A finished match must not leave the player on a dead board: once the
+    // result is acknowledged, leave the game screen.
+    if (mounted) Navigator.of(context).maybePop();
   }
 
   void _pause() {
