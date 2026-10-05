@@ -8,6 +8,7 @@ import '../controllers/game_controller.dart';
 import '../localization.dart';
 import '../widgets/board_background.dart';
 import '../widgets/board_widgets.dart';
+import '../widgets/card_detail_dialog.dart';
 import '../widgets/game/game_actions.dart';
 import '../widgets/game/game_hand.dart';
 import '../widgets/game/game_header.dart';
@@ -217,6 +218,11 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                       row: row,
                       cardWidth: cardWidth,
                       leading: controller.opponent.isWinning,
+                      onCardTap: (card) => showCardDetail(
+                        context,
+                        card.definition,
+                        strength: card.currentStrength,
+                      ),
                     ),
                   ),
                 const MidRule(),
@@ -238,6 +244,11 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                       row: row,
                       cardWidth: cardWidth,
                       leading: controller.human.isWinning,
+                      onCardTap: (card) => showCardDetail(
+                        context,
+                        card.definition,
+                        strength: card.currentStrength,
+                      ),
                     ),
                   ),
                 const SizedBox(height: 6),
@@ -319,6 +330,11 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                         row: row,
                         cardWidth: cardWidth,
                         leading: controller.opponent.isWinning,
+                        onCardTap: (card) => showCardDetail(
+                          context,
+                          card.definition,
+                          strength: card.currentStrength,
+                        ),
                       ),
                     ),
                   const MidRule(),
@@ -340,6 +356,11 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                         row: row,
                         cardWidth: cardWidth,
                         leading: controller.human.isWinning,
+                        onCardTap: (card) => showCardDetail(
+                          context,
+                          card.definition,
+                          strength: card.currentStrength,
+                        ),
                       ),
                     ),
                   const SizedBox(height: 10),

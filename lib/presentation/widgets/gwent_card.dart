@@ -19,6 +19,7 @@ class GwentCard extends StatelessWidget {
     this.dim = false,
     this.highlighted = false,
     this.onTap,
+    this.onLongPress,
   });
 
   final CardDefinition definition;
@@ -29,6 +30,7 @@ class GwentCard extends StatelessWidget {
   final bool dim;
   final bool highlighted;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
 
   double get _height => width * 6.35 / 4.45;
 
@@ -104,9 +106,10 @@ class GwentCard extends StatelessWidget {
     if (selected) {
       card = Transform.translate(offset: Offset(0, -width * 0.18), child: card);
     }
-    if (onTap != null) {
+    if (onTap != null || onLongPress != null) {
       card = GestureDetector(
         onTap: onTap,
+        onLongPress: onLongPress,
         behavior: HitTestBehavior.opaque,
         child: MouseRegion(cursor: SystemMouseCursors.click, child: card),
       );

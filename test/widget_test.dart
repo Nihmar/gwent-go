@@ -233,5 +233,37 @@ void main() {
       expect(find.text('Confirm (2/2)'), findsOneWidget);
       controller.dispose();
     });
+
+    testWidgets('long-pressing a hand card opens its detail', (tester) async {
+      setSurface(tester, 412, 915);
+      await tester.pumpWidget(
+        GwentApp(
+          home: GameScreen(
+            humanDeck: decks[0],
+            opponentDeck: decks[1],
+            difficulty: Difficulty.easy,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Keep hand'));
+      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pumpAndSettle();
+
+      final handCard = find
+          .descendant(
+            of: find.byType(GameHand),
+            matching: find.byType(GwentCard),
+          )
+          .first;
+      await tester.longPress(handCard);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Close'), findsOneWidget);
+      await tester.tap(find.text('Close'));
+      await tester.pumpAndSettle();
+      expect(find.text('Close'), findsNothing);
+    });
   });
 }

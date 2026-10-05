@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/data/card_repository.dart';
-import '../../../core/data/faction_catalog.dart';
 import '../../../core/models/card.dart';
 import '../../../core/models/collection.dart';
 import '../../../core/models/player.dart';
@@ -455,46 +454,6 @@ class DeckBadge extends StatelessWidget {
           fontWeight: FontWeight.w700,
         ),
       ),
-    );
-  }
-}
-
-/// Faction shield + title used by the deck editor header.
-class DeckHeaderInfo extends StatelessWidget {
-  const DeckHeaderInfo({
-    super.key,
-    required this.faction,
-    required this.title,
-    required this.subtitle,
-  });
-
-  final CardFaction faction;
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Image.asset(factionInfo(faction).shieldAsset, width: 22, height: 25),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-              Text(
-                subtitle,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: GwentColors.onSurfaceVariant,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }
