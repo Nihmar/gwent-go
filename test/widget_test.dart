@@ -234,6 +234,35 @@ void main() {
       controller.dispose();
     });
 
+    testWidgets('mulligan redraw count does not grow when picking cards', (
+      tester,
+    ) async {
+      setSurface(tester, 412, 915);
+      await tester.pumpWidget(
+        GwentApp(
+          home: GameScreen(
+            humanDeck: decks[0],
+            opponentDeck: decks[1],
+            difficulty: Difficulty.normal,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      const hint = 'Choose up to 2 cards to redraw';
+      expect(find.text(hint), findsOneWidget);
+
+      final overlayCards = find.descendant(
+        of: find.byType(MulliganOverlay),
+        matching: find.byType(GwentCard),
+      );
+      await tester.tap(overlayCards.first);
+      await tester.pumpAndSettle();
+
+      // Selecting a card must not increase the redraw budget shown.
+      expect(find.text(hint), findsOneWidget);
+    });
+
     testWidgets('long-pressing a hand card opens its detail', (tester) async {
       setSurface(tester, 412, 915);
       await tester.pumpWidget(

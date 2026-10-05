@@ -61,9 +61,10 @@ class MulliganOverlay extends StatelessWidget {
             children: [
               const SizedBox(height: 24),
               Text(
-                strings.mulliganTitle(
-                  controller.redrawsLeft + controller.redrawPicks.length,
-                ),
+                // redrawsLeft is the number of swaps still allowed for this
+                // mulligan; pending picks are only a selection, so they must
+                // not inflate the count shown to the player.
+                strings.mulliganTitle(controller.redrawsLeft),
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
