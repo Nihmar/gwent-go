@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import '../data/card_repository.dart';
 import '../models/card.dart';
 import '../models/collection.dart';
 import '../models/player.dart';
+import '../data/deck_codec.dart';
 import 'key_value_store.dart';
 
 /// User preferences that survive restarts.
@@ -107,7 +107,9 @@ class ProfileRepository {
     final raw = await _store.getString(_deckKey(faction));
     if (raw == null || raw.isEmpty) return null;
     try {
-      return _deckFromJson(jsonDecode(raw) as Map<String, dynamic>);
+      return deckFromJson(
+        (jsonDecode(raw) as Map).cast<String, Object?>(),
+      );
     } on FormatException {
       return null;
     }
@@ -116,7 +118,7 @@ class ProfileRepository {
   Future<void> saveDeck(DeckDefinition deck) async {
     await _store.setString(
       _deckKey(deck.faction),
-      jsonEncode(_deckToJson(deck)),
+      jsonEncode(deckToJson(deck)),
     );
   }
 
@@ -187,46 +189,4 @@ CardFaction _factionFromName(String? name) {
     if (faction.name == name) return faction;
   }
   return AppSettings.defaults.faction;
-}
-
-Map<String, dynamic> _deckToJson(DeckDefinition deck) => {
-  'id': deck.id,
-  'name': deck.name,
-  'faction': deck.faction.name,
-  'leader': deck.leader.id,
-  'cards': deck.cardCounts,
-};
-
-DeckDefinition? _deckFromJson(Map<String, dynamic> json) {
-  final factionName = json['faction'];
-  final leaderId = json['leader'];
-  if (factionName is! String || leaderId is! String) return null;
-  final faction = _factionByName(factionName);
-  final leader = CardRepository.maybeById(leaderId);
-  if (faction == null || leader == null || !leader.isLeader) return null;
-
-  final counts = <String, int>{};
-  final rawCards = json['cards'];
-  if (rawCards is Map) {
-    rawCards.forEach((id, count) {
-      if (id is! String || count is! int) return;
-      if (CardRepository.maybeById(id) == null) return;
-      counts[id] = count;
-    });
-  }
-  if (counts.isEmpty) return null;
-  return DeckDefinition(
-    id: json['id'] as String? ?? 'custom_${faction.name}',
-    name: json['name'] as String? ?? 'Custom deck',
-    faction: faction,
-    leader: leader,
-    cardCounts: counts,
-  );
-}
-
-CardFaction? _factionByName(String name) {
-  for (final faction in CardFaction.values) {
-    if (faction.name == name) return faction;
-  }
-  return null;
 }
