@@ -221,7 +221,7 @@ Goal: two devices on the same network can play.
   match after a configurable window.
 - Optional turn timer (decision needed; probably off for v1).
 
-### Phase 8 — Future transports and features
+### Phase 8 — Future transports and features *(investigated in [transports.md](transports.md))*
 
 - Wi-Fi Direct (Android) and Bluetooth behind the same `MatchTransport`.
 - Spectators, 3+ players, rematch series, ranked — explicitly out of scope until
