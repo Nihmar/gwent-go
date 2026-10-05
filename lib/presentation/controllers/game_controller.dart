@@ -193,10 +193,16 @@ class GameController extends ChangeNotifier {
     if (!engine.isHumanTurn || !human.leaderAvailable) return;
     switch (human.leader.abilities.first) {
       case 'eredin_destroyer':
+        final required = human.hand.length < 2 ? human.hand.length : 2;
+        if (required == 0) {
+          // Nothing to discard: go straight to the draw.
+          _startDestroyerDraw();
+          return;
+        }
         pendingChoice = TargetChoice(
           List.of(human.hand),
           TargetKind.hand,
-          requiredCount: 2,
+          requiredCount: required,
         );
         notifyListeners();
         return;
@@ -234,13 +240,7 @@ class GameController extends ChangeNotifier {
     switch (choice.kind) {
       case TargetKind.hand:
         _destroyerDiscard = targets.take(choice.requiredCount).toList();
-        final deck = List.of(human.deck);
-        if (deck.isEmpty) {
-          _finishDestroyer();
-          return;
-        }
-        pendingChoice = TargetChoice(deck, TargetKind.deck);
-        notifyListeners();
+        _startDestroyerDraw();
         return;
       case TargetKind.deck:
         engine.activateLeader(
@@ -261,6 +261,18 @@ class GameController extends ChangeNotifier {
   void _finishDestroyer() {
     engine.activateLeader(human.index, discard: _destroyerDiscard);
     _afterHumanAction();
+  }
+
+  /// Asks the player which card to draw after the Destroyer of Worlds discard,
+  /// or resolves immediately when the deck is empty.
+  void _startDestroyerDraw() {
+    final deck = List.of(human.deck);
+    if (deck.isEmpty) {
+      _finishDestroyer();
+      return;
+    }
+    pendingChoice = TargetChoice(deck, TargetKind.deck);
+    notifyListeners();
   }
 
   void _afterHumanAction() {
