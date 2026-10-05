@@ -68,7 +68,7 @@ class GwentCard extends StatelessWidget {
               child: _PowerBadge(
                 definition: definition,
                 strength: showStrength ? shownStrength : null,
-                size: width * 0.32,
+                size: width * 0.26,
               ),
             ),
           if (CardAssets.rowIcon(definition.row) case final rowIcon?)
@@ -199,7 +199,6 @@ class _PowerBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hero = definition.isHero;
-    final asset = CardAssets.powerBadge(definition);
     return SizedBox(
       key: GwentCard.powerBadgeKey,
       width: size,
@@ -207,23 +206,14 @@ class _PowerBadge extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          if (hero)
-            Image.asset(
-              asset,
-              width: size,
-              height: size,
-              fit: BoxFit.fill,
-              errorBuilder: (context, error, stack) => const SizedBox.shrink(),
-            )
-          else
-            // Unit, special and weather sprites keep the badge in a corner of
-            // a larger canvas, so crop it instead of scaling the whole image.
-            _SpriteCrop(asset: asset, size: size),
+          // Every sprite (hero included) keeps its disc in the same content
+          // rect, so one crop centres all of them under the number.
+          _SpriteCrop(asset: CardAssets.powerBadge(definition), size: size),
           if (strength != null)
             Text(
               '$strength',
               style: TextStyle(
-                fontSize: size * 0.4,
+                fontSize: size * 0.44,
                 fontWeight: FontWeight.w700,
                 height: 1,
                 color: hero ? const Color(0xFFF7E8C2) : const Color(0xFF221806),

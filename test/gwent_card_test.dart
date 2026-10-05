@@ -73,7 +73,26 @@ void main() {
     // The artwork centre stays clear, like on units and heroes.
     expect(badge.center.dx, lessThan(card.center.dx));
     expect(badge.center.dy, lessThan(card.center.dy));
-    expect(badge.width, closeTo(width * 0.32, 0.5));
+    expect(badge.width, closeTo(width * 0.26, 0.5));
+  });
+
+  testWidgets('heroes show their strength inside the badge', (tester) async {
+    const width = 104.0;
+    await tester.pumpWidget(
+      GwentApp(
+        home: Scaffold(
+          body: GwentCard(definition: CardRepository.byId('geralt'), width: width),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final badge = tester.getRect(find.byKey(GwentCard.powerBadgeKey));
+    final number = tester.getRect(find.text('15'));
+
+    // The hero sprite is cropped to its disc, so the number lands on it.
+    expect(number.center.dx, closeTo(badge.center.dx, 0.5));
+    expect(number.center.dy, closeTo(badge.center.dy, 0.5));
   });
 
   testWidgets('the badge sits inside the card with a margin', (tester) async {
