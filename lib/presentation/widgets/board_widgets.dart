@@ -6,6 +6,7 @@ import '../../core/rules/scoring.dart';
 import '../localization.dart';
 import '../theme/gwent_colors.dart';
 import 'card_assets.dart';
+import 'game/card_effects.dart';
 import 'gwent_card.dart';
 
 /// One battlefield row: marker, overlapping unit cards and an optional special.
@@ -21,6 +22,8 @@ class RowStrip extends StatelessWidget {
     this.selectable = false,
     this.onTap,
     this.onCardTap,
+    this.flashTick,
+    this.flashColor,
   });
 
   final GameState state;
@@ -32,6 +35,10 @@ class RowStrip extends StatelessWidget {
   final bool selectable;
   final VoidCallback? onTap;
   final void Function(CardInstance card)? onCardTap;
+
+  /// Per-card flash counters and colours for ability feedback.
+  final int Function(int uid)? flashTick;
+  final Color? Function(int uid)? flashColor;
 
   @override
   Widget build(BuildContext context) {
@@ -104,6 +111,8 @@ class RowStrip extends StatelessWidget {
                 cards: rowState.cards,
                 cardWidth: cardWidth,
                 onCardTap: onCardTap,
+                flashTick: flashTick,
+                flashColor: flashColor,
               ),
             ),
             if (rowState.special case final special?) ...[
@@ -126,11 +135,27 @@ class _CardStack extends StatelessWidget {
     required this.cards,
     required this.cardWidth,
     this.onCardTap,
+    this.flashTick,
+    this.flashColor,
   });
 
   final List<CardInstance> cards;
   final double cardWidth;
   final void Function(CardInstance card)? onCardTap;
+  final int Function(int uid)? flashTick;
+  final Color? Function(int uid)? flashColor;
+
+  Widget _withFlash(CardInstance card, double width, Widget child) {
+    final tick = flashTick?.call(card.uid) ?? 0;
+    final color = flashColor?.call(card.uid);
+    if (tick == 0 || color == null) return child;
+    return AbilityFlash(
+      flashKey: tick,
+      color: color,
+      radius: width * 0.095,
+      child: child,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -156,15 +181,19 @@ class _CardStack extends StatelessWidget {
                     key: ValueKey<int>(cards[i].uid),
                     left: i * effectiveStep,
                     top: 0,
-                    child: _EntranceCard(
-                      child: GwentCard(
-                        definition: cards[i].definition,
-                        strength: cards[i].currentStrength,
-                        width: effective,
-                        showName: false,
-                        onTap: onCardTap == null
-                            ? null
-                            : () => onCardTap!(cards[i]),
+                    child: EntranceCard(
+                      child: _withFlash(
+                        cards[i],
+                        effective,
+                        GwentCard(
+                          definition: cards[i].definition,
+                          strength: cards[i].currentStrength,
+                          width: effective,
+                          showName: false,
+                          onTap: onCardTap == null
+                              ? null
+                              : () => onCardTap!(cards[i]),
+                        ),
                       ),
                     ),
                   ),
@@ -410,65 +439,4 @@ class MidRule extends StatelessWidget {
       ],
     );
   }
-}
-
-/// Plays a short scale/fade entrance when a card is added to a row.
-///
-/// It runs once per widget instance; the parent stack keys each card by uid, so
-/// rebuilds and neighbours moving do not replay the animation.
-class _EntranceCard extends StatefulWidget {
-  const _EntranceCard({required this.child});
-
-  final Widget child;
-
-  @override
-  State<_EntranceCard> createState() => _EntranceCardState();
-}
-
-class _EntranceCardState extends State<_EntranceCard>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 240),
-  )..forward();
-
-  late final Animation<double> _scale = Tween<double>(
-    begin: 0.85,
-    end: 1,
-  ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
-
-  late final Animation<double> _opacity = CurvedAnimation(
-    parent: _controller,
-    curve: Curves.easeOut,
-  );
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => FadeTransition(
-    opacity: _opacity,
-    child: ScaleTransition(scale: _scale, child: widget.child),
-  );
-}
-
-/// A number that fades/scales when its value changes (row and player scores).
-class AnimatedScore extends StatelessWidget {
-  const AnimatedScore({super.key, required this.value, required this.style});
-
-  final int value;
-  final TextStyle style;
-
-  @override
-  Widget build(BuildContext context) => AnimatedSwitcher(
-    duration: const Duration(milliseconds: 220),
-    transitionBuilder: (child, animation) => FadeTransition(
-      opacity: animation,
-      child: ScaleTransition(scale: animation, child: child),
-    ),
-    child: Text('$value', key: ValueKey<int>(value), style: style),
-  );
 }

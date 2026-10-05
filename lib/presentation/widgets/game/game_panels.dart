@@ -6,6 +6,7 @@ import '../../controllers/game_controller.dart';
 import '../../localization.dart';
 import '../../theme/gwent_colors.dart';
 import '../board_widgets.dart';
+import 'card_effects.dart';
 import '../gwent_card.dart';
 
 /// Compact player summary used by the phone layout.

@@ -41,4 +41,19 @@ abstract final class GwentColors {
     end: Alignment.bottomCenter,
     colors: [goldBright, gold],
   );
+
+  /// Glow colour used when an ability affects a card.
+  static Color abilityEffect(String ability) => switch (ability) {
+    'scorch' ||
+    'scorch_c' ||
+    'scorch_r' ||
+    'scorch_s' => const Color(0xFFFF7043),
+    'medic' => const Color(0xFF81C784),
+    'muster' => const Color(0xFFFFD54F),
+    'spy' => const Color(0xFF64B5F6),
+    'decoy' => const Color(0xFF4DB6AC),
+    'avenger' || 'avenger_kambi' => const Color(0xFFBA68C8),
+    'berserker' || 'mardroeme' => const Color(0xFFA1887F),
+    _ => primary,
+  };
 }

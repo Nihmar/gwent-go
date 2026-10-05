@@ -217,6 +217,8 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                       owner: controller.opponent.index,
                       row: row,
                       cardWidth: cardWidth,
+                      flashTick: controller.flashCounter,
+                      flashColor: controller.flashColorFor,
                       leading: controller.opponent.isWinning,
                       onCardTap: (card) => showCardDetail(
                         context,
@@ -243,6 +245,8 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                       owner: controller.human.index,
                       row: row,
                       cardWidth: cardWidth,
+                      flashTick: controller.flashCounter,
+                      flashColor: controller.flashColorFor,
                       leading: controller.human.isWinning,
                       onCardTap: (card) => showCardDetail(
                         context,
@@ -329,6 +333,8 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                         owner: controller.opponent.index,
                         row: row,
                         cardWidth: cardWidth,
+                        flashTick: controller.flashCounter,
+                        flashColor: controller.flashColorFor,
                         leading: controller.opponent.isWinning,
                         onCardTap: (card) => showCardDetail(
                           context,
@@ -355,6 +361,8 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                         owner: controller.human.index,
                         row: row,
                         cardWidth: cardWidth,
+                        flashTick: controller.flashCounter,
+                        flashColor: controller.flashColorFor,
                         leading: controller.human.isWinning,
                         onCardTap: (card) => showCardDetail(
                           context,
