@@ -12,6 +12,20 @@ void main() {
       expect(ids.toSet().length, ids.length);
     });
 
+    test('every leader ability is classified as active or passive', () {
+      for (final card in allCards.where((c) => c.isLeader)) {
+        expect(card.abilities, isNotEmpty, reason: '${card.id} has no ability');
+        for (final ability in card.abilities) {
+          expect(
+            Ability.isActiveLeaderAbility(ability) ||
+                Ability.passiveLeaderAbilities.contains(ability),
+            isTrue,
+            reason: '${card.id} has unclassified leader ability $ability',
+          );
+        }
+      }
+    });
+
     test('every card has artwork on disk', () {
       for (final card in allCards) {
         final file = File('assets/cards/${card.artFilename}.jpg');

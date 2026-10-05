@@ -333,6 +333,20 @@ void main() {
       expect(engine.state.players[0].graveyard, isEmpty);
       expect(engine.state.players[0].deck.map((c) => c.id), contains('gryffin'));
     });
+
+    test('Pureblood Elf plays Biting Frost from the deck', () {
+      final engine = harness(
+        humanFaction: CardFaction.scoiatael,
+        humanLeader: 'francesca_bronze',
+      );
+      setTurn(engine, 0);
+      setDeck(engine, 0, ['frost', 'geralt']);
+      expect(engine.activateLeader(0), isTrue);
+      expect(engine.state.activeWeather, contains(Ability.frost));
+      expect(engine.state.weatherCards.single.id, 'frost');
+      expect(engine.state.rowState(0, CardRow.close).weather, isTrue);
+      expect(engine.state.players[0].leaderUsed, isTrue);
+    });
   });
 
   group('Manual leader choices', () {

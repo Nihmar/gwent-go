@@ -89,8 +89,19 @@ abstract final class Ability {
     'eredin_king',
     'francesca_queen',
     'francesca_beautiful',
+    'francesca_pureblood',
     'francesca_hope',
     'crach_an_craite',
+  };
+
+  /// Leader abilities that run automatically (at the start of the game or of a
+  /// round) and are never activated by the player.
+  static const Set<String> passiveLeaderAbilities = {
+    'emhyr_whiteflame',
+    'emhyr_invader',
+    'eredin_treacherous',
+    'francesca_daisy',
+    'king_bran',
   };
 
   static bool isActiveLeaderAbility(String id) =>
