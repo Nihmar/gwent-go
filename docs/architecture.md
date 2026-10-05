@@ -118,24 +118,36 @@ state.
 
 ## Future multiplayer considerations
 
-Multiplayer is intentionally **not** implemented, but the following were kept in
-mind and should be revisited when it is:
+Multiplayer is intentionally **not** implemented. The full design and phased
+plan live in [`multiplayer.md`](multiplayer.md); the summary below is kept for
+context.
 
-1. **Authoritative state and actions.** The engine already separates state
-   (`GameState`), actions (`playCard`, `pass`, `activateLeader`) and events.
-   A host/client model could ship actions to an authority and broadcast events.
-2. **Deterministic evaluation.** Seeded randomness makes a deterministic replay
-   feasible; hidden information (hands, decks) can stay server-side.
-3. **Host/client vs peer-to-peer.** A host/client model fits the current
-   synchronous engine best, since one side owns the deck shuffles and AI. A pure
-   peer-to-peer lockstep design would require a shared action log and a
-   fairness rule for simultaneous choices.
-4. **Transport.** LAN, Wi-Fi Direct and Bluetooth are all plausible. No
-   transport abstraction has been introduced yet to avoid speculative code; the
-   recommendation is to add a narrow `MatchTransport` interface when the first
-   transport is implemented.
-5. **Discovery, identity, reconnection.** Not designed yet. Player identity and
-   a reconnect handshake should be specified alongside the transport.
+The recommended model is **host-authoritative**: the host owns the single
+`GameEngine`, validates serializable commands and broadcasts a redacted
+projection to each seat. Lockstep was rejected for v1 (hidden information,
+cross-platform RNG guarantees, cheating). The plan is split into phases:
+
+1. **Engine as a command processor** — serializable `GameCommand`s with
+   rejection reasons, a custom in-core PRNG instead of `dart:math`, removal of
+   the privileged local human, per-seat mulligan and the Scoia'tael
+   first-player choice.
+2. **Fog of war and versioning** — `GameState.projectFor(seat)`, catalog and
+   protocol versioning, state hashing.
+3. **Session layer** — a Flutter-free `MatchTransport` plus `HostSession` /
+   `ClientSession` speaking JSON messages, tested with an in-memory loopback.
+4. **Hotseat** — two humans on one device to validate the refactor without
+   networking.
+5. **Presentation integration** — split the view controller from the turn
+   driver, add the lobby UI.
+6. **LAN transport and discovery** — TCP/WebSocket plus UDP discovery or mDNS,
+   with platform details behind `lib/platform/`.
+7. **Reconnection** — resume a match from a fresh projection.
+8. **Future transports** — Wi-Fi Direct and Bluetooth, then optional extras.
+
+Items that already help: the Flutter-free core, the synchronous engine with an
+event stream, the seeded `GameRandom`, the JSON snapshot and the pure
+`DeckValidator`. See [`multiplayer.md`](multiplayer.md) for the blockers, risks
+and open questions.
 
 ## Known limitations / follow-ups
 
