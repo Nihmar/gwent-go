@@ -14,14 +14,15 @@ import 'support/engine_harness.dart';
 int playMatch(Difficulty difficulty, {int seed = 1, int maxTurns = 2000}) {
   final decks = CardRepository.defaultDecks();
   final engine = GameEngine(
-    humanDeck: decks[0],
-    opponentDeck: decks[1],
+    firstDeck: decks[0],
+    secondDeck: decks[1],
     difficulty: difficulty,
     random: GameRandom(seed),
   );
   engine.startMatch();
   engine.takeEvents();
-  engine.finishMulligan();
+  engine.finishMulligan(0);
+  engine.finishMulligan(1);
   engine.takeEvents();
 
   final ai = createAi(difficulty);
@@ -74,10 +75,10 @@ void main() {
     test('Easy plays its strongest card and ignores the leader', () {
       final engine = harness();
       setTurn(engine, 1);
-      engine.opponent.hand
+      engine.state.players[1].hand
         ..clear()
         ..addAll([makeCard('gryffin', owner: 1), makeCard('fiend', owner: 1)]);
-      final action = EasyAi().decide(engine, engine.opponent);
+      final action = EasyAi().decide(engine, engine.state.players[1]);
       expect(action, isA<AiPlayCard>());
       expect((action as AiPlayCard).card.id, 'fiend');
     });
@@ -90,14 +91,14 @@ void main() {
           .cards
           .add(makeCard('geralt', owner: 1));
       engine.state.players[0].passed = true;
-      final action = HardAi().decide(engine, engine.opponent);
+      final action = HardAi().decide(engine, engine.state.players[1]);
       expect(action, isA<AiPass>());
     });
 
     test('Normal returns a legal action on the opening turn', () {
       final engine = harness();
       setTurn(engine, 1);
-      final action = NormalAi().decide(engine, engine.opponent);
+      final action = NormalAi().decide(engine, engine.state.players[1]);
       expect(action, isA<AiAction>());
     });
   });

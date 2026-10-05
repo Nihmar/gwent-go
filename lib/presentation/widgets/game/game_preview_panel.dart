@@ -80,7 +80,7 @@ class GamePreviewPanel extends StatelessWidget {
               Row(
                 children: [
                   FilledButton.icon(
-                    onPressed: controller.engine.isHumanTurn
+                    onPressed: controller.isLocalTurn
                         ? () => controller.playSelected()
                         : null,
                     icon: const Icon(Icons.double_arrow_rounded, size: 18),

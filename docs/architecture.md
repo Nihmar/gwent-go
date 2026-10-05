@@ -111,10 +111,14 @@ locale entry — no rules or UI code changes.
 
 ## Determinism
 
-`GameRandom` wraps `dart:math`'s `Random` and accepts an optional seed. Tests use
-seeded engines so full matches are reproducible. The engine emits events rather
-than performing animations, so replaying an action log would reproduce the same
-state.
+The engine mutates state through `GameEngine.apply` and serializable
+`GameCommand`s, so an action log can be replayed. `GameRandom` is an in-core
+xorshift128 generator seeded with SplitMix32 — `dart:math` is deliberately not
+used, because a seeded `Random` is not guaranteed to replay the same sequence
+across Dart versions or platforms. It always records its seed, which match
+snapshots store alongside the per-seat mulligan progress. The engine emits
+events rather than performing animations, so replaying an action log reproduces
+the same state.
 
 ## Future multiplayer considerations
 
@@ -130,7 +134,7 @@ cross-platform RNG guarantees, cheating). The plan is split into phases:
 1. **Engine as a command processor** — serializable `GameCommand`s with
    rejection reasons, a custom in-core PRNG instead of `dart:math`, removal of
    the privileged local human, per-seat mulligan and the Scoia'tael
-   first-player choice.
+   first-player choice. *(done)*
 2. **Fog of war and versioning** — `GameState.projectFor(seat)`, catalog and
    protocol versioning, state hashing.
 3. **Session layer** — a Flutter-free `MatchTransport` plus `HostSession` /

@@ -99,7 +99,7 @@ class _LeaderChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final strings = context.strings;
     final player = controller.human;
-    final available = player.leaderAvailable && controller.engine.isHumanTurn;
+    final available = player.leaderAvailable && controller.isLocalTurn;
     return Tooltip(
       message: strings.cardDescription(player.leader),
       child: GestureDetector(
@@ -277,7 +277,7 @@ class _LeaderButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final strings = context.strings;
     final player = controller.human;
-    final available = player.leaderAvailable && controller.engine.isHumanTurn;
+    final available = player.leaderAvailable && controller.isLocalTurn;
     return Column(
       children: [
         GwentCard(

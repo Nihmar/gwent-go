@@ -13,8 +13,8 @@ import 'support/engine_harness.dart';
 GameEngine mulliganEngine() {
   final decks = CardRepository.defaultDecks();
   final engine = GameEngine(
-    humanDeck: decks[0],
-    opponentDeck: decks[1],
+    firstDeck: decks[0],
+    secondDeck: decks[1],
     difficulty: Difficulty.normal,
     random: GameRandom(11),
   );
@@ -33,7 +33,7 @@ void main() {
       final engine = harness();
       setTurn(engine, 0);
       setHand(engine, 0, ['gryffin']);
-      final card = engine.human.hand.first;
+      final card = engine.state.players[0].hand.first;
 
       final result = engine.apply(
         PlayCardCommand(player: 0, cardUid: card.uid),
@@ -51,7 +51,7 @@ void main() {
       final engine = harness();
       setTurn(engine, 0);
       setHand(engine, 1, ['gryffin']);
-      final card = engine.opponent.hand.first;
+      final card = engine.state.players[1].hand.first;
 
       expect(
         rejectionOf(
@@ -64,9 +64,9 @@ void main() {
     test('a card outside the hand is rejected', () {
       final engine = harness();
       setTurn(engine, 0);
-      engine.human.hand.clear();
+      engine.state.players[0].hand.clear();
       final card = makeCard('gryffin', owner: 0);
-      engine.human.deck.add(card);
+      engine.state.players[0].deck.add(card);
 
       expect(
         rejectionOf(
@@ -96,7 +96,7 @@ void main() {
         owner: 0,
       );
       setHand(engine, 0, ['horn']);
-      final card = engine.human.hand.first;
+      final card = engine.state.players[0].hand.first;
 
       expect(
         rejectionOf(
@@ -116,7 +116,7 @@ void main() {
       final engine = harness();
       setTurn(engine, 0);
       setHand(engine, 0, ['decoy']);
-      final card = engine.human.hand.first;
+      final card = engine.state.players[0].hand.first;
 
       expect(
         rejectionOf(
@@ -128,7 +128,7 @@ void main() {
 
     test('a command during the mulligan is rejected', () {
       final engine = mulliganEngine();
-      final card = engine.human.hand.first;
+      final card = engine.state.players[0].hand.first;
 
       expect(
         rejectionOf(
@@ -180,46 +180,48 @@ void main() {
   });
 
   group('RedrawCommand', () {
-    test('redraws are limited to two', () {
+    test('each seat is limited to two redraws', () {
       final engine = mulliganEngine();
 
-      for (var i = 0; i < GameEngine.maxRedraws; i++) {
-        final card = engine.human.hand.first;
+      for (final seat in [0, 1]) {
+        for (var i = 0; i < GameEngine.maxRedraws; i++) {
+          final card = engine.state.players[seat].hand.first;
+          expect(
+            engine.apply(RedrawCommand(player: seat, cardUid: card.uid)),
+            isA<CommandAccepted>(),
+          );
+        }
+        final card = engine.state.players[seat].hand.first;
         expect(
-          engine.apply(RedrawCommand(player: 0, cardUid: card.uid)),
-          isA<CommandAccepted>(),
+          rejectionOf(
+            engine.apply(RedrawCommand(player: seat, cardUid: card.uid)),
+          ),
+          CommandRejection.noRedrawsLeft,
         );
       }
-      final card = engine.human.hand.first;
-      expect(
-        rejectionOf(engine.apply(RedrawCommand(player: 0, cardUid: card.uid))),
-        CommandRejection.noRedrawsLeft,
-      );
     });
 
-    test('another seat cannot redraw yet', () {
+    test('a seat that confirmed its hand cannot redraw', () {
       final engine = mulliganEngine();
-      final card = engine.opponent.hand.first;
+      engine.apply(const FinishMulliganCommand(0));
+      final card = engine.state.players[0].hand.first;
 
       expect(
-        rejectionOf(engine.apply(RedrawCommand(player: 1, cardUid: card.uid))),
-        CommandRejection.notYourTurn,
+        rejectionOf(engine.apply(RedrawCommand(player: 0, cardUid: card.uid))),
+        CommandRejection.alreadyDone,
       );
     });
   });
 
   group('FinishMulliganCommand', () {
-    test('another seat cannot finish the mulligan yet', () {
+    test('the round starts once every seat has finished', () {
       final engine = mulliganEngine();
 
       expect(
-        rejectionOf(engine.apply(const FinishMulliganCommand(1))),
-        CommandRejection.notYourTurn,
+        engine.apply(const FinishMulliganCommand(1)),
+        isA<CommandAccepted>(),
       );
-    });
-
-    test('the local seat starts the first round', () {
-      final engine = mulliganEngine();
+      expect(engine.state.phase, GamePhase.mulligan);
 
       expect(
         engine.apply(const FinishMulliganCommand(0)),
@@ -228,6 +230,80 @@ void main() {
       expect(engine.state.phase, GamePhase.playing);
       expect(engine.state.roundNumber, 1);
     });
+
+    test('finishing twice is rejected', () {
+      final engine = mulliganEngine();
+      engine.apply(const FinishMulliganCommand(0));
+
+      expect(
+        rejectionOf(engine.apply(const FinishMulliganCommand(0))),
+        CommandRejection.alreadyDone,
+      );
+    });
+  });
+
+  group('ChooseFirstPlayerCommand', () {
+    GameEngine scoiaEngine() {
+      final decks = CardRepository.defaultDecks();
+      final scoia = decks.firstWhere(
+        (deck) => deck.faction == CardFaction.scoiatael,
+      );
+      final realms = decks.firstWhere(
+        (deck) => deck.faction == CardFaction.realms,
+      );
+      final engine = GameEngine(
+        firstDeck: scoia,
+        secondDeck: realms,
+        difficulty: Difficulty.normal,
+        random: GameRandom(5),
+      );
+      engine.startMatch();
+      return engine;
+    }
+
+    test('only the lone Scoia\'tael seat may choose', () {
+      final engine = scoiaEngine();
+      expect(engine.firstPlayerChoice, 0);
+
+      expect(
+        rejectionOf(
+          engine.apply(
+            const ChooseFirstPlayerCommand(player: 1, firstPlayer: 1),
+          ),
+        ),
+        CommandRejection.choiceNotAllowed,
+      );
+
+      expect(
+        engine.apply(const ChooseFirstPlayerCommand(player: 0, firstPlayer: 1)),
+        isA<CommandAccepted>(),
+      );
+      expect(engine.state.firstPlayer, 1);
+      expect(engine.firstPlayerChoice, isNull);
+
+      // The decision is not offered again.
+      expect(
+        rejectionOf(
+          engine.apply(
+            const ChooseFirstPlayerCommand(player: 0, firstPlayer: 0),
+          ),
+        ),
+        CommandRejection.choiceNotAllowed,
+      );
+    });
+
+    test('a seat outside the match is rejected', () {
+      final engine = scoiaEngine();
+
+      expect(
+        rejectionOf(
+          engine.apply(
+            const ChooseFirstPlayerCommand(player: 0, firstPlayer: 9),
+          ),
+        ),
+        CommandRejection.invalidChoice,
+      );
+    });
   });
 
   group('cardByUid', () {
@@ -235,11 +311,11 @@ void main() {
       final engine = harness();
       setTurn(engine, 0);
       setHand(engine, 0, ['gryffin']);
-      final inHand = engine.human.hand.first;
+      final inHand = engine.state.players[0].hand.first;
       final onRow = makeCard('fiend', owner: 0);
       engine.state.rowState(0, CardRow.close).cards.add(onRow);
       final inGrave = makeCard('ciri', owner: 1);
-      engine.opponent.graveyard.add(inGrave);
+      engine.state.players[1].graveyard.add(inGrave);
 
       expect(engine.cardByUid(inHand.uid), same(inHand));
       expect(engine.cardByUid(onRow.uid), same(onRow));

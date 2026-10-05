@@ -76,7 +76,10 @@ class GameState {
 
   bool get isOver => phase == GamePhase.gameOver;
 
-  PlayerState get human => players.firstWhere((p) => p.isHuman);
+  /// True once every seat has confirmed its opening hand.
+  bool get allMulligansDone => players.every((p) => p.mulliganDone);
+
+  PlayerState playerAt(int seat) => players[seat];
 
   int opponentOf(int player) => player == 0 ? 1 : 0;
 

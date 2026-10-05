@@ -8,9 +8,8 @@ part of 'game_engine.dart';
 /// updates for cards that still exist.
 Map<String, dynamic> encodeMatch(
   GameState state, {
-  required String opponentName,
-  required int humanRedraws,
-  int? randomSeed,
+  required int randomSeed,
+  int? firstPlayerChoice,
 }) {
   final instances = <int, CardInstance>{};
   void collect(Iterable<CardInstance> cards) {
@@ -33,9 +32,8 @@ Map<String, dynamic> encodeMatch(
 
   return {
     'version': 1,
-    'opponentName': opponentName,
-    'humanRedraws': humanRedraws,
-    'randomSeed': ?randomSeed,
+    'randomSeed': randomSeed,
+    'firstPlayerChoice': ?firstPlayerChoice,
     'roundNumber': state.roundNumber,
     'currentPlayer': state.currentPlayer,
     'firstPlayer': state.firstPlayer,
@@ -67,6 +65,8 @@ Map<String, dynamic> encodeMatch(
           'passed': player.passed,
           'roundsLost': player.roundsLost,
           'winning': player.isWinning,
+          'redraws': player.redraws,
+          'mulliganDone': player.mulliganDone,
           'hand': [for (final c in player.hand) c.uid],
           'deck': [for (final c in player.deck) c.uid],
           'graveyard': [for (final c in player.graveyard) c.uid],
@@ -139,7 +139,9 @@ DecodedMatch decodeMatch(Map<String, dynamic> json) {
       ..leaderUsed = playerJson['leaderUsed'] as bool? ?? false
       ..passed = playerJson['passed'] as bool? ?? false
       ..roundsLost = playerJson['roundsLost'] as int? ?? 0
-      ..isWinning = playerJson['winning'] as bool? ?? false;
+      ..isWinning = playerJson['winning'] as bool? ?? false
+      ..redraws = playerJson['redraws'] as int? ?? 0
+      ..mulliganDone = playerJson['mulliganDone'] as bool? ?? false;
   }
 
   for (final entry in (json['rows'] as List).cast<Map<String, dynamic>>()) {
@@ -196,7 +198,7 @@ List<PlayerState> _decodePlayers(Map<String, dynamic> json) {
         name: entry['name'] as String? ?? 'Player $i',
         faction: faction,
         leader: leader,
-        isHuman: entry['human'] as bool? ?? i == 0,
+        isHuman: entry['human'] as bool? ?? false,
         difficulty: Difficulty.fromName(entry['difficulty'] as String? ?? ''),
         deckDefinition: DeckDefinition(
           id: 'restored_${faction.name}',

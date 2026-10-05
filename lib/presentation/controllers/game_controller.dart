@@ -41,29 +41,53 @@ class GameController extends ChangeNotifier {
     required DeckDefinition opponentDeck,
     required Difficulty difficulty,
     String opponentName = 'Opponent',
+    int localSeat = 0,
     int? seed,
   }) : this._(
          GameEngine(
-           humanDeck: humanDeck,
-           opponentDeck: opponentDeck,
+           firstDeck: humanDeck,
+           secondDeck: opponentDeck,
            difficulty: difficulty,
            random: seed == null ? null : GameRandom(seed),
-           opponentName: opponentName,
          ),
+         localSeat: localSeat,
+         opponentName: opponentName,
        );
 
-  /// Resumes a match from a snapshot produced by [snapshot].
-  factory GameController.resume(Map<String, dynamic> snapshot) {
-    final controller = GameController._(GameEngine.fromJson(snapshot));
+  /// Resumes a match from a snapshot produced by [snapshot] using the given
+  /// snapshot (which already carries the player names).
+  factory GameController.resume(
+    Map<String, dynamic> snapshot, {
+    int localSeat = 0,
+  }) {
+    final controller = GameController._(
+      GameEngine.fromJson(snapshot),
+      localSeat: localSeat,
+    );
+    controller._runAiMulligan();
     controller._maybeRunAi();
     return controller;
   }
 
-  GameController._(this.engine) : difficulty = engine.human.difficulty {
+  GameController._(
+    this.engine, {
+    required this.localSeat,
+    String? opponentName,
+  }) : difficulty = engine.state.players[localSeat].difficulty {
     _ai = createAi(difficulty);
+    // The engine is seat agnostic; the presentation marks which seat is local.
+    engine.state.players[localSeat].isHuman = true;
+    if (opponentName != null) {
+      engine.state.players[engine.state.opponentOf(localSeat)].name =
+          opponentName;
+    }
   }
 
   final GameEngine engine;
+
+  /// Seat this client controls.
+  final int localSeat;
+
   final Difficulty difficulty;
   late final AiPlayer _ai;
 
@@ -88,17 +112,44 @@ class GameController extends ChangeNotifier {
   bool get isChoosingForLeader => pendingChoice != null && selectedCard == null;
 
   GameState get state => engine.state;
-  PlayerState get human => engine.human;
-  PlayerState get opponent => engine.opponent;
-  bool get isMulligan => state.phase == GamePhase.mulligan;
+  PlayerState get human => state.players[localSeat];
+  PlayerState get opponent => state.players[state.opponentOf(localSeat)];
+  bool get isMulligan =>
+      state.phase == GamePhase.mulligan && !human.mulliganDone;
   bool get isGameOver => state.phase == GamePhase.gameOver;
-  int get redrawsLeft => GameEngine.maxRedraws - engine.humanRedraws;
+
+  /// True while this seat may act.
+  bool get isLocalTurn =>
+      state.phase == GamePhase.playing && state.currentPlayer == localSeat;
+
+  /// True while any other seat is acting.
+  bool get isRemoteTurn =>
+      state.phase == GamePhase.playing && state.currentPlayer != localSeat;
+
+  int get redrawsLeft => GameEngine.maxRedraws - human.redraws;
 
   /// Starts the match and enters the mulligan phase.
   void start() {
     engine.startMatch();
+    _runAiMulligan();
     _drainEvents();
     notifyListeners();
+  }
+
+  /// Redraws the opening hand of every seat this client does not control.
+  void _runAiMulligan() {
+    if (state.phase != GamePhase.mulligan) return;
+    for (final player in state.players) {
+      if (player.isHuman || player.mulliganDone) continue;
+      for (var i = 0; i < GameEngine.maxRedraws; i++) {
+        final order = engine.mulliganDiscards(player);
+        if (order.isEmpty) break;
+        final card = order.first;
+        if (card.baseStrength >= 15) break;
+        if (!engine.redraw(player.index, card)) break;
+      }
+      engine.finishMulligan(player.index);
+    }
   }
 
   /// Serializes the current match so it can be resumed later.
@@ -123,7 +174,7 @@ class GameController extends ChangeNotifier {
       engine.redraw(human.index, card);
     }
     redrawPicks.clear();
-    engine.finishMulligan();
+    engine.finishMulligan(human.index);
     _drainEvents();
     notifyListeners();
     _maybeRunAi();
@@ -183,13 +234,13 @@ class GameController extends ChangeNotifier {
   }
 
   void pass() {
-    if (!engine.isHumanTurn) return;
+    if (!isLocalTurn) return;
     engine.pass(human.index);
     _afterHumanAction();
   }
 
   void activateLeader() {
-    if (!engine.isHumanTurn || !human.leaderAvailable) return;
+    if (!isLocalTurn || !human.leaderAvailable) return;
     switch (human.leader.abilities.first) {
       case 'eredin_destroyer':
         final required = human.hand.length < 2 ? human.hand.length : 2;
@@ -291,12 +342,12 @@ class GameController extends ChangeNotifier {
     if (_disposed) return;
     if (isGameOver) return;
     if (state.phase != GamePhase.playing) return;
-    if (!engine.isOpponentTurn) return;
+    if (!isRemoteTurn) return;
     isAiThinking = true;
     notifyListeners();
     Future<void>.delayed(const Duration(milliseconds: 650), () {
       if (_disposed || isGameOver) return;
-      if (!engine.isOpponentTurn) {
+      if (!isRemoteTurn) {
         isAiThinking = false;
         notifyListeners();
         return;

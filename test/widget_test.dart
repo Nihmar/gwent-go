@@ -72,13 +72,14 @@ void main() {
       final decks = CardRepository.defaultDecks();
       final repository = ProfileRepository(InMemoryKeyValueStore());
       final engine = GameEngine(
-        humanDeck: decks[0],
-        opponentDeck: decks[1],
+        firstDeck: decks[0],
+        secondDeck: decks[1],
         difficulty: Difficulty.normal,
         random: GameRandom(3),
       );
       engine.startMatch();
-      engine.finishMulligan();
+      engine.finishMulligan(0);
+      engine.finishMulligan(1);
       await repository.saveMatch(engine.toJson());
       final controller = SettingsController(repository);
 
@@ -209,7 +210,7 @@ void main() {
         seed: 3,
       );
       controller.start();
-      controller.engine.finishMulligan();
+      controller.engine.finishMulligan(0);
       controller.state.currentPlayer = 0;
       controller.activateLeader();
       final choice = controller.pendingChoice!;
