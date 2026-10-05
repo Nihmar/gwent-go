@@ -4,6 +4,7 @@ import '../core/data/faction_catalog.dart';
 import '../core/models/card.dart';
 import '../core/models/player.dart';
 import '../core/rules/deck_validator.dart';
+import '../core/rules/game_command.dart';
 import '../l10n/generated/app_localizations.dart';
 
 /// Localized names for domain enums and card abilities.
@@ -56,6 +57,19 @@ extension GwentLocalizations on AppLocalizations {
     DeckIssue.cardNotAllowed => deckIssueCardNotAllowed,
     DeckIssue.tooManyCopies => deckIssueTooManyCopies,
     DeckIssue.unknownCard => deckIssueUnknownCard,
+  };
+
+  /// Human readable description of a card ability.
+  String commandRejectionMessage(CommandRejection reason) => switch (reason) {
+    CommandRejection.wrongPhase => commandWrongPhase,
+    CommandRejection.notYourTurn => commandNotYourTurn,
+    CommandRejection.playerPassed => commandPlayerPassed,
+    CommandRejection.unknownCard => commandUnknownCard,
+    CommandRejection.cardNotInHand => commandCardNotInHand,
+    CommandRejection.rowOccupied => commandRowOccupied,
+    CommandRejection.noTarget => commandNoTarget,
+    CommandRejection.leaderUnavailable => commandLeaderUnavailable,
+    CommandRejection.noRedrawsLeft => commandNoRedrawsLeft,
   };
 
   /// Human readable description of a card ability.

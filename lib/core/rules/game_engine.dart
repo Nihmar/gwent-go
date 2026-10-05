@@ -2,6 +2,7 @@ import '../data/card_repository.dart';
 import '../models/card.dart';
 import '../models/game_state.dart';
 import '../models/player.dart';
+import 'game_command.dart';
 import 'game_event.dart';
 import 'game_random.dart';
 import 'scoring.dart';
@@ -224,23 +225,6 @@ class GameEngine {
     _random.shuffle(player.deck);
   }
 
-  /// Human mulligan: swaps a single card. Returns false when none remain.
-  bool redraw(int playerIndex, CardInstance card) {
-    if (state.phase != GamePhase.mulligan) return false;
-    if (playerIndex != human.index) return false;
-    if (humanRedraws >= maxRedraws) return false;
-    if (human.deck.isEmpty || !human.hand.contains(card)) return false;
-    humanRedraws++;
-    _swapWithDeck(human, card);
-    return true;
-  }
-
-  void finishMulligan() {
-    if (state.phase != GamePhase.mulligan) return;
-    state.phase = GamePhase.playing;
-    _startRound();
-  }
-
   // ---------------------------------------------------------------------------
   // Round and turn flow
   // ---------------------------------------------------------------------------
@@ -414,10 +398,189 @@ class GameEngine {
   }
 
   // ---------------------------------------------------------------------------
-  // Public actions
+  // Commands
+  // ---------------------------------------------------------------------------
+
+  /// Applies a serialized [command].
+  ///
+  /// Returns [CommandAccepted] or [CommandRejected] with a language-independent
+  /// reason. Every state mutation goes through here, so a network or replay
+  /// layer can drive the engine with plain data.
+  CommandResult apply(GameCommand command) => switch (command) {
+    PlayCardCommand() => _applyPlayCard(command),
+    ActivateLeaderCommand() => _applyActivateLeader(command),
+    PassCommand() => _applyPass(command),
+    RedrawCommand() => _applyRedraw(command),
+    FinishMulliganCommand() => _applyFinishMulligan(command),
+  };
+
+  /// Finds a card anywhere on the table by its instance id.
+  CardInstance? cardByUid(int uid) {
+    for (final player in state.players) {
+      for (final zone in [player.hand, player.deck, player.graveyard]) {
+        for (final card in zone) {
+          if (card.uid == uid) return card;
+        }
+      }
+    }
+    for (final row in state.rows) {
+      for (final card in row.cards) {
+        if (card.uid == uid) return card;
+      }
+      final special = row.special;
+      if (special != null && special.uid == uid) return special;
+    }
+    for (final card in state.weatherCards) {
+      if (card.uid == uid) return card;
+    }
+    return null;
+  }
+
+  CommandResult _applyPlayCard(PlayCardCommand command) {
+    if (state.phase != GamePhase.playing) {
+      return const CommandRejected(CommandRejection.wrongPhase);
+    }
+    if (state.currentPlayer != command.player) {
+      return const CommandRejected(CommandRejection.notYourTurn);
+    }
+    final player = state.players[command.player];
+    if (player.passed) {
+      return const CommandRejected(CommandRejection.playerPassed);
+    }
+    final card = cardByUid(command.cardUid);
+    if (card == null) {
+      return const CommandRejected(CommandRejection.unknownCard);
+    }
+    if (!player.hand.contains(card)) {
+      return const CommandRejected(CommandRejection.cardNotInHand);
+    }
+    final targetUid = command.targetUid;
+    final target = targetUid == null ? null : cardByUid(targetUid);
+    if (targetUid != null && target == null) {
+      return const CommandRejected(CommandRejection.unknownCard);
+    }
+
+    if (card.hasAbility(Ability.decoy)) {
+      if (_abilities.decoyTargets(player).isEmpty) {
+        return const CommandRejected(CommandRejection.noTarget);
+      }
+      return _abilities.playDecoy(player, card, target)
+          ? const CommandAccepted()
+          : const CommandRejected(CommandRejection.noTarget);
+    }
+    if (card.isSpecial && card.hasAbility(Ability.scorch)) {
+      _abilities.resolveGlobalScorch(player);
+      _abilities.toGrave(card);
+      _emit(CardPlayed(player: command.player, card: card, row: null));
+      _endTurn();
+      return const CommandAccepted();
+    }
+    if (card.usesRowSpecialSlot &&
+        state
+            .rowState(command.player, command.targetRow ?? CardRow.close)
+            .hasSpecial) {
+      return const CommandRejected(CommandRejection.rowOccupied);
+    }
+
+    final row = _abilities.placeCard(player, card, targetRow: command.targetRow);
+    _emit(CardPlayed(player: command.player, card: card, row: row?.row));
+    _abilities.resolvePlaced(player, card, row, target: target);
+    Scoring.refresh(state);
+    _endTurn();
+    return const CommandAccepted();
+  }
+
+  CommandResult _applyActivateLeader(ActivateLeaderCommand command) {
+    if (state.phase != GamePhase.playing) {
+      return const CommandRejected(CommandRejection.wrongPhase);
+    }
+    if (state.currentPlayer != command.player) {
+      return const CommandRejected(CommandRejection.notYourTurn);
+    }
+    final player = state.players[command.player];
+    if (!player.leaderAvailable) {
+      return const CommandRejected(CommandRejection.leaderUnavailable);
+    }
+    final ability = player.leader.abilities.first;
+    if (!Ability.isActiveLeaderAbility(ability)) {
+      return const CommandRejected(CommandRejection.leaderUnavailable);
+    }
+    final targetUid = command.targetUid;
+    final deckPickUid = command.deckPickUid;
+    _abilities.resolveLeader(
+      player,
+      ability,
+      targetRow: command.targetRow,
+      target: targetUid == null ? null : cardByUid(targetUid),
+      discard: [for (final uid in command.discardUids) ?cardByUid(uid)],
+      deckPick: deckPickUid == null ? null : cardByUid(deckPickUid),
+    );
+    player.leaderUsed = true;
+    _emit(LeaderActivated(player: command.player, ability: ability));
+    Scoring.refresh(state);
+    _endTurn();
+    return const CommandAccepted();
+  }
+
+  CommandResult _applyPass(PassCommand command) {
+    if (state.phase != GamePhase.playing) {
+      return const CommandRejected(CommandRejection.wrongPhase);
+    }
+    final player = state.players[command.player];
+    if (player.passed) {
+      return const CommandRejected(CommandRejection.playerPassed);
+    }
+    player.passed = true;
+    _emit(PlayerPassed(command.player));
+    if (state.currentPlayer == command.player) {
+      _endTurn();
+    }
+    return const CommandAccepted();
+  }
+
+  CommandResult _applyRedraw(RedrawCommand command) {
+    if (state.phase != GamePhase.mulligan) {
+      return const CommandRejected(CommandRejection.wrongPhase);
+    }
+    // Only the local seat redraws until the per-seat mulligan lands (#37).
+    if (command.player != human.index) {
+      return const CommandRejected(CommandRejection.notYourTurn);
+    }
+    if (humanRedraws >= maxRedraws) {
+      return const CommandRejected(CommandRejection.noRedrawsLeft);
+    }
+    final card = cardByUid(command.cardUid);
+    if (card == null) {
+      return const CommandRejected(CommandRejection.unknownCard);
+    }
+    if (human.deck.isEmpty || !human.hand.contains(card)) {
+      return const CommandRejected(CommandRejection.cardNotInHand);
+    }
+    humanRedraws++;
+    _swapWithDeck(human, card);
+    return const CommandAccepted();
+  }
+
+  CommandResult _applyFinishMulligan(FinishMulliganCommand command) {
+    if (state.phase != GamePhase.mulligan) {
+      return const CommandRejected(CommandRejection.wrongPhase);
+    }
+    if (command.player != human.index) {
+      return const CommandRejected(CommandRejection.notYourTurn);
+    }
+    state.phase = GamePhase.playing;
+    _startRound();
+    return const CommandAccepted();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Convenience wrappers used by the single-player UI
   // ---------------------------------------------------------------------------
 
   /// Whether [card] can currently be played by [playerIndex].
+  ///
+  /// Used by the UI to dim unplayable cards; the real validation happens in
+  /// [_applyPlayCard].
   bool canPlayCard(int playerIndex, CardInstance card) {
     if (state.phase != GamePhase.playing) return false;
     if (state.currentPlayer != playerIndex) return false;
@@ -434,44 +597,16 @@ class GameEngine {
     CardInstance card, {
     CardRow? targetRow,
     CardInstance? target,
-  }) {
-    if (!canPlayCard(playerIndex, card)) return false;
-    final player = state.players[playerIndex];
+  }) => apply(
+    PlayCardCommand(
+      player: playerIndex,
+      cardUid: card.uid,
+      targetRow: targetRow,
+      targetUid: target?.uid,
+    ),
+  ).accepted;
 
-    if (card.hasAbility(Ability.decoy)) {
-      return _abilities.playDecoy(player, card, target);
-    }
-    if (card.isSpecial && card.hasAbility(Ability.scorch)) {
-      _abilities.resolveGlobalScorch(player);
-      _abilities.toGrave(card);
-      _emit(CardPlayed(player: playerIndex, card: card, row: null));
-      _endTurn();
-      return true;
-    }
-
-    if (card.usesRowSpecialSlot &&
-        state.rowState(playerIndex, targetRow ?? CardRow.close).hasSpecial) {
-      return false;
-    }
-
-    final row = _abilities.placeCard(player, card, targetRow: targetRow);
-    _emit(CardPlayed(player: playerIndex, card: card, row: row?.row));
-    _abilities.resolvePlaced(player, card, row, target: target);
-    Scoring.refresh(state);
-    _endTurn();
-    return true;
-  }
-
-  void pass(int playerIndex) {
-    if (state.phase != GamePhase.playing) return;
-    final player = state.players[playerIndex];
-    if (player.passed) return;
-    player.passed = true;
-    _emit(PlayerPassed(playerIndex));
-    if (state.currentPlayer == playerIndex) {
-      _endTurn();
-    }
-  }
+  void pass(int playerIndex) => apply(PassCommand(playerIndex));
 
   bool activateLeader(
     int playerIndex, {
@@ -479,25 +614,18 @@ class GameEngine {
     CardInstance? target,
     List<CardInstance>? discard,
     CardInstance? deckPick,
-  }) {
-    if (state.phase != GamePhase.playing) return false;
-    if (state.currentPlayer != playerIndex) return false;
-    final player = state.players[playerIndex];
-    if (!player.leaderAvailable) return false;
-    final ability = player.leader.abilities.first;
-    if (!Ability.isActiveLeaderAbility(ability)) return false;
-    _abilities.resolveLeader(
-      player,
-      ability,
+  }) => apply(
+    ActivateLeaderCommand(
+      player: playerIndex,
       targetRow: targetRow,
-      target: target,
-      discard: discard,
-      deckPick: deckPick,
-    );
-    player.leaderUsed = true;
-    _emit(LeaderActivated(player: playerIndex, ability: ability));
-    Scoring.refresh(state);
-    _endTurn();
-    return true;
-  }
+      targetUid: target?.uid,
+      discardUids: [for (final card in discard ?? const []) card.uid],
+      deckPickUid: deckPick?.uid,
+    ),
+  ).accepted;
+
+  bool redraw(int playerIndex, CardInstance card) =>
+      apply(RedrawCommand(player: playerIndex, cardUid: card.uid)).accepted;
+
+  void finishMulligan() => apply(FinishMulliganCommand(human.index));
 }
