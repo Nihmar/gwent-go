@@ -10,6 +10,7 @@ import '../localization.dart';
 import '../theme/gwent_colors.dart';
 import '../widgets/board_background.dart';
 import '../widgets/deck/deck_editor_parts.dart';
+import '../widgets/deck/leader_picker.dart';
 
 /// Result returned by the deck editor.
 class DeckEditorResult {
@@ -105,19 +106,11 @@ class _DeckEditorScreenState extends State<DeckEditorScreen> {
   }
 
   Future<void> _changeLeader() async {
-    final leaders = CardRepository.leadersFor(_faction);
-    final chosen = await showDialog<CardDefinition>(
-      context: context,
-      builder: (context) => SimpleDialog(
-        title: Text(context.strings.changeLeader),
-        children: [
-          for (final leader in leaders)
-            SimpleDialogOption(
-              onPressed: () => Navigator.of(context).pop(leader),
-              child: Text(leader.name),
-            ),
-        ],
-      ),
+    final chosen = await showLeaderPicker(
+      context,
+      faction: _faction,
+      leaders: CardRepository.leadersFor(_faction),
+      current: _leader,
     );
     if (chosen != null) setState(() => _leader = chosen);
   }
