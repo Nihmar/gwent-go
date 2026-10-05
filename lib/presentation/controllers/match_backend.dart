@@ -24,6 +24,9 @@ abstract interface class MatchBackend {
   /// True when this side owns the authoritative engine.
   bool get isAuthoritative;
 
+  /// False while the other side is unreachable. Always true locally.
+  bool get opponentOnline;
+
   /// Notified when the state changed outside a local action (remote views).
   set onChanged(VoidCallback? listener);
 
@@ -72,9 +75,28 @@ abstract interface class MatchBackend {
 
 /// Backend backed by the local rules engine.
 class EngineBackend implements MatchBackend {
-  EngineBackend(this.engine);
+  EngineBackend(this.engine, {Stream<SessionEvent>? peerEvents}) {
+    _peerEvents = peerEvents?.listen(_onPeerEvent);
+  }
 
   final GameEngine engine;
+
+  StreamSubscription<SessionEvent>? _peerEvents;
+  VoidCallback? _onPeerChanged;
+  bool _opponentOnline = true;
+
+  /// The host is authoritative but still needs to know when its guest goes
+  /// away, so the board can say so instead of looking frozen.
+  void _onPeerEvent(SessionEvent event) {
+    final online = switch (event) {
+      SessionPeerLost() => false,
+      SessionViewUpdated() => true,
+      _ => _opponentOnline,
+    };
+    if (online == _opponentOnline) return;
+    _opponentOnline = online;
+    _onPeerChanged?.call();
+  }
 
   @override
   GameState get state => engine.state;
@@ -83,7 +105,10 @@ class EngineBackend implements MatchBackend {
   bool get isAuthoritative => true;
 
   @override
-  set onChanged(VoidCallback? listener) {}
+  bool get opponentOnline => _opponentOnline;
+
+  @override
+  set onChanged(VoidCallback? listener) => _onPeerChanged = listener;
 
   @override
   void startMatch() => engine.startMatch();
@@ -143,16 +168,33 @@ class EngineBackend implements MatchBackend {
   );
 
   @override
-  void dispose() {}
+  void dispose() {
+    _peerEvents?.cancel();
+    _peerEvents = null;
+  }
 }
 
 /// Backend backed by a session client: the peer owns the rules.
 class SessionBackend implements MatchBackend {
   SessionBackend(this.session, {required this.localSeat}) {
     _subscription = session.events.listen((event) {
-      if (event is! SessionViewUpdated) return;
-      _state = null;
-      onChanged?.call();
+      switch (event) {
+        // A view is the proof the peer is back: the host resyncs a returning
+        // guest with a fresh projection.
+        case SessionViewUpdated():
+          _state = null;
+          if (!_opponentOnline) _opponentOnline = true;
+          onChanged?.call();
+        // The guest sees a lost host as a failed session: the link is gone
+        // and only a reconnect can bring it back.
+        case SessionPeerLost() || SessionFailed():
+          if (_opponentOnline) {
+            _opponentOnline = false;
+            onChanged?.call();
+          }
+        default:
+          break;
+      }
     });
   }
 
@@ -180,6 +222,10 @@ class SessionBackend implements MatchBackend {
 
   @override
   bool get isAuthoritative => false;
+
+  @override
+  bool get opponentOnline => _opponentOnline;
+  bool _opponentOnline = true;
 
   /// The match already started on the host.
   @override

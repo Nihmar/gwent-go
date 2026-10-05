@@ -1,10 +1,8 @@
 {
   "@@locale": "en",
-
   "appTitle": "GWENT",
   "appTagline": "The Witcher Card Game",
   "appAbout": "A cross-platform Flutter implementation of classic Gwent: three rounds, two armies, one deck.",
-
   "play": "Play",
   "newMatch": "New match",
   "continueMatch": "Continue match",
@@ -26,7 +24,6 @@
   "save": "Save",
   "sound": "Sound",
   "menu": "Menu",
-
   "opponentDifficulty": "Opponent difficulty",
   "easy": "Easy",
   "normal": "Normal",
@@ -34,14 +31,12 @@
   "difficultyEasyDescription": "Plays greedily and passes late; a forgiving opponent.",
   "difficultyNormalDescription": "Competent trades and sensible passing decisions.",
   "difficultyHardDescription": "Strong sequencing, holds finishers and passes at the right time.",
-
   "faction": "Faction",
   "factionRealms": "Northern Realms",
   "factionNilfgaard": "Nilfgaard",
   "factionMonsters": "Monsters",
   "factionScoiatael": "Scoia'tael",
   "factionSkellige": "Skellige",
-
   "startMatch": "Start match",
   "startGame": "Start game",
   "matches": "Matches",
@@ -55,7 +50,6 @@
   "pause": "Pause",
   "cards": "cards",
   "strength": "strength",
-
   "deckEditor": "Deck editor",
   "deck": "Deck",
   "collection": "Collection",
@@ -73,13 +67,16 @@
   "inDeckCount": "{copies} of {max} in deck",
   "@inDeckCount": {
     "placeholders": {
-      "copies": { "type": "int" },
-      "max": { "type": "int" }
+      "copies": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
     }
   },
   "deckEditorHint": "Tap to add · long-press for the full ability",
   "noCardsFound": "No cards match your filters",
-
   "localMatch": "Local match",
   "lanMatch": "LAN match",
   "hostMatch": "Host match",
@@ -93,18 +90,21 @@
   "playerSeat": "Player {seat}",
   "@playerSeat": {
     "placeholders": {
-      "seat": { "type": "int" }
+      "seat": {
+        "type": "int"
+      }
     }
   },
   "passDeviceTitle": "Pass the device to {name}",
   "@passDeviceTitle": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "passDeviceHint": "The next hand stays hidden until the next player is ready.",
   "passDeviceReady": "I'm ready",
-
   "commandWrongPhase": "This action is not available right now.",
   "commandNotYourTurn": "It is not your turn.",
   "commandPlayerPassed": "You have already passed this round.",
@@ -134,19 +134,25 @@
   "deckIssueTooFewUnits": "Needs at least {min} unit cards",
   "@deckIssueTooFewUnits": {
     "placeholders": {
-      "min": { "type": "int" }
+      "min": {
+        "type": "int"
+      }
     }
   },
   "deckIssueTooManySpecial": "At most {max} special cards",
   "@deckIssueTooManySpecial": {
     "placeholders": {
-      "max": { "type": "int" }
+      "max": {
+        "type": "int"
+      }
     }
   },
   "deckIssueTooManyCards": "At most {max} cards in total",
   "@deckIssueTooManyCards": {
     "placeholders": {
-      "max": { "type": "int" }
+      "max": {
+        "type": "int"
+      }
     }
   },
   "deckIssueLeaderFaction": "The leader does not match the faction",
@@ -158,30 +164,43 @@
   "cardsOwned": "{owned} cards owned · {distinct} distinct",
   "@cardsOwned": {
     "placeholders": {
-      "owned": { "type": "int" },
-      "distinct": { "type": "int" }
+      "owned": {
+        "type": "int"
+      },
+      "distinct": {
+        "type": "int"
+      }
     }
   },
   "cardsInDeck": "{count} / {max} cards",
   "@cardsInDeck": {
     "placeholders": {
-      "count": { "type": "int" },
-      "max": { "type": "int" }
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
     }
   },
-
   "round": "Round",
   "roundOf": "Round {current} of {total}",
   "@roundOf": {
     "placeholders": {
-      "current": { "type": "int" },
-      "total": { "type": "int" }
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "roundShort": "R{round}",
   "@roundShort": {
     "placeholders": {
-      "round": { "type": "int" }
+      "round": {
+        "type": "int"
+      }
     }
   },
   "yourTurn": "Your turn",
@@ -205,7 +224,9 @@
   "selectDiscardHint": "Discard {count} cards",
   "@selectDiscardHint": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "selectDrawHint": "Choose a card to draw",
@@ -213,7 +234,9 @@
   "mulliganTitle": "Choose up to {count} cards to redraw",
   "@mulliganTitle": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "mulliganConfirm": "Keep hand",
@@ -228,7 +251,9 @@
   "winnerOpponent": "{name} wins the match",
   "@winnerOpponent": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "matchDrawn": "The match is a draw",
@@ -239,28 +264,42 @@
   "weatherRowAtOne": "{row} at 1",
   "@weatherRowAtOne": {
     "placeholders": {
-      "row": { "type": "String" }
+      "row": {
+        "type": "String"
+      }
     }
   },
   "pointsAbbrev": "{value} str",
   "@pointsAbbrev": {
     "placeholders": {
-      "value": { "type": "int" }
+      "value": {
+        "type": "int"
+      }
     }
   },
   "opponentSummary": "{faction} · {difficulty} AI",
   "@opponentSummary": {
     "placeholders": {
-      "faction": { "type": "String" },
-      "difficulty": { "type": "String" }
+      "faction": {
+        "type": "String"
+      },
+      "difficulty": {
+        "type": "String"
+      }
     }
   },
   "handAndDeckHint": "{name} has {hand} cards in hand · {deck} in deck",
   "@handAndDeckHint": {
     "placeholders": {
-      "name": { "type": "String" },
-      "hand": { "type": "int" },
-      "deck": { "type": "int" }
+      "name": {
+        "type": "String"
+      },
+      "hand": {
+        "type": "int"
+      },
+      "deck": {
+        "type": "int"
+      }
     }
   },
   "spyDraw": "Spy: drawing 2 cards",
@@ -268,7 +307,6 @@
   "medic": "Medic: choosing a card to revive",
   "scorch": "Scorch!",
   "decoy": "Decoy swapped",
-
   "rowClose": "Close Combat",
   "rowRanged": "Ranged Combat",
   "rowSiege": "Siege Combat",
@@ -293,7 +331,6 @@
   "abilityTagMardroeme": "Mardroeme",
   "abilityTagScorch": "Scorch",
   "abilityTagAgile": "Agile",
-
   "abilityHero": "Not affected by any Special Cards or abilities.",
   "abilityDecoy": "Swap with a card on the battlefield to return it to your hand.",
   "abilityHorn": "Doubles the strength of all unit cards in that row. Limited to 1 per row.",
@@ -314,7 +351,6 @@
   "abilityFog": "Sets the strength of all Ranged Combat cards to 1 for both players.",
   "abilityRain": "Sets the strength of all Siege Combat cards to 1 for both players.",
   "abilityClear": "Removes all Weather Cards (Biting Frost, Impenetrable Fog and Torrential Rain) effects.",
-
   "leaderFoltestKing": "Pick an Impenetrable Fog card from your deck and play it instantly.",
   "leaderFoltestLord": "Clear any weather effects in play.",
   "leaderFoltestSiegemaster": "Doubles the strength of all your Siege units (unless a Commander's Horn is also present on that row).",
@@ -337,13 +373,13 @@
   "leaderFrancescaHope": "Move agile units to whichever valid row maximizes their strength.",
   "leaderCrachAnCraite": "Shuffle all cards from each player's graveyard back into their decks.",
   "leaderKingBran": "Units only lose half their Strength in bad weather conditions.",
-
   "factionAbilityRealms": "Draw a card from your deck whenever you win a round.",
   "factionAbilityNilfgaard": "Wins any round that ends in a draw.",
   "factionAbilityMonsters": "Keeps a random Unit Card out after each round.",
   "factionAbilityScoiatael": "Decides who takes the first turn.",
   "factionAbilitySkellige": "2 random cards from the graveyard are placed on the battlefield at the start of the third round.",
-
   "aiOpponent": "AI opponent",
-  "opponentName": "Opponent"
+  "opponentName": "Opponent",
+  "opponentDisconnected": "Opponent disconnected",
+  "waitingForOpponent": "Waiting for them to reconnect…"
 }

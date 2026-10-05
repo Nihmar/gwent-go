@@ -196,6 +196,13 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                   PassDeviceOverlay(controller: controller)
                 else ...[
                   wide ? _buildDesktop(context) : _buildPhone(context),
+                  if (!controller.opponentOnline)
+                    Positioned(
+                      top: 8,
+                      left: 12,
+                      right: 12,
+                      child: _DisconnectedBanner(onLeave: _pause),
+                    ),
                   if (controller.isMulligan)
                     MulliganOverlay(controller: controller),
                   if (controller.pendingChoice case final choice?)
@@ -402,6 +409,57 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Shown while the opponent is unreachable.
+///
+/// The host keeps the match alive waiting for the guest to come back, so the
+/// board stays playable-looking but locked; this banner explains why and offers
+/// a way out.
+class _DisconnectedBanner extends StatelessWidget {
+  const _DisconnectedBanner({required this.onLeave});
+
+  final VoidCallback onLeave;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = context.strings;
+    final scheme = Theme.of(context).colorScheme;
+    final text = TextStyle(color: scheme.onErrorContainer);
+    return Material(
+      color: scheme.errorContainer,
+      elevation: 4,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+        child: Row(
+          children: [
+            Icon(Icons.wifi_off, color: scheme.onErrorContainer),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    strings.opponentDisconnected,
+                    style: text.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  Text(
+                    strings.waitingForOpponent,
+                    style: text.copyWith(fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+            TextButton(
+              onPressed: onLeave,
+              child: Text(strings.close),
+            ),
+          ],
+        ),
       ),
     );
   }
