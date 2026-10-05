@@ -28,7 +28,7 @@ abstract final class Scoring {
   ///
   /// Heroes are immune to every modifier and Decoy is always worth zero.
   static int cardStrength(GameState state, RowState row, CardInstance card) {
-    if (card.name == 'Decoy') return 0;
+    if (card.hasAbility(Ability.decoy)) return 0;
     var total = card.baseStrength;
     if (card.isHero) return total;
 

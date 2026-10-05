@@ -163,8 +163,7 @@ class CardDefinition {
   /// Ermion that merely carry the horn / mardroeme ability occupy a normal
   /// card position.
   bool get usesRowSpecialSlot =>
-      isSpecial &&
-      (name == "Commander's Horn" || hasAbility(Ability.mardroeme));
+      isSpecial && (hasAbility(Ability.horn) || hasAbility(Ability.mardroeme));
 
   bool hasAbility(String ability) => abilities.contains(ability);
 

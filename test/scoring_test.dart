@@ -108,6 +108,27 @@ void main() {
       expect(Scoring.rowTotal(state, row), 0);
     });
 
+    test('Decoy is worth zero by ability, not by card name', () {
+      final state = blankState();
+      final row = state.rowState(0, CardRow.close);
+      row.cards.add(
+        CardInstance(
+          uid: 1,
+          definition: const CardDefinition(
+            id: 'test_decoy',
+            name: 'Impostor',
+            faction: CardFaction.special,
+            row: CardRow.special,
+            baseStrength: 7,
+            artFilename: 'decoy',
+            abilities: [Ability.decoy],
+          ),
+          owner: 0,
+        ),
+      );
+      expect(Scoring.rowTotal(state, row), 0);
+    });
+
     test("Eredin the Treacherous doubles spy strength", () {
       final state = blankState();
       state.doubleSpyPower = true;

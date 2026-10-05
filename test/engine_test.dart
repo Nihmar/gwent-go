@@ -233,6 +233,43 @@ void main() {
       expect(engine.human.graveyard.map((c) => c.id), contains('frost'));
       expect(engine.state.weatherCards.length, 1);
     });
+
+    test('weather de-duplicates by effect, not by card name', () {
+      final engine = harness();
+      // A real frost card is already active.
+      setTurn(engine, 0);
+      setHand(engine, 0, ['frost']);
+      engine.playCard(0, engine.human.hand.first);
+
+      // A differently named card with the same effect must be discarded.
+      final renamed = CardInstance(
+        uid: 1 << 21,
+        definition: const CardDefinition(
+          id: 'test_deep_freeze',
+          name: 'Deep Freeze',
+          faction: CardFaction.weather,
+          row: CardRow.weather,
+          baseStrength: 0,
+          artFilename: 'weather_frost',
+          abilities: [Ability.frost],
+        ),
+        owner: 0,
+      );
+      setTurn(engine, 0);
+      engine.human.hand
+        ..clear()
+        ..add(renamed);
+
+      expect(engine.playCard(0, renamed), isTrue);
+      expect(
+        engine.state.weatherCards.map((c) => c.id),
+        isNot(contains('test_deep_freeze')),
+      );
+      expect(
+        engine.human.graveyard.map((c) => c.id),
+        contains('test_deep_freeze'),
+      );
+    });
   });
 
   group('Draw events', () {
