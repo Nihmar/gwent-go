@@ -120,38 +120,40 @@ snapshots store alongside the per-seat mulligan progress. The engine emits
 events rather than performing animations, so replaying an action log reproduces
 the same state.
 
-## Future multiplayer considerations
+## Multiplayer
 
-Multiplayer is intentionally **not** implemented. The full design and phased
-plan live in [`multiplayer.md`](multiplayer.md); the summary below is kept for
+Multiplayer is implemented as hotseat play (two humans on one device) and a
+**host-authoritative LAN mode** for two devices. The full design and phased plan
+live in [`multiplayer.md`](multiplayer.md); the summary below is kept for
 context.
 
-The recommended model is **host-authoritative**: the host owns the single
-`GameEngine`, validates serializable commands and broadcasts a redacted
-projection to each seat. Lockstep was rejected for v1 (hidden information,
-cross-platform RNG guarantees, cheating). The plan is split into phases:
+The model is **host-authoritative**: the host owns the single `GameEngine`,
+validates serializable commands and sends the guest a redacted projection, so
+the guest never simulates. Lockstep was rejected for v1 (hidden information,
+cross-platform RNG guarantees, cheating). The plan was split into phases:
 
 1. **Engine as a command processor** — serializable `GameCommand`s with
    rejection reasons, a custom in-core PRNG instead of `dart:math`, removal of
    the privileged local human, per-seat mulligan and the Scoia'tael
    first-player choice. *(done)*
-2. **Fog of war and versioning** — `GameState.projectFor(seat)`, catalog and
-   protocol versioning, state hashing.
+2. **Fog of war and versioning** — `encodeProjection`/`decodeProjection`,
+   catalog, rules and protocol versioning. *(done)*
 3. **Session layer** — a Flutter-free `MatchTransport` plus `HostSession` /
    `ClientSession` speaking JSON messages, tested with an in-memory loopback.
-4. **Hotseat** — two humans on one device to validate the refactor without
-   networking.
-5. **Presentation integration** — split the view controller from the turn
-   driver, add the lobby UI.
-6. **LAN transport and discovery** — TCP/WebSocket plus UDP discovery or mDNS,
-   with platform details behind `lib/platform/`.
-7. **Reconnection** — resume a match from a fresh projection.
-8. **Future transports** — Wi-Fi Direct and Bluetooth, then optional extras.
+   *(done)*
+4. **Hotseat** — two humans on one device. *(done)*
+5. **Presentation integration** — a `MatchBackend` abstraction, the
+   `TurnDriver` split and the LAN lobby flow. *(done)*
+6. **LAN transport and discovery** — TCP transport plus UDP announcement and
+   discovery, with a manual address fallback, behind `lib/platform/`. *(done)*
+7. **Reconnection** — a returning guest is caught up with a fresh projection.
+   *(done)*
+8. **Future transports** — Wi-Fi Direct and Bluetooth, investigated in
+   [`transports.md`](transports.md).
 
-Items that already help: the Flutter-free core, the synchronous engine with an
-event stream, the seeded `GameRandom`, the JSON snapshot and the pure
-`DeckValidator`. See [`multiplayer.md`](multiplayer.md) for the blockers, risks
-and open questions.
+`GameController` drives single-player and hotseat matches through `EngineBackend`
+and a guest through `SessionBackend`, so the widgets render both cases
+unchanged.
 
 ## Known limitations / follow-ups
 

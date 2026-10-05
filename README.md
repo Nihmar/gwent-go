@@ -27,6 +27,8 @@ The game is playable end to end against the computer:
 - settings, decks and match statistics persisted with `shared_preferences`;
 - a match can be paused automatically, the app closed, and resumed from the
   home screen;
+- two humans on one device (hotseat) and host-authoritative LAN play over TCP,
+  with UDP discovery, a manual address fallback and reconnection after a drop;
 - English UI built on Flutter's localization stack (easy to translate).
 
 ## Project layout
@@ -50,7 +52,7 @@ tool/                   generators for the catalog and default decks
 ```
 
 The rules engine has no Flutter dependency: it can be unit tested on its own and
-reused for future local or online multiplayer.
+supports local (hotseat) and LAN play through the same command interface.
 
 ## Development
 
