@@ -69,7 +69,7 @@ class _AbilityResolver {
       engine._emit(const WeatherChanged({}));
       return;
     }
-    if (state.weatherCards.any((c) => c.name == card.name)) {
+    if (state.weatherCards.any((c) => _sameWeatherType(c, card))) {
       detach(card);
       player.graveyard.add(card);
       return;
@@ -83,6 +83,18 @@ class _AbilityResolver {
     if (changed) {
       engine._emit(WeatherChanged(Set.unmodifiable(state.activeWeather)));
     }
+  }
+
+  /// Weather effects a card applies (a Storm applies rain and fog).
+  Set<String> _weatherTypes(CardInstance card) =>
+      card.abilities.where(Ability.isWeather).toSet();
+
+  /// Weather cards are unique per effect profile, not per display name, so a
+  /// card keeps behaving like the effect it represents even if it is renamed.
+  bool _sameWeatherType(CardInstance a, CardInstance b) {
+    final left = _weatherTypes(a);
+    final right = _weatherTypes(b);
+    return left.length == right.length && left.containsAll(right);
   }
 
   // ---------------------------------------------------------------------------
@@ -138,7 +150,9 @@ class _AbilityResolver {
   }
 
   void _transformBerserker(CardInstance card, RowState row) {
-    final targetId = card.name.contains('Young')
+    // The ranged Berserker becomes the Young Vildkaarl, the close one becomes
+    // the full Vildkaarl: the row carries the distinction, not the name.
+    final targetId = card.row == CardRow.ranged
         ? 'young_vildkaarl'
         : 'vildkaarl';
     final definition = CardRepository.maybeById(targetId);
